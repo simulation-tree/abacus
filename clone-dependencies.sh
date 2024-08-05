@@ -1,0 +1,24 @@
+#!/bin/bash
+cd ..
+git clone https://github.com/game-simulations/unmanaged.git
+git clone https://github.com/game-simulations/simulation.git
+git clone https://github.com/game-simulations/data.git
+git clone https://github.com/game-simulations/meshes.git
+git clone https://github.com/game-simulations/models.git
+git clone https://github.com/game-simulations/shaders.git
+git clone https://github.com/game-simulations/textures.git
+git clone https://github.com/game-simulations/fonts.git
+git clone https://github.com/game-simulations/transforms.git
+git clone https://github.com/game-simulations/serialization.git
+git clone https://github.com/game-simulations/bin-packing.git
+git clone https://github.com/game-simulations/rendering.git
+git clone https://github.com/game-simulations/windows.git
+git clone https://github.com/game-simulations/data-systems.git
+git clone https://github.com/game-simulations/font-systems.git
+git clone https://github.com/game-simulations/model-systems.git
+git clone https://github.com/game-simulations/rendering-systems.git
+git clone https://github.com/game-simulations/shader-systems.git
+git clone https://github.com/game-simulations/textures-systems.git
+git clone https://github.com/game-simulations/transform-systems.git
+git clone https://github.com/game-simulations/window-systems.git
+git clone https://github.com/game-simulations/vulkan-renderer.git
