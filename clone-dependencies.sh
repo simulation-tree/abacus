@@ -2,6 +2,8 @@
 cd ..
 git clone https://github.com/game-simulations/unmanaged.git
 git clone https://github.com/game-simulations/simulation.git
+git clone https://github.com/game-simulations/logging.git
+git clone https://github.com/game-simulations/commander.git
 git clone https://github.com/game-simulations/data.git
 git clone https://github.com/game-simulations/meshes.git
 git clone https://github.com/game-simulations/models.git
