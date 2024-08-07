@@ -2,6 +2,7 @@
 using Data.Systems;
 using Rendering.Events;
 using Rendering.Systems;
+using Rendering.Vulkan;
 using Simulation;
 using Simulation.Systems;
 using Transforms.Events;
@@ -18,7 +19,7 @@ public static class Bootstrap
             DataImportSystem data = new(world);
             TransformSystem transforms = new(world);
             WindowSystem windows = new(world);
-            RenderingSystem rendering = new(world);
+            RenderEngineSystem rendering = new(world);
             rendering.RegisterSystem<VulkanRenderer>();
 
             //play the simulation
