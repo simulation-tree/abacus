@@ -24,15 +24,10 @@
     <ProjectReference Include="..\data-systems\source\Data Systems.csproj" />
     <ProjectReference Include="..\data\Data.csproj" />
     <ProjectReference Include="..\rendering-systems\source\Rendering Systems.csproj" />
+    <ProjectReference Include="..\rendering\source\Rendering.csproj" />
     <ProjectReference Include="..\transform-systems\source\Transform Systems.csproj" />
     <ProjectReference Include="..\vulkan-renderer\source\Vulkan Renderer.csproj" />
     <ProjectReference Include="..\window-systems\source\Window Systems.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Reference Include="Rendering">
-      <HintPath>bin\Debug\net9.0\Rendering.dll</HintPath>
-    </Reference>
   </ItemGroup>
 
   <ItemGroup>
