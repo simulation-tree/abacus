@@ -1,9 +1,13 @@
 ﻿using Meshes;
 using Rendering;
+using Rendering.Components;
 using Shaders;
 using Simulation;
 using System.Numerics;
 using System.Runtime.InteropServices;
+using Textures;
+using Transforms.Components;
+using Unmanaged;
 using Windows;
 using Windows.Components;
 
@@ -11,8 +15,6 @@ public struct Program : IDisposable
 {
     private DateTime lastTime;
     private TimeSpan time;
-    private Vector2 windowPosition;
-    private Vector2 windowSize;
     private readonly World world;
     private readonly Window window;
 
@@ -23,8 +25,6 @@ public struct Program : IDisposable
 
         //build host
         window = new(world, "Window", new(100, 100), new(900, 720), "vulkan", new(&WindowClosed));
-        windowPosition = window.GetPositionAsVector2();
-        windowSize = window.GetSizeAsVector2();
 
         //build scene
         Camera camera = new(world, window.AsDestination(), false, 90f * MathF.PI / 180f);
@@ -34,6 +34,7 @@ public struct Program : IDisposable
         Mesh.Collection<Vector3> positions = mesh.CreatePositions();
         Mesh.Collection<Vector2> uvs = mesh.CreateUVs();
         Mesh.Collection<Vector3> normals = mesh.CreateNormals();
+        Mesh.Collection<Vector4> colors = mesh.CreateColors();
 
         //simple quad
         positions.Add(new(-1, -1, 0));
@@ -51,11 +52,22 @@ public struct Program : IDisposable
         normals.Add(new(0, 0, 1));
         normals.Add(new(0, 0, 1));
 
+        colors.Add(new(1, 0, 0, 1));
+        colors.Add(new(0, 1, 0, 1));
+        colors.Add(new(0, 0, 1, 1));
+        colors.Add(new(1, 1, 1, 1));
+
         mesh.AddTriangle(0, 1, 2);
         mesh.AddTriangle(0, 2, 3);
 
+        Texture texture = new(world, "Tester/Assets/Textures/texture.jpg");
         Shader shader = new(world, "Tester/Assets/Shaders/unlit.vert", "Tester/Assets/Shaders/unlit.frag");
         Material material = new(world, shader);
+        material.AddComponentBinding(0, 0, ShaderStage.Vertex, RuntimeType.Get<Color>());
+        material.AddComponentBinding(1, 0, ShaderStage.Vertex, RuntimeType.Get<LocalToWorld>());
+        material.AddComponentBinding(2, 0, ShaderStage.Vertex, RuntimeType.Get<CameraProjection>());
+        material.AddTextureBinding(3, 0, texture);
+
         Renderer renderer = new(world, mesh, material, camera);
 
         [UnmanagedCallersOnly]
@@ -79,38 +91,44 @@ public struct Program : IDisposable
         TimeSpan delta = now - lastTime;
         lastTime = now;
         time += delta;
-        if (time.TotalSeconds > 30f || window.IsDestroyed())
+        if (time.TotalSeconds > 120f || window.IsDestroyed())
         {
+            Console.WriteLine("Conditions reached for finishing the demo");
             return false;
         }
 
+        Vector2 windowPosition = window.GetPosition();
+        Vector2 windowSize = window.GetSize();
         foreach (eint keyboardEntity in world.GetAll<IsKeyboard>())
         {
             Keyboard keyboard = new(world, keyboardEntity);
-            if (keyboard.WasPressed((uint)Keyboard.Button.Escape))
+            if (keyboard.WasPressed(Keyboard.Button.Escape))
             {
                 return false;
             }
 
-            if (keyboard.WasPressed((uint)Keyboard.Button.X))
+            if (keyboard.WasPressed(Keyboard.Button.X))
             {
-                Console.WriteLine("Closed");
+                Console.WriteLine("Closed early");
                 window.Destroy();
+                return false; //otherwise exceptions later on, this is basically `continue` for the `Update` method
             }
 
-            if (keyboard.WasPressed((uint)Keyboard.Button.R))
+            if (keyboard.WasPressed(Keyboard.Button.R))
             {
-                Console.WriteLine("Window resizable state toggled");
-                window.SetResizable(!window.IsResizable());
+                bool isResizable = !window.IsResizable();
+                Console.WriteLine($"Resizable {isResizable}");
+                window.SetResizable(isResizable);
             }
 
-            if (keyboard.WasPressed((uint)Keyboard.Button.B))
+            if (keyboard.WasPressed(Keyboard.Button.B))
             {
-                Console.WriteLine("Window borderless state toggled");
-                window.SetBorderless(!window.IsBorderless());
+                bool isBorderless = !window.IsBorderless();
+                Console.WriteLine($"Borderless {isBorderless}");
+                window.SetBorderless(isBorderless);
             }
 
-            if (keyboard.WasPressed((uint)Keyboard.Button.F))
+            if (keyboard.WasPressed(Keyboard.Button.F))
             {
                 Console.WriteLine("Window fullscreen state toggled");
                 if (window.IsFullscreen())
@@ -123,25 +141,13 @@ public struct Program : IDisposable
                 }
             }
 
-            if (keyboard.IsPressed((uint)Keyboard.Button.N))
-            {
-                Thread.Sleep(20);
-                Console.WriteLine("N");
-            }
-
-            if (keyboard.IsPressed((uint)Keyboard.Button.G))
-            {
-                Thread.Sleep(20);
-                Console.WriteLine($"G");
-            }
-
-            if (keyboard.WasPressed((uint)Keyboard.Button.N))
+            if (keyboard.WasPressed(Keyboard.Button.N))
             {
                 window.SetMinimized(!window.IsMinimized());
                 Console.WriteLine($"Window hidden state toggled to {window.IsMinimized()}");
             }
 
-            if (keyboard.WasPressed((uint)Keyboard.Button.M))
+            if (keyboard.WasPressed(Keyboard.Button.M))
             {
                 if (window.IsMaximized())
                 {
@@ -155,12 +161,13 @@ public struct Program : IDisposable
                 Console.WriteLine($"Window maximized state toggled {window.IsMaximized()}");
             }
 
-            ButtonState left = keyboard.GetButtonState((uint)Keyboard.Button.Left);
-            ButtonState right = keyboard.GetButtonState((uint)Keyboard.Button.Right);
-            ButtonState up = keyboard.GetButtonState((uint)Keyboard.Button.Up);
-            ButtonState down = keyboard.GetButtonState((uint)Keyboard.Button.Down);
-            ButtonState shift = keyboard.GetButtonState((uint)Keyboard.Button.LeftShift);
-            ButtonState control = keyboard.GetButtonState((uint)Keyboard.Button.LeftControl);
+            ButtonState left = keyboard.GetButtonState(Keyboard.Button.Left);
+            ButtonState right = keyboard.GetButtonState(Keyboard.Button.Right);
+            ButtonState up = keyboard.GetButtonState(Keyboard.Button.Up);
+            ButtonState down = keyboard.GetButtonState(Keyboard.Button.Down);
+            ButtonState shift = keyboard.GetButtonState(Keyboard.Button.LeftShift);
+            ButtonState control = keyboard.GetButtonState(Keyboard.Button.LeftControl);
+            ButtonState reset = keyboard.GetButtonState(Keyboard.Button.Space);
             Vector2 direction = default;
             if (left.IsPressed)
             {
@@ -187,7 +194,8 @@ public struct Program : IDisposable
                 direction *= 3;
             }
 
-            direction *= 64f;
+            float speed = 120f;
+            direction *= speed;
             if (control.IsPressed)
             {
                 windowSize += direction * (float)delta.TotalSeconds;
@@ -196,6 +204,18 @@ public struct Program : IDisposable
             else
             {
                 windowPosition += direction * (float)delta.TotalSeconds;
+            }
+
+            if (reset.IsPressed)
+            {
+                float resetSpeed = 2f;
+                if (control.IsPressed)
+                {
+                    resetSpeed *= 3f;
+                }
+
+                windowPosition = Vector2.Lerp(windowPosition, new(100, 100), (float)delta.TotalSeconds * resetSpeed);
+                windowSize = Vector2.Lerp(windowSize, new(400, 400), (float)delta.TotalSeconds * resetSpeed);
             }
         }
 
@@ -206,7 +226,7 @@ public struct Program : IDisposable
         {
             Mouse mouse = new(world, mouseEntity);
             Vector2 position = mouse.GetPosition();
-            ButtonState left = mouse.GetButtonState((uint)Mouse.Button.LeftButton);
+            ButtonState left = mouse.GetButtonState(Mouse.Button.LeftButton);
             if (left.WasPressed)
             {
                 Console.WriteLine($"Left button pressed at {position}");
@@ -216,7 +236,7 @@ public struct Program : IDisposable
                 Console.WriteLine($"Left button released at {position}");
             }
 
-            ButtonState right = mouse.GetButtonState((uint)Mouse.Button.RightButton);
+            ButtonState right = mouse.GetButtonState(Mouse.Button.RightButton);
             if (right.WasPressed)
             {
                 Console.WriteLine($"Right button pressed at {position}");
@@ -228,5 +248,15 @@ public struct Program : IDisposable
         }
 
         return true;
+    }
+
+    public readonly struct Color
+    {
+        public readonly Vector4 value;
+
+        public Color(Vector4 value)
+        {
+            this.value = value;
+        }
     }
 }
