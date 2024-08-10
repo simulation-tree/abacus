@@ -17,7 +17,6 @@ git clone https://github.com/game-simulations/windows.git
 git clone https://github.com/game-simulations/data-systems.git
 git clone https://github.com/game-simulations/font-systems.git
 git clone https://github.com/game-simulations/model-systems.git
-git clone https://github.com/game-simulations/rendering-systems.git
 git clone https://github.com/game-simulations/shader-systems.git
 git clone https://github.com/game-simulations/texture-systems.git
 git clone https://github.com/game-simulations/transform-systems.git
