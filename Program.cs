@@ -1,4 +1,5 @@
-﻿using Meshes;
+﻿using Data;
+using Meshes;
 using Rendering;
 using Rendering.Components;
 using Shaders;
@@ -16,20 +17,35 @@ public struct Program : IDisposable
 {
     private DateTime lastTime;
     private TimeSpan time;
+    private Vector2 lastPointerPosition;
+    private Vector3 cameraPosition;
+    private Vector2 cameraPitchYaw;
+    private float moveSpeed;
+    private float positionLerpSpeed;
+    private float lookSensitivity;
+    private bool invertY;
+
     private readonly World world;
     private readonly Window window;
+    private readonly Camera camera;
+    private readonly Renderer renderer;
 
     public unsafe Program(World world)
     {
         this.world = world;
         lastTime = DateTime.Now;
+        moveSpeed = 4f;
+        lookSensitivity = 2f;
+        invertY = true;
+        positionLerpSpeed = 12f;
 
         //build host
         window = new(world, "Window", new(100, 100), new(900, 720), "vulkan", new(&WindowClosed));
 
         //build scene
-        Camera camera = new(world, window.AsDestination(), false, 90f * MathF.PI / 180f);
+        camera = new(world, window.AsDestination(), false, MathF.PI * 0.5f);
         camera.SetPosition(0f, 0f, -10f);
+        cameraPosition = camera.GetPosition();
 
         Mesh mesh = new(world);
         Mesh.Collection<Vector3> positions = mesh.CreatePositions();
@@ -53,27 +69,27 @@ public struct Program : IDisposable
         normals.Add(new(0, 0, 1));
         normals.Add(new(0, 0, 1));
 
-        colors.Add(new(1, 0, 0, 1));
-        colors.Add(new(0, 1, 0, 1));
-        colors.Add(new(0, 0, 1, 1));
+        colors.Add(new(1, 1, 1, 1));
+        colors.Add(new(1, 1, 1, 1));
+        colors.Add(new(1, 1, 1, 1));
         colors.Add(new(1, 1, 1, 1));
 
         mesh.AddTriangle(0, 1, 2);
-        mesh.AddTriangle(0, 2, 3);
+        mesh.AddTriangle(2, 3, 0);
 
         Texture texture = new(world, "Tester/Assets/Textures/texture.jpg");
         Shader shader = new(world, "Tester/Assets/Shaders/unlit.vert", "Tester/Assets/Shaders/unlit.frag");
         Material material = new(world, shader);
-        material.AddComponentBinding(0, 0, default, RuntimeType.Get<Color>(), ShaderStage.Vertex);
-        material.AddComponentBinding(1, 0, default, RuntimeType.Get<LocalToWorld>(), ShaderStage.Vertex);
+        material.AddComponentBinding(RuntimeType.Get<Color>(), ShaderStage.Vertex);
+        material.AddComponentBinding(RuntimeType.Get<LocalToWorld>(), ShaderStage.Vertex);
         material.AddComponentBinding(2, 0, camera, RuntimeType.Get<CameraProjection>(), ShaderStage.Vertex);
         material.AddTextureBinding(3, 0, texture);
 
-        Renderer renderer = new(world, mesh, material, camera);
-        renderer.AddComponent(new Color(1f, 0f, 0f, 1f));
+        renderer = new(world, mesh, material, camera);
+        renderer.AddComponent(new Color(0f, 1f, 0f, 1f));
 
-        Transform transform = renderer.AsTransform();
-        transform.SetPosition(0f, 0f, 0f);
+        Transform transform = renderer.BecomeTransform();
+        transform.SetPosition(0f, 0f, 1f);
         if (!transform.ContainsComponent<Transform, IsTransform>())
         {
             throw new InvalidOperationException("Transform component not added");
@@ -103,9 +119,35 @@ public struct Program : IDisposable
         if (time.TotalSeconds > 120f || window.IsDestroyed())
         {
             Console.WriteLine("Conditions reached for finishing the demo");
+            return false; //source of "shutdown" event
+        }
+
+        TestMouseInputs();
+        AnimateTestRenderer(delta);
+        MoveCameraAround(delta);
+        if (!TestWindowEntity(delta))
+        {
             return false;
         }
 
+        return true;
+    }
+
+    private readonly void AnimateTestRenderer(TimeSpan delta)
+    {
+        ref Color color = ref renderer.GetComponentRef<Renderer, Color>();
+        float hue = color.Hue;
+        hue += (float)delta.TotalSeconds * 0.1f;
+        while (hue > 1f)
+        {
+            hue -= 1f;
+        }
+
+        color.Hue = hue;
+    }
+
+    private readonly bool TestWindowEntity(TimeSpan delta)
+    {
         Vector2 windowPosition = window.GetPosition();
         Vector2 windowSize = window.GetSize();
         foreach (eint keyboardEntity in world.GetAll<IsKeyboard>())
@@ -113,14 +155,14 @@ public struct Program : IDisposable
             Keyboard keyboard = new(world, keyboardEntity);
             if (keyboard.WasPressed(Keyboard.Button.Escape))
             {
-                return false;
+                return false; //source of "shutdown" event
             }
 
             if (keyboard.WasPressed(Keyboard.Button.X))
             {
                 Console.WriteLine("Closed early");
                 window.Destroy();
-                return false; //otherwise exceptions later on, this is basically `continue` for the `Update` method
+                return true; //finished this function early, theres already a conditional check for window destruction
             }
 
             if (keyboard.WasPressed(Keyboard.Button.R))
@@ -203,6 +245,7 @@ public struct Program : IDisposable
                 direction *= 3;
             }
 
+            //either move the window, or resize the window, controlled by the control key
             float speed = 120f;
             direction *= speed;
             if (control.IsPressed)
@@ -215,6 +258,7 @@ public struct Program : IDisposable
                 windowPosition += direction * (float)delta.TotalSeconds;
             }
 
+            //lerp window to a fixed position and size when holding space
             if (reset.IsPressed)
             {
                 float resetSpeed = 2f;
@@ -223,14 +267,18 @@ public struct Program : IDisposable
                     resetSpeed *= 3f;
                 }
 
-                windowPosition = Vector2.Lerp(windowPosition, new(100, 100), (float)delta.TotalSeconds * resetSpeed);
+                windowPosition = Vector2.Lerp(windowPosition, new(300, 300), (float)delta.TotalSeconds * resetSpeed);
                 windowSize = Vector2.Lerp(windowSize, new(400, 400), (float)delta.TotalSeconds * resetSpeed);
             }
         }
 
         window.SetPosition(windowPosition);
         window.SetSize(windowSize);
+        return true;
+    }
 
+    private readonly void TestMouseInputs()
+    {
         foreach (eint mouseEntity in world.GetAll<IsMouse>())
         {
             Mouse mouse = new(world, mouseEntity);
@@ -255,17 +303,95 @@ public struct Program : IDisposable
                 Console.WriteLine($"Right button released at {position}");
             }
         }
-
-        return true;
     }
 
-    public readonly struct Color
+    private void MoveCameraAround(TimeSpan delta)
     {
-        public readonly Vector4 value;
+        ref Vector3 position = ref camera.GetPositionRef();
+        ref Quaternion rotation = ref camera.GetRotationRef();
 
-        public Color(float r, float g, float b, float a)
+        //move around with keyboard or gamepad
+        bool moveLeft = false;
+        bool moveRight = false;
+        bool moveForward = false;
+        bool moveBackward = false;
+        bool moveUp = false;
+        bool moveDown = false;
+        foreach (eint keyboardEntity in world.GetAll<IsKeyboard>())
         {
-            this.value = new(r, g, b, a);
+            Keyboard keyboard = new(world, keyboardEntity);
+            ButtonState left = keyboard.GetButtonState(Keyboard.Button.A);
+            ButtonState right = keyboard.GetButtonState(Keyboard.Button.D);
+            ButtonState forward = keyboard.GetButtonState(Keyboard.Button.W);
+            ButtonState backward = keyboard.GetButtonState(Keyboard.Button.S);
+            ButtonState up = keyboard.GetButtonState(Keyboard.Button.Space);
+            ButtonState down = keyboard.GetButtonState(Keyboard.Button.LeftControl);
+            moveLeft |= left.IsPressed;
+            moveRight |= right.IsPressed;
+            moveForward |= forward.IsPressed;
+            moveBackward |= backward.IsPressed;
+            moveUp |= up.IsPressed;
+            moveDown |= down.IsPressed;
         }
+
+        Vector3 moveDirection = default;
+        if (moveLeft)
+        {
+            moveDirection.X -= 1;
+        }
+
+        if (moveRight)
+        {
+            moveDirection.X += 1;
+        }
+
+        if (moveForward)
+        {
+            moveDirection.Z += 1;
+        }
+
+        if (moveBackward)
+        {
+            moveDirection.Z -= 1;
+        }
+
+        if (moveUp)
+        {
+            moveDirection.Y += 1;
+        }
+
+        if (moveDown)
+        {
+            moveDirection.Y -= 1;
+        }
+
+        if (moveDirection.LengthSquared() > 0)
+        {
+            moveDirection = Vector3.Normalize(moveDirection) * moveSpeed;
+        }
+
+        cameraPosition += Vector3.Transform(moveDirection, rotation) * (float)delta.TotalSeconds;
+        position = Vector3.Lerp(position, cameraPosition, (float)delta.TotalSeconds * positionLerpSpeed);
+
+        //look around with mice
+        foreach (eint mouseEntity in world.GetAll<IsMouse>())
+        {
+            Mouse mouse = new(world, mouseEntity);
+            Vector2 pointerPosition = mouse.GetPosition();
+            if (lastPointerPosition == default)
+            {
+                lastPointerPosition = pointerPosition;
+            }
+
+            Vector2 pointerMoveDelta = pointerPosition - lastPointerPosition;
+            lastPointerPosition = pointerPosition;
+            cameraPitchYaw.X += pointerMoveDelta.X * 0.01f;
+            cameraPitchYaw.Y += pointerMoveDelta.Y * 0.01f;
+            cameraPitchYaw.Y = Math.Clamp(cameraPitchYaw.Y, -MathF.PI * 0.5f, MathF.PI * 0.5f);
+        }
+
+        Quaternion pitch = Quaternion.CreateFromAxisAngle(Vector3.UnitY, cameraPitchYaw.X);
+        Quaternion yaw = Quaternion.CreateFromAxisAngle(Vector3.UnitX, cameraPitchYaw.Y);
+        rotation = pitch * yaw;
     }
 }

@@ -24,6 +24,7 @@ out gl_PerVertex
 
 void main() {
     gl_Position = cameraInfo.proj * cameraInfo.view * entity.model * vec4(inPosition, 1.0);
+    //gl_Position = vec4(inPosition * 0.1f, 1.0);
     fragColor = entity.color * inColor;
     uv = inUv;
 }
