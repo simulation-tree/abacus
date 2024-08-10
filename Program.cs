@@ -81,6 +81,7 @@ public struct Program : IDisposable
 
         Texture texture = new(world, "Tester/Assets/Textures/texture.jpg");
         Shader shader = new(world, "Tester/Assets/Shaders/unlit.vert", "Tester/Assets/Shaders/unlit.frag");
+
         Material material = new(world, shader);
         material.AddPushBinding(RuntimeType.Get<Color>());
         material.AddPushBinding(RuntimeType.Get<LocalToWorld>());
@@ -90,6 +91,29 @@ public struct Program : IDisposable
         dummyRenderer = new(world, mesh, material, camera);
         dummyRenderer.AddComponent(Color.Yellow);
         dummyRenderer.BecomeTransform();
+
+        //to verify 2 renderers + 2 materials + 1 shader + 1 mesh
+        //Material testMaterial = new(world, shader);
+        //testMaterial.AddPushBinding(RuntimeType.Get<Color>());
+        //testMaterial.AddPushBinding(RuntimeType.Get<LocalToWorld>());
+        //testMaterial.AddComponentBinding(2, 0, camera, RuntimeType.Get<CameraProjection>(), ShaderStage.Vertex);
+        //testMaterial.AddTextureBinding(3, 0, texture);
+
+        //to very 2 renderers + 1 material + 1 shader + 2 meshes
+        //Mesh testMesh = new(world);
+        //Mesh.Collection<Vector3> testPositions = testMesh.CreatePositions();
+        //Mesh.Collection<Vector2> testUVs = testMesh.CreateUVs();
+        //Mesh.Collection<Vector4> testColors = testMesh.CreateColors();
+        //testPositions.Add(new(-1, 0, 0));
+        //testPositions.Add(new(1, 0, 0));
+        //testPositions.Add(new(0, 1, 0));
+        //testUVs.Add(new(0, 0));
+        //testUVs.Add(new(1, 0));
+        //testUVs.Add(new(0.5f, 1));
+        //testColors.Add(new(1, 1, 1, 1));
+        //testColors.Add(new(1, 1, 1, 1));
+        //testColors.Add(new(1, 1, 1, 1));
+        //testMesh.AddTriangle(0, 1, 2);
 
         testRenderer = new(world, mesh, material, camera);
         testRenderer.AddComponent(Color.White);
