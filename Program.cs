@@ -287,7 +287,7 @@ public struct Program : IDisposable
             ButtonState up = keyboard.GetButtonState(Keyboard.Button.Up);
             ButtonState down = keyboard.GetButtonState(Keyboard.Button.Down);
             ButtonState shift = keyboard.GetButtonState(Keyboard.Button.LeftShift);
-            ButtonState control = keyboard.GetButtonState(Keyboard.Button.LeftControl);
+            ButtonState alt = keyboard.GetButtonState(Keyboard.Button.LeftAlt);
             ButtonState reset = keyboard.GetButtonState(Keyboard.Button.V);
             Vector2 direction = default;
             if (left.IsPressed)
@@ -318,7 +318,7 @@ public struct Program : IDisposable
             //either move the window, or resize the window, controlled by the control key
             float speed = 120f;
             direction *= speed;
-            if (control.IsPressed)
+            if (alt.IsPressed)
             {
                 windowSize += direction * delta;
                 windowPosition -= direction * delta * 0.5f;
@@ -332,7 +332,7 @@ public struct Program : IDisposable
             if (reset.IsPressed)
             {
                 float resetSpeed = 2f;
-                if (control.IsPressed)
+                if (alt.IsPressed)
                 {
                     resetSpeed *= 3f;
                 }
