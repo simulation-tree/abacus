@@ -15,6 +15,8 @@ using Windows.Components;
 
 public struct Program : IDisposable
 {
+    private readonly World world;
+
     private DateTime lastTime;
     private TimeSpan time;
     private Vector2 lastPointerPosition;
@@ -25,10 +27,10 @@ public struct Program : IDisposable
     private float lookSensitivity;
     private bool invertY;
 
-    private readonly World world;
     private readonly Window window;
     private readonly Camera camera;
-    private readonly Renderer renderer;
+    private readonly Renderer dummyRenderer;
+    private readonly Renderer testRenderer;
 
     public unsafe Program(World world)
     {
@@ -54,10 +56,10 @@ public struct Program : IDisposable
         Mesh.Collection<Vector4> colors = mesh.CreateColors();
 
         //simple quad
-        positions.Add(new(-1, -1, 0));
-        positions.Add(new(1, -1, 0));
+        positions.Add(new(0, 0, 0));
+        positions.Add(new(1, 0, 0));
         positions.Add(new(1, 1, 0));
-        positions.Add(new(-1, 1, 0));
+        positions.Add(new(0, 1, 0));
 
         uvs.Add(new(0, 0));
         uvs.Add(new(1, 0));
@@ -81,19 +83,18 @@ public struct Program : IDisposable
         Shader shader = new(world, "Tester/Assets/Shaders/unlit.vert", "Tester/Assets/Shaders/unlit.frag");
         Material material = new(world, shader);
         material.AddPushBinding(RuntimeType.Get<Color>());
-        material.AddPushBinding(RuntimeType.Get<LocalToWorld>(), RuntimeType.Get<Color>().Size);
+        material.AddPushBinding(RuntimeType.Get<LocalToWorld>());
         material.AddComponentBinding(2, 0, camera, RuntimeType.Get<CameraProjection>(), ShaderStage.Vertex);
         material.AddTextureBinding(3, 0, texture);
 
-        renderer = new(world, mesh, material, camera);
-        renderer.AddComponent(new Color(0f, 1f, 0f, 1f));
+        dummyRenderer = new(world, mesh, material, camera);
+        dummyRenderer.AddComponent(Color.Yellow);
+        dummyRenderer.BecomeTransform();
 
-        Transform transform = renderer.BecomeTransform();
-        transform.SetPosition(0f, 0f, 1f);
-        if (!transform.ContainsComponent<Transform, IsTransform>())
-        {
-            throw new InvalidOperationException("Transform component not added");
-        }
+        testRenderer = new(world, mesh, material, camera);
+        testRenderer.AddComponent(Color.White);
+        Transform testTransform = testRenderer.BecomeTransform();
+        testTransform.SetPosition(0, 2, 0);
 
         [UnmanagedCallersOnly]
         static void WindowClosed(World world, eint windowEntity)
@@ -140,11 +141,11 @@ public struct Program : IDisposable
             Keyboard keyboard = new(world, keyboardEntity);
             if (keyboard.WasPressed(Keyboard.Button.J))
             {
-                renderer.SetEnabledState(!renderer.IsEnabled());
+                dummyRenderer.SetEnabledState(!dummyRenderer.IsEnabled());
             }
         }
 
-        ref Color color = ref renderer.GetComponentRef<Renderer, Color>();
+        ref Color color = ref dummyRenderer.GetComponentRef<Renderer, Color>();
         float hue = color.Hue;
         hue += (float)delta.TotalSeconds * 0.1f;
         while (hue > 1f)
