@@ -7,6 +7,8 @@ using Shaders.Events;
 using Shaders.Systems;
 using Simulation;
 using Simulation.Systems;
+using Textures.Events;
+using Textures.Systems;
 using Transforms.Events;
 using Windows.Events;
 using Windows.Systems;
@@ -21,7 +23,9 @@ public static class Bootstrap
             DataImportSystem data = new(world);
             TransformSystem transforms = new(world);
             WindowSystem windows = new(world);
+            TextureImportSystem textures = new(world);
             ShaderImportSystem shaders = new(world);
+            CameraSystem cameras = new(world);
             RenderEngineSystem rendering = new(world);
             rendering.RegisterSystem<VulkanRendererType>();
 
@@ -33,8 +37,9 @@ public static class Bootstrap
                 world.Submit(new TransformUpdate());
                 world.Submit(new DataUpdate());
                 world.Submit(new ShaderUpdate());
-                world.Submit(new RenderUpdate());
+                world.Submit(new TextureUpdate());
                 world.Submit(new CameraUpdate());
+                world.Submit(new RenderUpdate());
                 world.Poll();
             }
             while (program.Update());
@@ -42,7 +47,9 @@ public static class Bootstrap
 
             //finish
             rendering.Dispose();
+            cameras.Dispose();
             shaders.Dispose();
+            textures.Dispose();
             windows.Dispose();
             transforms.Dispose();
             data.Dispose();

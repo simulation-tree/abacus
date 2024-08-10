@@ -6,6 +6,7 @@ using Simulation;
 using System.Numerics;
 using System.Runtime.InteropServices;
 using Textures;
+using Transforms;
 using Transforms.Components;
 using Unmanaged;
 using Windows;
@@ -69,6 +70,14 @@ public struct Program : IDisposable
         material.AddTextureBinding(3, 0, texture);
 
         Renderer renderer = new(world, mesh, material, camera);
+        renderer.AddComponent(new Color(1f, 0f, 0f, 1f));
+
+        Transform transform = renderer.AsTransform();
+        transform.SetPosition(0f, 0f, 0f);
+        if (!transform.ContainsComponent<Transform, IsTransform>())
+        {
+            throw new InvalidOperationException("Transform component not added");
+        }
 
         [UnmanagedCallersOnly]
         static void WindowClosed(World world, eint windowEntity)
@@ -254,9 +263,9 @@ public struct Program : IDisposable
     {
         public readonly Vector4 value;
 
-        public Color(Vector4 value)
+        public Color(float r, float g, float b, float a)
         {
-            this.value = value;
+            this.value = new(r, g, b, a);
         }
     }
 }
