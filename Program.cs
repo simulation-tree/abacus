@@ -63,9 +63,9 @@ public struct Program : IDisposable
         Texture texture = new(world, "Tester/Assets/Textures/texture.jpg");
         Shader shader = new(world, "Tester/Assets/Shaders/unlit.vert", "Tester/Assets/Shaders/unlit.frag");
         Material material = new(world, shader);
-        material.AddComponentBinding(0, 0, ShaderStage.Vertex, RuntimeType.Get<Color>());
-        material.AddComponentBinding(1, 0, ShaderStage.Vertex, RuntimeType.Get<LocalToWorld>());
-        material.AddComponentBinding(2, 0, ShaderStage.Vertex, RuntimeType.Get<CameraProjection>());
+        material.AddComponentBinding(0, 0, default, RuntimeType.Get<Color>(), ShaderStage.Vertex);
+        material.AddComponentBinding(1, 0, default, RuntimeType.Get<LocalToWorld>(), ShaderStage.Vertex);
+        material.AddComponentBinding(2, 0, camera, RuntimeType.Get<CameraProjection>(), ShaderStage.Vertex);
         material.AddTextureBinding(3, 0, texture);
 
         Renderer renderer = new(world, mesh, material, camera);

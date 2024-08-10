@@ -1,15 +1,14 @@
 #version 450
 
+layout(push_constant) uniform EntityData {
+    vec4 color;
+    mat4 model;
+} entity;
+
 layout(location = 0) in vec3 inPosition;
 layout(location = 1) in vec4 inColor;
 layout(location = 2) in vec2 inUv;
 
-layout(binding = 0) uniform ColorInfo {
-    vec4 color;
-} colorInfo;
-layout(binding = 1) uniform TransformInfo {
-	mat4 model;
-} transformInfo;
 layout(binding = 2) uniform CameraInfo {
 	mat4 proj;
     mat4 view;
@@ -24,7 +23,7 @@ out gl_PerVertex
 };
 
 void main() {
-    gl_Position = cameraInfo.proj * cameraInfo.view * transformInfo.model * vec4(inPosition, 1.0);
-    fragColor = colorInfo.color * inColor;
+    gl_Position = cameraInfo.proj * cameraInfo.view * entity.model * vec4(inPosition, 1.0);
+    fragColor = entity.color * inColor;
     uv = inUv;
 }
