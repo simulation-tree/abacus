@@ -138,15 +138,17 @@ public struct Program : IDisposable
     public bool Update()
     {
         DateTime now = DateTime.Now;
-        TimeSpan delta = now - lastTime;
+        TimeSpan deltaSpan = now - lastTime;
         lastTime = now;
-        time += delta;
+        time += deltaSpan;
+
         if (time.TotalSeconds > 120f || window.IsDestroyed())
         {
             Console.WriteLine("Conditions reached for finishing the demo");
             return false; //source of "shutdown" event
         }
 
+        float delta = (float)deltaSpan.TotalSeconds;
         TestMouseInputs();
         AnimateTestRenderer(delta);
         MoveCameraAround(delta);
@@ -158,7 +160,7 @@ public struct Program : IDisposable
         return true;
     }
 
-    private readonly void AnimateTestRenderer(TimeSpan delta)
+    private readonly void AnimateTestRenderer(float delta)
     {
         foreach (eint keyboardEntity in world.GetAll<IsKeyboard>())
         {
@@ -167,11 +169,25 @@ public struct Program : IDisposable
             {
                 dummyRenderer.SetEnabledState(!dummyRenderer.IsEnabled());
             }
+
+            if (keyboard.IsPressed(Keyboard.Button.O))
+            {
+                Mesh mesh = dummyRenderer.GetMesh();
+                Mesh.Collection<Vector3> positions = mesh.GetPositions();
+                float revolveSpeed = 2f;
+                float revolveDistance = 0.7f;
+                float x = MathF.Sin((float)time.TotalSeconds * revolveSpeed) * revolveDistance;
+                float y = MathF.Cos((float)time.TotalSeconds * revolveSpeed) * revolveDistance;
+                positions[0] = Vector3.Lerp(positions[0], new(x, y, 0), delta * 3f);
+                positions[1] = Vector3.Lerp(positions[1], new(x + 1, y, 0), delta * 4f);
+                positions[2] = Vector3.Lerp(positions[2], new(x + 1, y + 1, 0), delta * 2f);
+                positions[3] = Vector3.Lerp(positions[3], new(x, y + 1, 0), delta * 5f);
+            }
         }
 
         ref Color color = ref dummyRenderer.GetComponentRef<Renderer, Color>();
         float hue = color.Hue;
-        hue += (float)delta.TotalSeconds * 0.1f;
+        hue += delta * 0.2f;
         while (hue > 1f)
         {
             hue -= 1f;
@@ -180,7 +196,7 @@ public struct Program : IDisposable
         color.Hue = hue;
     }
 
-    private readonly bool TestWindowEntity(TimeSpan delta)
+    private readonly bool TestWindowEntity(float delta)
     {
         Vector2 windowPosition = window.GetPosition();
         Vector2 windowSize = window.GetSize();
@@ -252,7 +268,7 @@ public struct Program : IDisposable
             ButtonState down = keyboard.GetButtonState(Keyboard.Button.Down);
             ButtonState shift = keyboard.GetButtonState(Keyboard.Button.LeftShift);
             ButtonState control = keyboard.GetButtonState(Keyboard.Button.LeftControl);
-            ButtonState reset = keyboard.GetButtonState(Keyboard.Button.Space);
+            ButtonState reset = keyboard.GetButtonState(Keyboard.Button.V);
             Vector2 direction = default;
             if (left.IsPressed)
             {
@@ -284,15 +300,15 @@ public struct Program : IDisposable
             direction *= speed;
             if (control.IsPressed)
             {
-                windowSize += direction * (float)delta.TotalSeconds;
-                windowPosition -= direction * (float)delta.TotalSeconds * 0.5f;
+                windowSize += direction * delta;
+                windowPosition -= direction * delta * 0.5f;
             }
             else
             {
-                windowPosition += direction * (float)delta.TotalSeconds;
+                windowPosition += direction * delta;
             }
 
-            //lerp window to a fixed position and size when holding space
+            //lerp window to a fixed position and size when holding the V key
             if (reset.IsPressed)
             {
                 float resetSpeed = 2f;
@@ -301,8 +317,8 @@ public struct Program : IDisposable
                     resetSpeed *= 3f;
                 }
 
-                windowPosition = Vector2.Lerp(windowPosition, new(300, 300), (float)delta.TotalSeconds * resetSpeed);
-                windowSize = Vector2.Lerp(windowSize, new(400, 400), (float)delta.TotalSeconds * resetSpeed);
+                windowPosition = Vector2.Lerp(windowPosition, new(300, 300), delta * resetSpeed);
+                windowSize = Vector2.Lerp(windowSize, new(400, 400), delta * resetSpeed);
             }
         }
 
@@ -339,7 +355,7 @@ public struct Program : IDisposable
         }
     }
 
-    private void MoveCameraAround(TimeSpan delta)
+    private void MoveCameraAround(float delta)
     {
         ref Vector3 position = ref camera.GetPositionRef();
         ref Quaternion rotation = ref camera.GetRotationRef();
@@ -404,8 +420,8 @@ public struct Program : IDisposable
             moveDirection = Vector3.Normalize(moveDirection) * moveSpeed;
         }
 
-        cameraPosition += Vector3.Transform(moveDirection, rotation) * (float)delta.TotalSeconds;
-        position = Vector3.Lerp(position, cameraPosition, (float)delta.TotalSeconds * positionLerpSpeed);
+        cameraPosition += Vector3.Transform(moveDirection, rotation) * delta;
+        position = Vector3.Lerp(position, cameraPosition, delta * positionLerpSpeed);
 
         //look around with mice
         foreach (eint mouseEntity in world.GetAll<IsMouse>())
