@@ -12,18 +12,19 @@
     <None Remove="Assets\Shaders\unlit.frag" />
     <None Remove="Assets\Shaders\unlit.vert" />
     <None Remove="Assets\Textures\texture.jpg" />
+    <None Remove="Assets\Textures\wave.png" />
   </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="Assets\Shaders\unlit.frag" />
     <EmbeddedResource Include="Assets\Shaders\unlit.vert" />
     <EmbeddedResource Include="Assets\Textures\texture.jpg" />
+    <EmbeddedResource Include="Assets\Textures\wave.png" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\data-systems\source\Data Systems.csproj" />
     <ProjectReference Include="..\data\Data.csproj" />
-    <ProjectReference Include="..\rendering-systems\source\Rendering Systems.csproj" />
     <ProjectReference Include="..\rendering\source\Rendering.csproj" />
     <ProjectReference Include="..\shader-systems\source\Shader Systems.csproj" />
     <ProjectReference Include="..\texture-systems\source\Texture Systems.csproj" />

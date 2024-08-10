@@ -61,8 +61,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Font Systems", "..\font-sys
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Font System Tests", "..\font-systems\tests\Font System Tests.csproj", "{0C5CDCE6-7C0E-4D23-99C9-0743ACA906AA}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Rendering Systems", "..\rendering-systems\source\Rendering Systems.csproj", "{CDC41F82-4872-47A3-94CE-5D61AEAFCDE4}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bin Packing", "..\bin-packing\source\Bin Packing.csproj", "{3D8D114D-D887-4641-AB7A-77AA0CED95AF}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bin Packing Tests", "..\bin-packing\tests\Bin Packing Tests.csproj", "{C8F6D419-0357-4123-ABED-B493A8168D36}"
@@ -201,10 +199,6 @@ Global
 		{0C5CDCE6-7C0E-4D23-99C9-0743ACA906AA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0C5CDCE6-7C0E-4D23-99C9-0743ACA906AA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0C5CDCE6-7C0E-4D23-99C9-0743ACA906AA}.Release|Any CPU.Build.0 = Release|Any CPU
-		{CDC41F82-4872-47A3-94CE-5D61AEAFCDE4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{CDC41F82-4872-47A3-94CE-5D61AEAFCDE4}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{CDC41F82-4872-47A3-94CE-5D61AEAFCDE4}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{CDC41F82-4872-47A3-94CE-5D61AEAFCDE4}.Release|Any CPU.Build.0 = Release|Any CPU
 		{3D8D114D-D887-4641-AB7A-77AA0CED95AF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{3D8D114D-D887-4641-AB7A-77AA0CED95AF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3D8D114D-D887-4641-AB7A-77AA0CED95AF}.Release|Any CPU.ActiveCfg = Release|Any CPU

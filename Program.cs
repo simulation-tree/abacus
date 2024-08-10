@@ -1,4 +1,5 @@
 ﻿using Data;
+using Materials;
 using Meshes;
 using Rendering;
 using Rendering.Components;
@@ -31,6 +32,8 @@ public struct Program : IDisposable
     private readonly Camera camera;
     private readonly Renderer dummyRenderer;
     private readonly Renderer testRenderer;
+    private readonly Texture waveImage;
+    private readonly Texture testImage;
 
     public unsafe Program(World world)
     {
@@ -45,7 +48,7 @@ public struct Program : IDisposable
         window = new(world, "Window", new(100, 100), new(900, 720), "vulkan", new(&WindowClosed));
 
         //build scene
-        camera = new(world, window.AsDestination(), false, MathF.PI * 0.5f);
+        camera = new(world, window.AsDestination(), CameraFieldOfView.FromDegrees(90f));
         camera.SetPosition(0f, 0f, -10f);
         cameraPosition = camera.GetPosition();
 
@@ -79,27 +82,27 @@ public struct Program : IDisposable
         mesh.AddTriangle(0, 1, 2);
         mesh.AddTriangle(2, 3, 0);
 
-        Texture texture = new(world, "Tester/Assets/Textures/texture.jpg");
+        testImage = new(world, "Tester/Assets/Textures/texture.jpg");
         Shader shader = new(world, "Tester/Assets/Shaders/unlit.vert", "Tester/Assets/Shaders/unlit.frag");
 
         Material material = new(world, shader);
         material.AddPushBinding(RuntimeType.Get<Color>());
         material.AddPushBinding(RuntimeType.Get<LocalToWorld>());
-        material.AddComponentBinding(2, 0, camera, RuntimeType.Get<CameraProjection>(), ShaderStage.Vertex);
-        material.AddTextureBinding(3, 0, texture);
+        material.AddComponentBinding(0, 0, camera, RuntimeType.Get<CameraProjection>());
+        material.AddTextureBinding(1, 0, testImage);
 
         dummyRenderer = new(world, mesh, material, camera);
         dummyRenderer.AddComponent(Color.Yellow);
         dummyRenderer.BecomeTransform();
 
-        //to verify 2 renderers + 2 materials + 1 shader + 1 mesh
-        //Material testMaterial = new(world, shader);
-        //testMaterial.AddPushBinding(RuntimeType.Get<Color>());
-        //testMaterial.AddPushBinding(RuntimeType.Get<LocalToWorld>());
-        //testMaterial.AddComponentBinding(2, 0, camera, RuntimeType.Get<CameraProjection>(), ShaderStage.Vertex);
-        //testMaterial.AddTextureBinding(3, 0, texture);
+        waveImage = new(world, "Tester/Assets/Textures/wave.png");
+        Material testMaterial = new(world, shader);
+        testMaterial.AddPushBinding(RuntimeType.Get<Color>());
+        testMaterial.AddPushBinding(RuntimeType.Get<LocalToWorld>());
+        testMaterial.AddComponentBinding(0, 0, camera, RuntimeType.Get<CameraProjection>());
+        testMaterial.AddTextureBinding(1, 0, waveImage);
 
-        //to very 2 renderers + 1 material + 1 shader + 2 meshes
+        //to verify 2 renderers + 1 material + 1 shader + 2 meshes
         //Mesh testMesh = new(world);
         //Mesh.Collection<Vector3> testPositions = testMesh.CreatePositions();
         //Mesh.Collection<Vector2> testUVs = testMesh.CreateUVs();
@@ -115,10 +118,11 @@ public struct Program : IDisposable
         //testColors.Add(new(1, 1, 1, 1));
         //testMesh.AddTriangle(0, 1, 2);
 
-        testRenderer = new(world, mesh, material, camera);
+        testRenderer = new(world, mesh, testMaterial, camera);
         testRenderer.AddComponent(Color.White);
         Transform testTransform = testRenderer.BecomeTransform();
-        testTransform.SetPosition(0, 2, 0);
+        testTransform.SetPosition(-7, -4, -2);
+        testTransform.SetScale(8f, 8f, 1f);
 
         [UnmanagedCallersOnly]
         static void WindowClosed(World world, eint windowEntity)
@@ -182,6 +186,22 @@ public struct Program : IDisposable
                 positions[1] = Vector3.Lerp(positions[1], new(x + 1, y, 0), delta * 4f);
                 positions[2] = Vector3.Lerp(positions[2], new(x + 1, y + 1, 0), delta * 2f);
                 positions[3] = Vector3.Lerp(positions[3], new(x, y + 1, 0), delta * 5f);
+                //would look a lot lot cooler with many more vertices :o
+            }
+
+            if (keyboard.WasPressed(Keyboard.Button.E))
+            {
+                Material dummyMaterial = dummyRenderer.GetMaterial();
+                ref MaterialTextureBinding textureBinding = ref dummyMaterial.GetTextureBindingRef(1);
+                bool shouldToggle = textureBinding.TextureEntity == waveImage.GetEntityValue();
+                textureBinding.SetTexture(shouldToggle ? testImage : waveImage);
+
+                using RandomGenerator rng = new();
+                float x = rng.NextFloat(0.666f);
+                float y = rng.NextFloat(0.666f);
+                float w = 0.333f;
+                float h = 0.333f;
+                textureBinding.SetRegion(x, y, w, h);
             }
         }
 

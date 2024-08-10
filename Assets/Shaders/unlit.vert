@@ -9,7 +9,7 @@ layout(location = 0) in vec3 inPosition;
 layout(location = 1) in vec4 inColor;
 layout(location = 2) in vec2 inUv;
 
-layout(binding = 2) uniform CameraInfo {
+layout(binding = 0) uniform CameraInfo {
 	mat4 proj;
     mat4 view;
 } cameraInfo;
