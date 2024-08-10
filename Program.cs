@@ -80,8 +80,8 @@ public struct Program : IDisposable
         Texture texture = new(world, "Tester/Assets/Textures/texture.jpg");
         Shader shader = new(world, "Tester/Assets/Shaders/unlit.vert", "Tester/Assets/Shaders/unlit.frag");
         Material material = new(world, shader);
-        material.AddComponentBinding(RuntimeType.Get<Color>(), ShaderStage.Vertex);
-        material.AddComponentBinding(RuntimeType.Get<LocalToWorld>(), ShaderStage.Vertex);
+        material.AddPushBinding(RuntimeType.Get<Color>());
+        material.AddPushBinding(RuntimeType.Get<LocalToWorld>(), RuntimeType.Get<Color>().Size);
         material.AddComponentBinding(2, 0, camera, RuntimeType.Get<CameraProjection>(), ShaderStage.Vertex);
         material.AddTextureBinding(3, 0, texture);
 
@@ -135,6 +135,15 @@ public struct Program : IDisposable
 
     private readonly void AnimateTestRenderer(TimeSpan delta)
     {
+        foreach (eint keyboardEntity in world.GetAll<IsKeyboard>())
+        {
+            Keyboard keyboard = new(world, keyboardEntity);
+            if (keyboard.WasPressed(Keyboard.Button.J))
+            {
+                renderer.SetEnabledState(!renderer.IsEnabled());
+            }
+        }
+
         ref Color color = ref renderer.GetComponentRef<Renderer, Color>();
         float hue = color.Hue;
         hue += (float)delta.TotalSeconds * 0.1f;
