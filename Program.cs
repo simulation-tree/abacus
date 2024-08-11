@@ -49,8 +49,9 @@ public struct Program : IDisposable
 
         //build scene
         camera = new(world, window.AsDestination(), CameraFieldOfView.FromDegrees(90f));
-        camera.SetPosition(0f, 0f, -10f);
-        cameraPosition = camera.GetPosition();
+        Transform cameraTransform = camera.BecomeTransform();
+        cameraTransform.SetPosition(0f, 0f, -10f);
+        cameraPosition = cameraTransform.GetPosition();
 
         Mesh mesh = new(world);
         Mesh.Collection<Vector3> positions = mesh.CreatePositions();
@@ -377,8 +378,9 @@ public struct Program : IDisposable
 
     private void MoveCameraAround(float delta)
     {
-        ref Vector3 position = ref camera.GetPositionRef();
-        ref Quaternion rotation = ref camera.GetRotationRef();
+        Transform cameraTransform = camera.BecomeTransform();
+        ref Vector3 position = ref cameraTransform.GetPositionRef();
+        ref Quaternion rotation = ref cameraTransform.GetRotationRef();
 
         //move around with keyboard or gamepad
         bool moveLeft = false;
@@ -463,5 +465,17 @@ public struct Program : IDisposable
         Quaternion pitch = Quaternion.CreateFromAxisAngle(Vector3.UnitY, cameraPitchYaw.X);
         Quaternion yaw = Quaternion.CreateFromAxisAngle(Vector3.UnitX, cameraPitchYaw.Y);
         rotation = pitch * yaw;
+    }
+}
+
+public readonly struct CameraProjection
+{
+    public readonly Matrix4x4 projection;
+    public readonly Matrix4x4 view;
+
+    public CameraProjection(Matrix4x4 projection, Matrix4x4 view)
+    {
+        this.projection = projection;
+        this.view = view;
     }
 }
