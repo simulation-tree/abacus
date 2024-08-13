@@ -207,14 +207,14 @@ public struct Program : IDisposable
         }
 
         ref Color color = ref dummyRenderer.GetComponentRef<Renderer, Color>();
-        float hue = color.Hue;
+        float hue = color.H;
         hue += delta * 0.2f;
         while (hue > 1f)
         {
             hue -= 1f;
         }
 
-        color.Hue = hue;
+        color.H = hue;
     }
 
     private readonly bool TestWindowEntity(float delta)
