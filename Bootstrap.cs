@@ -21,6 +21,7 @@ public static class Bootstrap
         {
             //systems part of the simulation
             DataImportSystem data = new(world);
+            MaterialImportSystem materials = new(world);
             TransformSystem transforms = new(world);
             WindowSystem windows = new(world);
             TextureImportSystem textures = new(world);
@@ -52,6 +53,7 @@ public static class Bootstrap
             textures.Dispose();
             windows.Dispose();
             transforms.Dispose();
+            materials.Dispose();
             data.Dispose();
         }
     }

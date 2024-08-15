@@ -1,5 +1,5 @@
 ﻿using Data;
-using Materials;
+using DefaultPresentationAssets;
 using Meshes;
 using Rendering;
 using Rendering.Components;
@@ -83,10 +83,10 @@ public struct Program : IDisposable
         mesh.AddTriangle(0, 1, 2);
         mesh.AddTriangle(2, 3, 0);
 
-        testImage = new(world, "Tester/Assets/Textures/texture.jpg");
-        Shader shader = new(world, "Tester/Assets/Shaders/unlit.vert", "Tester/Assets/Shaders/unlit.frag");
+        testImage = new(world, "*/Assets/Textures/texture.jpg");
+        //Shader shader = new(world, "*/Assets/Shaders/unlit.vertex.glsl", "*/Assets/Shaders/unlit.fragment.glsl");
 
-        Material material = new(world, shader);
+        Material material = new(world, DataRequest.GetAddress<UnlitTexturedMaterial>());
         material.AddPushBinding(RuntimeType.Get<Color>());
         material.AddPushBinding(RuntimeType.Get<LocalToWorld>());
         material.AddComponentBinding(0, 0, camera, RuntimeType.Get<CameraProjection>());
@@ -96,8 +96,8 @@ public struct Program : IDisposable
         dummyRenderer.AddComponent(Color.Yellow);
         dummyRenderer.BecomeTransform();
 
-        waveImage = new(world, "Tester/Assets/Textures/wave.png");
-        Material testMaterial = new(world, shader);
+        waveImage = new(world, "*/Assets/Textures/wave.png");
+        Material testMaterial = new(world, DataRequest.GetAddress<UnlitTexturedMaterial>());
         testMaterial.AddPushBinding(RuntimeType.Get<Color>());
         testMaterial.AddPushBinding(RuntimeType.Get<LocalToWorld>());
         testMaterial.AddComponentBinding(0, 0, camera, RuntimeType.Get<CameraProjection>());
@@ -170,11 +170,6 @@ public struct Program : IDisposable
         foreach (eint keyboardEntity in world.GetAll<IsKeyboard>())
         {
             Keyboard keyboard = new(world, keyboardEntity);
-            if (keyboard.WasPressed(Keyboard.Button.J))
-            {
-                dummyRenderer.SetEnabledState(!dummyRenderer.IsEnabled());
-            }
-
             if (keyboard.IsPressed(Keyboard.Button.O))
             {
                 Mesh mesh = dummyRenderer.GetMesh();
