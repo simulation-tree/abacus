@@ -1,37 +1,39 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <OutputType>WinExe</OutputType>
-    <TargetFramework>net9.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-  </PropertyGroup>
+	<PropertyGroup>
+		<OutputType>WinExe</OutputType>
+		<TargetFramework>net9.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <None Remove="Assets\Textures\texture.jpg" />
-    <None Remove="Assets\Textures\wave.png" />
-  </ItemGroup>
+	<ItemGroup>
+		<None Remove="Assets\Textures\texture.jpg" />
+		<None Remove="Assets\Textures\wave.png" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <EmbeddedResource Include="Assets\Textures\texture.jpg" />
-    <EmbeddedResource Include="Assets\Textures\wave.png" />
-  </ItemGroup>
+	<ItemGroup>
+		<EmbeddedResource Include="Assets\Textures\texture.jpg" />
+		<EmbeddedResource Include="Assets\Textures\wave.png" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\data-systems\source\Data Systems.csproj" />
-    <ProjectReference Include="..\data\source\Data.csproj" />
-    <ProjectReference Include="..\default-presentation-assets\source\Default Presentation Assets.csproj" />
-    <ProjectReference Include="..\rendering\source\Rendering.csproj" />
-    <ProjectReference Include="..\shader-systems\source\Shader Systems.csproj" />
-    <ProjectReference Include="..\texture-systems\source\Texture Systems.csproj" />
-    <ProjectReference Include="..\transform-systems\source\Transform Systems.csproj" />
-    <ProjectReference Include="..\vulkan-renderer\source\Vulkan Renderer.csproj" />
-    <ProjectReference Include="..\window-systems\source\Window Systems.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\data-systems\source\Data Systems.csproj" />
+		<ProjectReference Include="..\data\source\Data.csproj" />
+		<ProjectReference Include="..\default-presentation-assets\source\Default Presentation Assets.csproj" />
+		<ProjectReference Include="..\model-systems\source\Model Systems.csproj" />
+		<ProjectReference Include="..\models\Models.csproj" />
+		<ProjectReference Include="..\rendering\source\Rendering.csproj" />
+		<ProjectReference Include="..\shader-systems\source\Shader Systems.csproj" />
+		<ProjectReference Include="..\texture-systems\source\Texture Systems.csproj" />
+		<ProjectReference Include="..\transform-systems\source\Transform Systems.csproj" />
+		<ProjectReference Include="..\vulkan-renderer\source\Vulkan Renderer.csproj" />
+		<ProjectReference Include="..\window-systems\source\Window Systems.csproj" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Assets\Models\" />
-  </ItemGroup>
+	<ItemGroup>
+		<Folder Include="Assets\Models\" />
+	</ItemGroup>
 
 </Project>

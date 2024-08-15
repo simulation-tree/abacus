@@ -1,9 +1,9 @@
 ﻿using Data;
 using DefaultPresentationAssets;
 using Meshes;
+using Models;
 using Rendering;
 using Rendering.Components;
-using Shaders;
 using Simulation;
 using System.Numerics;
 using System.Runtime.InteropServices;
@@ -53,11 +53,11 @@ public struct Program : IDisposable
         cameraTransform.SetPosition(0f, 0f, -10f);
         cameraPosition = cameraTransform.GetPosition();
 
-        Mesh mesh = new(world);
-        Mesh.Collection<Vector3> positions = mesh.CreatePositions();
-        Mesh.Collection<Vector2> uvs = mesh.CreateUVs();
-        Mesh.Collection<Vector3> normals = mesh.CreateNormals();
-        Mesh.Collection<Vector4> colors = mesh.CreateColors();
+        Mesh manuallyBuiltMesh = new(world);
+        Mesh.Collection<Vector3> positions = manuallyBuiltMesh.CreatePositions();
+        Mesh.Collection<Vector2> uvs = manuallyBuiltMesh.CreateUVs();
+        Mesh.Collection<Vector3> normals = manuallyBuiltMesh.CreateNormals();
+        Mesh.Collection<Color> colors = manuallyBuiltMesh.CreateColors();
 
         //simple quad
         positions.Add(new(0, 0, 0));
@@ -80,24 +80,29 @@ public struct Program : IDisposable
         colors.Add(new(1, 1, 1, 1));
         colors.Add(new(1, 1, 1, 1));
 
-        mesh.AddTriangle(0, 1, 2);
-        mesh.AddTriangle(2, 3, 0);
+        manuallyBuiltMesh.AddTriangle(0, 1, 2);
+        manuallyBuiltMesh.AddTriangle(2, 3, 0);
+
+        Model model = new(world, Address.Get<QuadMesh>());
+        Mesh quadMesh = model.GetMesh(0);
+        Mesh.ChannelMask channels = quadMesh.GetChannelMask();
+        ReadOnlySpan<Vector3> quadPositions = quadMesh.GetPositions().AsSpan();
 
         testImage = new(world, "*/Assets/Textures/texture.jpg");
         //Shader shader = new(world, "*/Assets/Shaders/unlit.vertex.glsl", "*/Assets/Shaders/unlit.fragment.glsl");
 
-        Material material = new(world, DataRequest.GetAddress<UnlitTexturedMaterial>());
+        Material material = new(world, Address.Get<UnlitTexturedMaterial>());
         material.AddPushBinding(RuntimeType.Get<Color>());
         material.AddPushBinding(RuntimeType.Get<LocalToWorld>());
         material.AddComponentBinding(0, 0, camera, RuntimeType.Get<CameraProjection>());
         material.AddTextureBinding(1, 0, testImage);
 
-        dummyRenderer = new(world, mesh, material, camera);
+        dummyRenderer = new(world, quadMesh, material, camera);
         dummyRenderer.AddComponent(Color.Yellow);
         dummyRenderer.BecomeTransform();
 
         waveImage = new(world, "*/Assets/Textures/wave.png");
-        Material testMaterial = new(world, DataRequest.GetAddress<UnlitTexturedMaterial>());
+        Material testMaterial = new(world, Address.Get<UnlitTexturedMaterial>());
         testMaterial.AddPushBinding(RuntimeType.Get<Color>());
         testMaterial.AddPushBinding(RuntimeType.Get<LocalToWorld>());
         testMaterial.AddComponentBinding(0, 0, camera, RuntimeType.Get<CameraProjection>());
@@ -119,7 +124,7 @@ public struct Program : IDisposable
         //testColors.Add(new(1, 1, 1, 1));
         //testMesh.AddTriangle(0, 1, 2);
 
-        testRenderer = new(world, mesh, testMaterial, camera);
+        testRenderer = new(world, manuallyBuiltMesh, testMaterial, camera);
         testRenderer.AddComponent(Color.White);
         Transform testTransform = testRenderer.BecomeTransform();
         testTransform.SetPosition(-7, -4, -2);
