@@ -175,6 +175,11 @@ public struct Program : IDisposable
         foreach (eint keyboardEntity in world.GetAll<IsKeyboard>())
         {
             Keyboard keyboard = new(world, keyboardEntity);
+            if (keyboard.WasPressed(Keyboard.Button.J))
+            {
+                dummyRenderer.SetEnabledState(!dummyRenderer.IsEnabled());
+            }
+
             if (keyboard.IsPressed(Keyboard.Button.O))
             {
                 Mesh mesh = dummyRenderer.GetMesh();

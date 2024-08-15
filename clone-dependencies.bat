@@ -14,6 +14,9 @@ git clone https://github.com/game-simulations/serialization.git
 git clone https://github.com/game-simulations/bin-packing.git
 git clone https://github.com/game-simulations/rendering.git
 git clone https://github.com/game-simulations/windows.git
+git clone https://github.com/game-simulations/programs.git
+git clone https://github.com/game-simulations/default-presentation-assets.git
+git clone https://github.com/game-simulations/expression-machine.git
 git clone https://github.com/game-simulations/data-systems.git
 git clone https://github.com/game-simulations/font-systems.git
 git clone https://github.com/game-simulations/model-systems.git
