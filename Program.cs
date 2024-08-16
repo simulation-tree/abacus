@@ -48,11 +48,11 @@ public struct Program : IDisposable
         //load scene built in unity
         try
         {
-            //DataRequest scene = new(world, "*/Assets/Cav.world");
-            //using BinaryReader reader = new(scene.GetBytes());
-            //World sceneWorld = reader.ReadObject<World>();
-            //world.Clear();
-            //world.Append(sceneWorld);
+            DataRequest scene = new(world, "*/Assets/Cav.world");
+            using BinaryReader reader = new(scene.GetBytes());
+            using World sceneWorld = reader.ReadObject<World>();
+            world.Clear();
+            world.Append(sceneWorld);
         }
         catch (Exception ex)
         {
@@ -62,8 +62,18 @@ public struct Program : IDisposable
         //build host
         window = new(world, "Window", new(100, 100), new(900, 720), "vulkan", new(&WindowClosed));
 
+        //find existing camera or create new one
+        if (!world.TryGetFirst<IsCamera>(out eint cameraEntity))
+        {
+            camera = new(world, window.AsDestination(), CameraFieldOfView.FromDegrees(90f));
+        }
+        else
+        {
+            camera = new(world, cameraEntity);
+            camera.SetDestination(window);
+        }
+
         //build scene
-        camera = new(world, window.AsDestination(), CameraFieldOfView.FromDegrees(90f));
         Transform cameraTransform = camera.BecomeTransform();
         cameraTransform.SetPosition(0f, 0f, -10f);
         cameraPosition = cameraTransform.GetPosition();
@@ -481,17 +491,5 @@ public struct Program : IDisposable
         Quaternion pitch = Quaternion.CreateFromAxisAngle(Vector3.UnitY, cameraPitchYaw.X);
         Quaternion yaw = Quaternion.CreateFromAxisAngle(Vector3.UnitX, cameraPitchYaw.Y);
         rotation = pitch * yaw;
-    }
-}
-
-public readonly struct CameraProjection
-{
-    public readonly Matrix4x4 projection;
-    public readonly Matrix4x4 view;
-
-    public CameraProjection(Matrix4x4 projection, Matrix4x4 view)
-    {
-        this.projection = projection;
-        this.view = view;
     }
 }
