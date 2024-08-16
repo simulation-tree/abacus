@@ -1,5 +1,6 @@
 ﻿using Data.Events;
 using Data.Systems;
+using Models.Events;
 using Models.Systems;
 using Rendering.Events;
 using Rendering.Systems;
@@ -39,6 +40,7 @@ public static class Bootstrap
                 world.Submit(new WindowUpdate());
                 world.Submit(new TransformUpdate());
                 world.Submit(new DataUpdate());
+                world.Submit(new ModelUpdate());
                 world.Submit(new ShaderUpdate());
                 world.Submit(new TextureUpdate());
                 world.Submit(new CameraUpdate());

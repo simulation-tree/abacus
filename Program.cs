@@ -5,6 +5,7 @@ using Models;
 using Rendering;
 using Rendering.Components;
 using Simulation;
+using System;
 using System.Numerics;
 using System.Runtime.InteropServices;
 using Textures;
@@ -43,6 +44,20 @@ public struct Program : IDisposable
         lookSensitivity = 2f;
         invertY = true;
         positionLerpSpeed = 12f;
+
+        //load scene built in unity
+        try
+        {
+            //DataRequest scene = new(world, "*/Assets/Cav.world");
+            //using BinaryReader reader = new(scene.GetBytes());
+            //World sceneWorld = reader.ReadObject<World>();
+            //world.Clear();
+            //world.Append(sceneWorld);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Failed to load scene, skipping that");
+        }
 
         //build host
         window = new(world, "Window", new(100, 100), new(900, 720), "vulkan", new(&WindowClosed));
@@ -83,11 +98,7 @@ public struct Program : IDisposable
         manuallyBuiltMesh.AddTriangle(0, 1, 2);
         manuallyBuiltMesh.AddTriangle(2, 3, 0);
 
-        Model model = new(world, Address.Get<QuadMesh>());
-        Mesh quadMesh = model.GetMesh(0);
-        Mesh.ChannelMask channels = quadMesh.GetChannelMask();
-        ReadOnlySpan<Vector3> quadPositions = quadMesh.GetPositions().AsSpan();
-
+        Mesh quadMesh = new(world, Address.Get<QuadMesh>());
         testImage = new(world, "*/Assets/Textures/texture.jpg");
         //Shader shader = new(world, "*/Assets/Shaders/unlit.vertex.glsl", "*/Assets/Shaders/unlit.fragment.glsl");
 

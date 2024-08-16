@@ -3,17 +3,25 @@
 	<PropertyGroup>
 		<OutputType>WinExe</OutputType>
 		<TargetFramework>net9.0</TargetFramework>
-		<ImplicitUsings>enable</ImplicitUsings>
+		<ImplicitUsings>disable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <Compile Remove="Assets\Models\**" />
+	  <EmbeddedResource Remove="Assets\Models\**" />
+	  <None Remove="Assets\Models\**" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Remove="Assets\Cav.world" />
 		<None Remove="Assets\Textures\texture.jpg" />
 		<None Remove="Assets\Textures\wave.png" />
 	</ItemGroup>
 
 	<ItemGroup>
+		<EmbeddedResource Include="Assets\Cav.world" />
 		<EmbeddedResource Include="Assets\Textures\texture.jpg" />
 		<EmbeddedResource Include="Assets\Textures\wave.png" />
 	</ItemGroup>
@@ -30,10 +38,6 @@
 		<ProjectReference Include="..\transform-systems\source\Transform Systems.csproj" />
 		<ProjectReference Include="..\vulkan-renderer\source\Vulkan Renderer.csproj" />
 		<ProjectReference Include="..\window-systems\source\Window Systems.csproj" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<Folder Include="Assets\Models\" />
 	</ItemGroup>
 
 </Project>
