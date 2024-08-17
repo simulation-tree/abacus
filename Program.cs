@@ -1,7 +1,6 @@
 ﻿using Data;
 using DefaultPresentationAssets;
 using Meshes;
-using Models;
 using Rendering;
 using Rendering.Components;
 using Simulation;
@@ -48,11 +47,11 @@ public struct Program : IDisposable
         //load scene built in unity
         try
         {
-            DataRequest scene = new(world, "*/Assets/Cav.world");
-            using BinaryReader reader = new(scene.GetBytes());
-            using World sceneWorld = reader.ReadObject<World>();
-            world.Clear();
-            world.Append(sceneWorld);
+            //DataRequest scene = new(world, "*/Assets/Cav.world");
+            //using BinaryReader reader = new(scene.GetBytes());
+            //using World sceneWorld = reader.ReadObject<World>();
+            //world.Clear();
+            //world.Append(sceneWorld);
         }
         catch (Exception ex)
         {
@@ -65,18 +64,18 @@ public struct Program : IDisposable
         //find existing camera or create new one
         if (!world.TryGetFirst<IsCamera>(out eint cameraEntity))
         {
-            camera = new(world, window.AsDestination(), CameraFieldOfView.FromDegrees(90f));
+            camera = new(world, window, CameraFieldOfView.FromDegrees(90f));
         }
         else
         {
             camera = new(world, cameraEntity);
-            camera.SetDestination(window);
+            camera.Destination = window;
         }
 
         //build scene
-        Transform cameraTransform = camera.BecomeTransform();
-        cameraTransform.SetPosition(0f, 0f, -10f);
-        cameraPosition = cameraTransform.GetPosition();
+        Transform cameraTransform = ((Entity)camera).Become<Transform>();
+        cameraTransform.Position = new(0f, 0f, -10f);
+        cameraPosition = cameraTransform.Position;
 
         Mesh manuallyBuiltMesh = new(world);
         Mesh.Collection<Vector3> positions = manuallyBuiltMesh.CreatePositions();
@@ -119,8 +118,8 @@ public struct Program : IDisposable
         material.AddTextureBinding(1, 0, testImage);
 
         dummyRenderer = new(world, quadMesh, material, camera);
-        dummyRenderer.AddComponent(Color.Yellow);
-        dummyRenderer.BecomeTransform();
+        ((Entity)dummyRenderer).AddComponent(Color.Yellow);
+        ((Entity)dummyRenderer).Become<Transform>();
 
         waveImage = new(world, "*/Assets/Textures/wave.png");
         Material testMaterial = new(world, Address.Get<UnlitTexturedMaterial>());
@@ -146,10 +145,10 @@ public struct Program : IDisposable
         //testMesh.AddTriangle(0, 1, 2);
 
         testRenderer = new(world, manuallyBuiltMesh, testMaterial, camera);
-        testRenderer.AddComponent(Color.White);
-        Transform testTransform = testRenderer.BecomeTransform();
-        testTransform.SetPosition(-7, -4, -2);
-        testTransform.SetScale(8f, 8f, 1f);
+        ((Entity)testRenderer).AddComponent(Color.White);
+        Transform testTransform = ((Entity)testRenderer).Become<Transform>();
+        testTransform.Position = new(-7, -4, -2);
+        testTransform.Scale = new(8f, 8f, 1f);
 
         [UnmanagedCallersOnly]
         static void WindowClosed(World world, eint windowEntity)
@@ -160,7 +159,7 @@ public struct Program : IDisposable
 
     public void Dispose()
     {
-        if (!window.IsDestroyed())
+        if (!window.IsDestroyed)
         {
             window.Dispose();
         }
@@ -173,7 +172,7 @@ public struct Program : IDisposable
         lastTime = now;
         time += deltaSpan;
 
-        if (time.TotalSeconds > 120f || window.IsDestroyed())
+        if (time.TotalSeconds > 120f || window.IsDestroyed)
         {
             Console.WriteLine("Conditions reached for finishing the demo");
             return false; //source of "shutdown" event
@@ -198,12 +197,12 @@ public struct Program : IDisposable
             Keyboard keyboard = new(world, keyboardEntity);
             if (keyboard.WasPressed(Keyboard.Button.J))
             {
-                dummyRenderer.SetEnabledState(!dummyRenderer.IsEnabled());
+                dummyRenderer.IsEnabled = !dummyRenderer.IsEnabled;
             }
 
             if (keyboard.IsPressed(Keyboard.Button.O))
             {
-                Mesh mesh = dummyRenderer.GetMesh();
+                Mesh mesh = dummyRenderer.Mesh;
                 Mesh.Collection<Vector3> positions = mesh.GetPositions();
                 float revolveSpeed = 2f;
                 float revolveDistance = 0.7f;
@@ -218,9 +217,9 @@ public struct Program : IDisposable
 
             if (keyboard.WasPressed(Keyboard.Button.E))
             {
-                Material dummyMaterial = dummyRenderer.GetMaterial();
-                ref MaterialTextureBinding textureBinding = ref dummyMaterial.GetTextureBindingRef(1);
-                bool shouldToggle = textureBinding.TextureEntity == waveImage.GetEntityValue();
+                Material dummyMaterial = dummyRenderer.Material;
+                ref MaterialTextureBinding textureBinding = ref dummyMaterial.GetTextureBindingRef(1, 0);
+                bool shouldToggle = textureBinding.TextureEntity == ((Entity)waveImage).value;
                 textureBinding.SetTexture(shouldToggle ? testImage : waveImage);
 
                 using RandomGenerator rng = new();
@@ -232,7 +231,7 @@ public struct Program : IDisposable
             }
         }
 
-        ref Color color = ref dummyRenderer.GetComponentRef<Renderer, Color>();
+        ref Color color = ref ((Entity)dummyRenderer).GetComponentRef<Color>();
         float hue = color.H;
         hue += delta * 0.2f;
         while (hue > 1f)
@@ -245,8 +244,8 @@ public struct Program : IDisposable
 
     private readonly bool TestWindowEntity(float delta)
     {
-        Vector2 windowPosition = window.GetPosition();
-        Vector2 windowSize = window.GetSize();
+        Vector2 windowPosition = window.Position;
+        Vector2 windowSize = window.Size;
         foreach (eint keyboardEntity in world.GetAll<IsKeyboard>())
         {
             Keyboard keyboard = new(world, keyboardEntity);
@@ -258,28 +257,28 @@ public struct Program : IDisposable
             if (keyboard.WasPressed(Keyboard.Button.X))
             {
                 Console.WriteLine("Closed early");
-                window.Destroy();
+                window.Dispose();
                 return true; //finished this function early, theres already a conditional check for window destruction
             }
 
             if (keyboard.WasPressed(Keyboard.Button.R))
             {
-                bool isResizable = !window.IsResizable();
+                bool isResizable = !window.IsResizable;
                 Console.WriteLine($"Resizable {isResizable}");
-                window.SetResizable(isResizable);
+                window.IsResizable = isResizable;
             }
 
             if (keyboard.WasPressed(Keyboard.Button.B))
             {
-                bool isBorderless = !window.IsBorderless();
+                bool isBorderless = !window.IsBorderless;
                 Console.WriteLine($"Borderless {isBorderless}");
-                window.SetBorderless(isBorderless);
+                window.IsBorderless = isBorderless;
             }
 
             if (keyboard.WasPressed(Keyboard.Button.F))
             {
                 Console.WriteLine("Window fullscreen state toggled");
-                if (window.IsFullscreen())
+                if (window.IsFullscreen)
                 {
                     window.BecomeWindowed();
                 }
@@ -291,13 +290,13 @@ public struct Program : IDisposable
 
             if (keyboard.WasPressed(Keyboard.Button.N))
             {
-                window.SetMinimized(!window.IsMinimized());
-                Console.WriteLine($"Window hidden state toggled to {window.IsMinimized()}");
+                window.IsMinimized = !window.IsMinimized;
+                Console.WriteLine($"Window hidden state toggled to {window.IsMinimized}");
             }
 
             if (keyboard.WasPressed(Keyboard.Button.M))
             {
-                if (window.IsMaximized())
+                if (window.IsMaximized)
                 {
                     window.BecomeWindowed();
                 }
@@ -306,7 +305,7 @@ public struct Program : IDisposable
                     window.BecomeMaximized();
                 }
 
-                Console.WriteLine($"Window maximized state toggled {window.IsMaximized()}");
+                Console.WriteLine($"Window maximized state toggled {window.IsMaximized}");
             }
 
             ButtonState left = keyboard.GetButtonState(Keyboard.Button.Left);
@@ -369,8 +368,8 @@ public struct Program : IDisposable
             }
         }
 
-        window.SetPosition(windowPosition);
-        window.SetSize(windowSize);
+        window.Position = windowPosition;
+        window.Size = windowSize;
         return true;
     }
 
@@ -379,7 +378,7 @@ public struct Program : IDisposable
         foreach (eint mouseEntity in world.GetAll<IsMouse>())
         {
             Mouse mouse = new(world, mouseEntity);
-            Vector2 position = mouse.GetPosition();
+            Vector2 position = mouse.Position;
             ButtonState left = mouse.GetButtonState(Mouse.Button.LeftButton);
             if (left.WasPressed)
             {
@@ -404,9 +403,9 @@ public struct Program : IDisposable
 
     private void MoveCameraAround(float delta)
     {
-        Transform cameraTransform = camera.BecomeTransform();
-        ref Vector3 position = ref cameraTransform.GetPositionRef();
-        ref Quaternion rotation = ref cameraTransform.GetRotationRef();
+        Transform cameraTransform = ((Entity)camera).Become<Transform>();
+        Vector3 position = cameraTransform.Position;
+        Quaternion rotation = cameraTransform.Rotation;
 
         //move around with keyboard or gamepad
         bool moveLeft = false;
@@ -475,7 +474,7 @@ public struct Program : IDisposable
         foreach (eint mouseEntity in world.GetAll<IsMouse>())
         {
             Mouse mouse = new(world, mouseEntity);
-            Vector2 pointerPosition = mouse.GetPosition();
+            Vector2 pointerPosition = mouse.Position;
             if (lastPointerPosition == default)
             {
                 lastPointerPosition = pointerPosition;
@@ -491,5 +490,8 @@ public struct Program : IDisposable
         Quaternion pitch = Quaternion.CreateFromAxisAngle(Vector3.UnitY, cameraPitchYaw.X);
         Quaternion yaw = Quaternion.CreateFromAxisAngle(Vector3.UnitX, cameraPitchYaw.Y);
         rotation = pitch * yaw;
+
+        cameraTransform.Position = position;
+        cameraTransform.Rotation = rotation;
     }
 }

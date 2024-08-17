@@ -30,10 +30,10 @@ public class CameraSystem : SystemBase
             Camera camera = new(world, result.entity);
 
             //todo: should have methods that let user to switch camera from projection to ortho and back
-            ref CameraProjection projection = ref camera.TryGetComponentRef<Camera, CameraProjection>(out bool has);
+            ref CameraProjection projection = ref ((Entity)camera).TryGetComponentRef<CameraProjection>(out bool has);
             if (!has)
             {
-                projection = ref camera.AddComponentRef<Camera, CameraProjection>();
+                projection = ref ((Entity)camera).AddComponentRef<CameraProjection>();
             }
 
             CalculateProjection(camera, ref projection);
@@ -43,40 +43,39 @@ public class CameraSystem : SystemBase
     private void CalculateProjection(Camera camera, ref CameraProjection component)
     {
         //destination may be gone if a window is destroyed
-        eint destinationEntity = world.GetComponent<CameraOutput>(camera.GetEntityValue()).destination;
-        if (!world.ContainsEntity(destinationEntity)) return;
+        Destination destination = camera.Destination;
+        if (!world.ContainsEntity(destination)) return;
 
-        Transform cameraTransform = camera.BecomeTransform();
-        Vector3 position = cameraTransform.GetPosition();
-        Quaternion rotation = cameraTransform.GetRotation();
+        Entity cameraEntity = (Entity)camera;
+        Transform cameraTransform = cameraEntity.Become<Transform>();
+        Vector3 position = cameraTransform.Position;
+        Quaternion rotation = cameraTransform.Rotation;
         Matrix4x4 projection = Matrix4x4.Identity;
         Vector3 forward = Vector3.Transform(Vector3.UnitZ, rotation);
         Vector3 up = Vector3.Transform(Vector3.UnitY, rotation);
         Vector3 target = position + forward;
         Matrix4x4 view = Matrix4x4.CreateLookAt(position, target, up);
 
-        Destination destination = camera.GetDestination();
-        bool isOrthographic = camera.IsOrthographic();
-        if (camera.TryGetComponent(out CameraOrthographicSize orthographicSize))
+        if (cameraEntity.TryGetComponent(out CameraOrthographicSize orthographicSize))
         {
-            if (!isOrthographic)
+            if (cameraEntity.ContainsComponent<CameraFieldOfView>())
             {
                 throw new InvalidOperationException($"Camera cannot have both {nameof(CameraOrthographicSize)} and {nameof(CameraFieldOfView)} components");
             }
 
-            (uint width, uint height) = destination.GetDestinationSize();
-            (float min, float max) = camera.GetDepth();
+            (uint width, uint height) = destination.DestinationSize;
+            (float min, float max) = camera.Depth;
             projection = Matrix4x4.CreateOrthographic(orthographicSize.value * width, orthographicSize.value * height, min, max);
         }
-        else if (camera.TryGetComponent(out CameraFieldOfView fov))
+        else if (cameraEntity.TryGetComponent(out CameraFieldOfView fov))
         {
-            if (isOrthographic)
+            if (cameraEntity.ContainsComponent<CameraOrthographicSize>())
             {
                 throw new InvalidOperationException($"Camera cannot have both {nameof(CameraOrthographicSize)} and {nameof(CameraFieldOfView)} components");
             }
 
-            float aspect = destination.GetAspectRatio();
-            (float min, float max) = camera.GetDepth();
+            float aspect = destination.AspectRatio;
+            (float min, float max) = camera.Depth;
             projection = Matrix4x4.CreatePerspectiveFieldOfView(fov.value, aspect, min, max);
             projection.M11 *= -1; //flip x axis
         }
