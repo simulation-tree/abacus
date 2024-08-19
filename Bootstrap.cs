@@ -8,6 +8,11 @@ using Rendering.Vulkan;
 using Shaders.Events;
 using Shaders.Systems;
 using Simulation;
+using System;
+using System.Diagnostics;
+using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
 using Textures.Events;
 using Textures.Systems;
 using Transforms.Events;
@@ -19,6 +24,26 @@ public static class Bootstrap
 {
     public static void Main()
     {
+        using TextWriter consoleWriter = new StringWriter();
+        _ = Task.Run(() =>
+        {
+            string lastOutput = string.Empty;
+            while (true)
+            {
+                string output = consoleWriter.ToString() ?? string.Empty;
+                if (lastOutput != output)
+                {
+                    Debug.WriteLine(output);
+                }
+
+                lastOutput = output;
+                consoleWriter.Flush();
+                Thread.Sleep(8);
+            }
+        });
+
+        Console.SetOut(consoleWriter);
+
         using (World world = new())
         {
             //systems part of the simulation
