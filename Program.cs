@@ -1,6 +1,7 @@
 ﻿using Data;
 using DefaultPresentationAssets;
 using Meshes;
+using Models;
 using Rendering;
 using Rendering.Components;
 using Simulation;
@@ -59,16 +60,16 @@ public struct Program : IDisposable
         }
 
         //build host
-        window = new(world, "Window", new(100, 100), new(900, 720), "vulkan", new(&WindowClosed));
+        window = new(world, "Window", new(100, 100), new(900, 720), "vulkan", new(&WindowClosed)); //1
 
         //find existing camera or create new one
         if (!world.TryGetFirst<IsCamera>(out eint cameraEntity))
         {
-            camera = new(world, window, CameraFieldOfView.FromDegrees(90f));
+            camera = new(world, window, CameraFieldOfView.FromDegrees(90f)); //2
         }
         else
         {
-            camera = new(world, cameraEntity);
+            camera = new(world, cameraEntity); //2
             camera.Destination = window;
         }
 
@@ -77,7 +78,7 @@ public struct Program : IDisposable
         cameraTransform.Position = new(0f, 0f, -10f);
         cameraPosition = cameraTransform.Position;
 
-        Mesh manuallyBuiltMesh = new(world);
+        Mesh manuallyBuiltMesh = new(world); //3
         Mesh.Collection<Vector3> positions = manuallyBuiltMesh.CreatePositions();
         Mesh.Collection<Vector2> uvs = manuallyBuiltMesh.CreateUVs();
         Mesh.Collection<Vector3> normals = manuallyBuiltMesh.CreateNormals();
@@ -107,11 +108,12 @@ public struct Program : IDisposable
         manuallyBuiltMesh.AddTriangle(0, 1, 2);
         manuallyBuiltMesh.AddTriangle(2, 3, 0);
 
-        Mesh quadMesh = new(world, Address.Get<QuadMesh>());
-        testImage = new(world, "*/Assets/Textures/texture.jpg");
+        Model quadModel = new(world, Address.Get<QuadMesh>()); //4
+        Mesh quadMesh = new(world, quadModel); //5
+        testImage = new(world, "*/Assets/Textures/texture.jpg"); //6
         //Shader shader = new(world, "*/Assets/Shaders/unlit.vertex.glsl", "*/Assets/Shaders/unlit.fragment.glsl");
 
-        Material material = new(world, Address.Get<UnlitTexturedMaterial>());
+        Material material = new(world, Address.Get<UnlitTexturedMaterial>()); //7
         material.AddPushBinding(RuntimeType.Get<Color>());
         material.AddPushBinding(RuntimeType.Get<LocalToWorld>());
         material.AddComponentBinding(0, 0, camera, RuntimeType.Get<CameraProjection>());
@@ -203,7 +205,7 @@ public struct Program : IDisposable
             if (keyboard.IsPressed(Keyboard.Button.O))
             {
                 Mesh mesh = dummyRenderer.Mesh;
-                Mesh.Collection<Vector3> positions = mesh.GetPositions();
+                Mesh.Collection<Vector3> positions = mesh.Positions;
                 float revolveSpeed = 2f;
                 float revolveDistance = 0.7f;
                 float x = MathF.Sin((float)time.TotalSeconds * revolveSpeed) * revolveDistance;
