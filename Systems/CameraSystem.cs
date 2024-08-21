@@ -25,15 +25,16 @@ public class CameraSystem : SystemBase
     private void Update(CameraUpdate update)
     {
         cameraQuery.Update();
-        foreach (Query<IsCamera>.Result result in cameraQuery)
+        foreach (var x in cameraQuery)
         {
-            Camera camera = new(world, result.entity);
+            eint cameraEntity = x.entity;
+            Camera camera = new(world, cameraEntity);
 
             //todo: should have methods that let user to switch camera from projection to ortho and back
-            ref CameraProjection projection = ref ((Entity)camera).TryGetComponentRef<CameraProjection>(out bool has);
+            ref CameraProjection projection = ref world.TryGetComponentRef<CameraProjection>(cameraEntity, out bool has);
             if (!has)
             {
-                projection = ref ((Entity)camera).AddComponentRef<CameraProjection>();
+                projection = ref world.AddComponentRef<CameraProjection>(cameraEntity);
             }
 
             CalculateProjection(camera, ref projection);
@@ -46,7 +47,7 @@ public class CameraSystem : SystemBase
         Destination destination = camera.Destination;
         if (!world.ContainsEntity(destination)) return;
 
-        Entity cameraEntity = (Entity)camera;
+        Entity cameraEntity = camera;
         Transform cameraTransform = cameraEntity.Become<Transform>();
         Vector3 position = cameraTransform.Position;
         Quaternion rotation = cameraTransform.Rotation;

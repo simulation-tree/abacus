@@ -55,6 +55,7 @@ public static class Bootstrap
             TextureImportSystem textures = new(world);
             ShaderImportSystem shaders = new(world);
             CameraSystem cameras = new(world);
+            
             RenderEngineSystem rendering = new(world);
             rendering.RegisterSystem<VulkanRendererType>();
 

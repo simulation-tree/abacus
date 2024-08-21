@@ -221,7 +221,7 @@ public struct Program : IDisposable
             {
                 Material dummyMaterial = dummyRenderer.Material;
                 ref MaterialTextureBinding textureBinding = ref dummyMaterial.GetTextureBindingRef(1, 0);
-                bool shouldToggle = textureBinding.TextureEntity == ((Entity)waveImage).value;
+                bool shouldToggle = textureBinding.TextureEntity == waveImage;
                 textureBinding.SetTexture(shouldToggle ? testImage : waveImage);
 
                 using RandomGenerator rng = new();
