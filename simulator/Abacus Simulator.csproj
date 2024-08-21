@@ -1,0 +1,33 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<OutputType>WinExe</OutputType>
+		<TargetFramework>net9.0</TargetFramework>
+		<ImplicitUsings>disable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+		<BaseOutputPath>bin~\</BaseOutputPath>
+		<BaseIntermediateOutputPath>obj~\</BaseIntermediateOutputPath>
+	</PropertyGroup>
+
+	<ItemGroup>
+	  <Compile Remove="Assets\**" />
+	  <EmbeddedResource Remove="Assets\**" />
+	  <None Remove="Assets\**" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\..\data-systems\source\Data Systems.csproj" />
+		<ProjectReference Include="..\..\data\source\Data.csproj" />
+		<ProjectReference Include="..\..\model-systems\source\Model Systems.csproj" />
+		<ProjectReference Include="..\..\programs\source\Programs.csproj" />
+		<ProjectReference Include="..\..\rendering\source\Rendering.csproj" />
+		<ProjectReference Include="..\..\shader-systems\source\Shader Systems.csproj" />
+		<ProjectReference Include="..\..\texture-systems\source\Texture Systems.csproj" />
+		<ProjectReference Include="..\..\transform-systems\source\Transform Systems.csproj" />
+		<ProjectReference Include="..\..\vulkan-renderer\source\Vulkan Renderer.csproj" />
+		<ProjectReference Include="..\..\window-systems\source\Window Systems.csproj" />
+		<ProjectReference Include="..\program\Abacus Program.csproj" />
+	</ItemGroup>
+
+</Project>

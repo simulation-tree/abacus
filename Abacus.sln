@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.5.002.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tester", "Tester.csproj", "{E4B86E6D-5CD9-49F6-AE1E-731441F3FA1D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Abacus Program", "program\Abacus Program.csproj", "{E4B86E6D-5CD9-49F6-AE1E-731441F3FA1D}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Unmanaged", "..\unmanaged\source\Unmanaged.csproj", "{4F36256C-74BF-4DE6-AFC3-FFCE7B2466ED}"
 EndProject
@@ -92,6 +92,10 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Text Rendering Systems", "..\text-rendering-systems\source\Text Rendering Systems.csproj", "{8B15A900-2AF1-4CD5-A38D-6E61CA5ACB05}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FreeType", "..\freetype\source\FreeType.csproj", "{0EC8D10D-604A-4F10-B758-7349A040824D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Text Rendering Systems Tests", "..\text-rendering-systems\tests\Text Rendering Systems Tests.csproj", "{1428A37A-82DB-4DD8-A065-1C31D98D3FCC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Abacus Simulator", "simulator\Abacus Simulator.csproj", "{92E6B3ED-0000-4C49-A52C-744048818EC8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -279,6 +283,14 @@ Global
 		{0EC8D10D-604A-4F10-B758-7349A040824D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0EC8D10D-604A-4F10-B758-7349A040824D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0EC8D10D-604A-4F10-B758-7349A040824D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1428A37A-82DB-4DD8-A065-1C31D98D3FCC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1428A37A-82DB-4DD8-A065-1C31D98D3FCC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1428A37A-82DB-4DD8-A065-1C31D98D3FCC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1428A37A-82DB-4DD8-A065-1C31D98D3FCC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{92E6B3ED-0000-4C49-A52C-744048818EC8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{92E6B3ED-0000-4C49-A52C-744048818EC8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{92E6B3ED-0000-4C49-A52C-744048818EC8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{92E6B3ED-0000-4C49-A52C-744048818EC8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
