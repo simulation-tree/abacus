@@ -15,6 +15,7 @@ git clone https://github.com/game-simulations/bin-packing.git
 git clone https://github.com/game-simulations/rendering.git
 git clone https://github.com/game-simulations/windows.git
 git clone https://github.com/game-simulations/programs.git
+git clone https://github.com/game-simulations/freetype.git
 git clone https://github.com/game-simulations/default-presentation-assets.git
 git clone https://github.com/game-simulations/expression-machine.git
 git clone https://github.com/game-simulations/text-rendering.git
