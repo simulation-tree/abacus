@@ -133,13 +133,19 @@ namespace Abacus
             testMaterial.AddComponentBinding(0, 0, camera, RuntimeType.Get<CameraProjection>());
             testMaterial.AddTextureBinding(1, 0, waveImage);
 
+            //font entity (reusable)
             Font cascadiaMono = new(world, Address.Get<CascadiaMonoFont>());
+
+            //mesh entity (reusable)
             exampleTextMesh = new TextMesh(world, "hiii <3", cascadiaMono);
+
+            //material entity (reusable)
             Material textMaterial = new(world, Address.Get<TextMaterial>());
             textMaterial.AddComponentBinding(1, 0, camera, RuntimeType.Get<CameraProjection>());
             textMaterial.AddPushBinding(RuntimeType.Get<Color>());
             textMaterial.AddPushBinding(RuntimeType.Get<LocalToWorld>());
 
+            //render request itself (not reusable)
             TextRenderer text = new(world, exampleTextMesh, textMaterial, camera);
             ((Entity)text).AddComponent(Color.Green);
             Transform textTransform = ((Entity)text).Become<Transform>();
