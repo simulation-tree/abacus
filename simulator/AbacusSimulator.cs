@@ -1,6 +1,8 @@
 ﻿using Abacus;
 using Data.Events;
 using Data.Systems;
+using Fonts.Events;
+using Fonts.Systems;
 using Models.Events;
 using Models.Systems;
 using Programs;
@@ -24,10 +26,10 @@ using Windows.Systems;
 
 public static class AbacusSimulator
 {
-    public static void Main()
+    public static int Main()
     {
         RerouteConsoleOutputToDebug();
-
+        uint returnCode = 0;
         using (World world = new())
         {
             //systems part of the simulation
@@ -38,6 +40,8 @@ public static class AbacusSimulator
             WindowSystem windows = new(world);
             TextureImportSystem textures = new(world);
             ShaderImportSystem shaders = new(world);
+            FontImportSystem fonts = new(world);
+            TextRenderingSystem textMeshes = new(world);
             CameraSystem cameras = new(world);
             RenderEngineSystem rendering = new(world);
             rendering.RegisterSystem<VulkanRendererType>();
@@ -55,6 +59,7 @@ public static class AbacusSimulator
                     world.Submit(new ModelUpdate());
                     world.Submit(new ShaderUpdate());
                     world.Submit(new TextureUpdate());
+                    world.Submit(new FontUpdate());
                     world.Submit(new CameraUpdate());
                     world.Submit(new RenderUpdate());
                     world.Poll();
@@ -62,13 +67,16 @@ public static class AbacusSimulator
                     DateTime now = DateTime.UtcNow;
                     delta = now - time;
                     time = now;
+                    returnCode = program.Update(delta);
                 }
-                while (program.Update(delta) == 0);
+                while (returnCode == 0);
             }
 
             //finish
             rendering.Dispose();
             cameras.Dispose();
+            textMeshes.Dispose();
+            fonts.Dispose();
             shaders.Dispose();
             textures.Dispose();
             windows.Dispose();
@@ -77,8 +85,11 @@ public static class AbacusSimulator
             materials.Dispose();
             data.Dispose();
         }
+
+        return (int)returnCode;
     }
 
+    [Conditional("DEBUG")]
     private static void RerouteConsoleOutputToDebug()
     {
         TextWriter consoleWriter = new StringWriter();

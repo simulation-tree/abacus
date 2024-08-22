@@ -1,5 +1,6 @@
 ﻿using Data;
 using DefaultPresentationAssets;
+using Fonts;
 using Meshes;
 using Models;
 using Programs;
@@ -37,6 +38,7 @@ namespace Abacus
         private readonly Renderer testRenderer;
         private readonly Texture waveImage;
         private readonly Texture testImage;
+        private readonly TextMesh exampleTextMesh;
 
         public unsafe AbacusProgram(World world)
         {
@@ -61,16 +63,16 @@ namespace Abacus
             }
 
             //build host
-            window = new(world, "Window", new(100, 100), new(900, 720), "vulkan", new(&WindowClosed)); //1
+            window = new(world, "Window", new(100, 100), new(900, 720), "vulkan", new(&WindowClosed));
 
             //find existing camera or create new one
             if (!world.TryGetFirst<IsCamera>(out eint cameraEntity))
             {
-                camera = new(world, window, CameraFieldOfView.FromDegrees(90f)); //2
+                camera = new(world, window, CameraFieldOfView.FromDegrees(90f));
             }
             else
             {
-                camera = new(world, cameraEntity); //2
+                camera = new(world, cameraEntity);
                 camera.Destination = window;
             }
 
@@ -79,7 +81,7 @@ namespace Abacus
             cameraTransform.Position = new(0f, 0f, -10f);
             cameraPosition = cameraTransform.Position;
 
-            Mesh manuallyBuiltMesh = new(world); //3
+            Mesh manuallyBuiltMesh = new(world);
             Mesh.Collection<Vector3> positions = manuallyBuiltMesh.CreatePositions();
             Mesh.Collection<Vector2> uvs = manuallyBuiltMesh.CreateUVs();
             Mesh.Collection<Vector3> normals = manuallyBuiltMesh.CreateNormals();
@@ -109,12 +111,12 @@ namespace Abacus
             manuallyBuiltMesh.AddTriangle(0, 1, 2);
             manuallyBuiltMesh.AddTriangle(2, 3, 0);
 
-            Model quadModel = new(world, Address.Get<QuadMesh>()); //4
-            Mesh quadMesh = new(world, quadModel); //5
-            testImage = new(world, "*/Assets/Textures/texture.jpg"); //6
-                                                                     //Shader shader = new(world, "*/Assets/Shaders/unlit.vertex.glsl", "*/Assets/Shaders/unlit.fragment.glsl");
+            Model quadModel = new(world, Address.Get<QuadMesh>());
+            Mesh quadMesh = new(world, quadModel);
+            testImage = new(world, "*/Assets/Textures/texture.jpg");
+            //Shader shader = new(world, "*/Assets/Shaders/unlit.vertex.glsl", "*/Assets/Shaders/unlit.fragment.glsl");
 
-            Material material = new(world, Address.Get<UnlitTexturedMaterial>()); //7
+            Material material = new(world, Address.Get<UnlitTexturedMaterial>());
             material.AddPushBinding(RuntimeType.Get<Color>());
             material.AddPushBinding(RuntimeType.Get<LocalToWorld>());
             material.AddComponentBinding(0, 0, camera, RuntimeType.Get<CameraProjection>());
@@ -130,6 +132,18 @@ namespace Abacus
             testMaterial.AddPushBinding(RuntimeType.Get<LocalToWorld>());
             testMaterial.AddComponentBinding(0, 0, camera, RuntimeType.Get<CameraProjection>());
             testMaterial.AddTextureBinding(1, 0, waveImage);
+
+            Font cascadiaMono = new(world, Address.Get<CascadiaMonoFont>());
+            exampleTextMesh = new TextMesh(world, "hiii <3", cascadiaMono);
+            Material textMaterial = new(world, Address.Get<TextMaterial>());
+            textMaterial.AddComponentBinding(1, 0, camera, RuntimeType.Get<CameraProjection>());
+            textMaterial.AddPushBinding(RuntimeType.Get<Color>());
+            textMaterial.AddPushBinding(RuntimeType.Get<LocalToWorld>());
+
+            TextRenderer text = new(world, exampleTextMesh, textMaterial, camera);
+            ((Entity)text).AddComponent(Color.Green);
+            Transform textTransform = ((Entity)text).Become<Transform>();
+            textTransform.Position = new(-10, 2, 0);
 
             //to verify 2 renderers + 1 material + 1 shader + 2 meshes
             //Mesh testMesh = new(world);
@@ -181,6 +195,7 @@ namespace Abacus
             TestMouseInputs();
             AnimateTestRenderer(delta);
             MoveCameraAround(delta);
+            ModifyText();
             if (!TestWindowEntity(delta))
             {
                 //propagating upwards
@@ -188,6 +203,23 @@ namespace Abacus
             }
 
             return true;
+        }
+
+        private readonly void ModifyText()
+        {
+            foreach (eint keyboardEntity in world.GetAll<IsKeyboard>())
+            {
+                Keyboard keyboard = new(world, keyboardEntity);
+                if (keyboard.IsPressed(Keyboard.Button.G))
+                {
+                    exampleTextMesh.SetText(Guid.NewGuid().ToString());
+                }
+                
+                if (keyboard.WasPressed(Keyboard.Button.T))
+                {
+                    exampleTextMesh.SetText(DateTime.Now.ToString());
+                }
+            }
         }
 
         private readonly void AnimateTestRenderer(float delta)

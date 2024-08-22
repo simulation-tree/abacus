@@ -46,6 +46,7 @@
 		<ProjectReference Include="..\..\models\Models.csproj" />
 		<ProjectReference Include="..\..\programs\source\Programs.csproj" />
 		<ProjectReference Include="..\..\rendering\source\Rendering.csproj" />
+		<ProjectReference Include="..\..\text-rendering\source\Text Rendering.csproj" />
 		<ProjectReference Include="..\..\transforms\source\Transforms.csproj" />
 		<ProjectReference Include="..\..\windows\source\Windows.csproj" />
 	</ItemGroup>
