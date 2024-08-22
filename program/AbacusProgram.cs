@@ -39,6 +39,7 @@ namespace Abacus
         private readonly Texture waveImage;
         private readonly Texture testImage;
         private readonly TextMesh exampleTextMesh;
+        private readonly Renderer squareBox;
 
         public unsafe AbacusProgram(World world)
         {
@@ -117,9 +118,9 @@ namespace Abacus
             //Shader shader = new(world, "*/Assets/Shaders/unlit.vertex.glsl", "*/Assets/Shaders/unlit.fragment.glsl");
 
             Material material = new(world, Address.Get<UnlitTexturedMaterial>());
-            material.AddPushBinding(RuntimeType.Get<Color>());
-            material.AddPushBinding(RuntimeType.Get<LocalToWorld>());
-            material.AddComponentBinding(0, 0, camera, RuntimeType.Get<CameraProjection>());
+            material.AddPushBinding<Color>();
+            material.AddPushBinding<LocalToWorld>();
+            material.AddComponentBinding<CameraProjection>(0, 0, camera);
             material.AddTextureBinding(1, 0, testImage);
 
             dummyRenderer = new(world, quadMesh, material, camera);
@@ -128,28 +129,52 @@ namespace Abacus
 
             waveImage = new(world, "*/Assets/Textures/wave.png");
             Material testMaterial = new(world, Address.Get<UnlitTexturedMaterial>());
-            testMaterial.AddPushBinding(RuntimeType.Get<Color>());
-            testMaterial.AddPushBinding(RuntimeType.Get<LocalToWorld>());
-            testMaterial.AddComponentBinding(0, 0, camera, RuntimeType.Get<CameraProjection>());
+            testMaterial.AddPushBinding<Color>();
+            testMaterial.AddPushBinding<LocalToWorld>();
+            testMaterial.AddComponentBinding<CameraProjection>(0, 0, camera);
             testMaterial.AddTextureBinding(1, 0, waveImage);
+
+            Texture squareTexture = new(world, Address.Get<SquareTexture>());
+            Material defaultSquareMaterial = new(world, Address.Get<UnlitTexturedMaterial>());
+            defaultSquareMaterial.AddPushBinding<Color>();
+            defaultSquareMaterial.AddPushBinding<LocalToWorld>();
+            defaultSquareMaterial.AddComponentBinding<CameraProjection>(0, 0, camera);
+            defaultSquareMaterial.AddTextureBinding(1, 0, squareTexture);
+            squareBox = new(world, quadMesh, defaultSquareMaterial, camera);
+            ((Entity)squareBox).AddComponent(Color.Red);
+            Transform squareTransform = ((Entity)squareBox).Become<Transform>();
+            squareTransform.Position = new(8, 4, -2);
+            squareTransform.Scale = new(4, 4, 1);
 
             //font entity (reusable)
             Font cascadiaMono = new(world, Address.Get<CascadiaMonoFont>());
 
-            //mesh entity (reusable)
-            exampleTextMesh = new TextMesh(world, "hiii <3", cascadiaMono);
-
             //material entity (reusable)
             Material textMaterial = new(world, Address.Get<TextMaterial>());
-            textMaterial.AddComponentBinding(1, 0, camera, RuntimeType.Get<CameraProjection>());
-            textMaterial.AddPushBinding(RuntimeType.Get<Color>());
-            textMaterial.AddPushBinding(RuntimeType.Get<LocalToWorld>());
+            textMaterial.AddComponentBinding<CameraProjection>(1, 0, camera);
+            textMaterial.AddPushBinding<Color>();
+            textMaterial.AddPushBinding<LocalToWorld>();
+
+            //mesh entity (reusable if text is the same)
+            exampleTextMesh = new TextMesh(world, "hiii <3", cascadiaMono);
 
             //render request itself (not reusable)
             TextRenderer text = new(world, exampleTextMesh, textMaterial, camera);
-            ((Entity)text).AddComponent(Color.Green);
-            Transform textTransform = ((Entity)text).Become<Transform>();
-            textTransform.Position = new(-10, 2, 0);
+            text.Parent = squareBox;
+            Entity textEntity = text;
+            textEntity.AddComponent(Color.Green);
+            textEntity.AddComponent(Anchor.BottomLeft);
+            Transform textTransform = textEntity.Become<Transform>();
+            textTransform.Position = new(0f, 0f, -0.1f);
+
+            TextMesh anotherTextMesh = new(world, "top right corner?", cascadiaMono, new(1f, 1f));
+            TextRenderer anotherText = new(world, anotherTextMesh, textMaterial, camera);
+            anotherText.Parent = squareBox;
+            Entity anotherTextEntity = anotherText;
+            anotherTextEntity.AddComponent(Color.Blue);
+            anotherTextEntity.AddComponent(Anchor.TopRight);
+            Transform anotherTextTransform = anotherTextEntity.Become<Transform>();
+            anotherTextTransform.Position = new(0f, 0f, -0.1f);
 
             //to verify 2 renderers + 1 material + 1 shader + 2 meshes
             //Mesh testMesh = new(world);
@@ -220,7 +245,7 @@ namespace Abacus
                 {
                     exampleTextMesh.SetText(Guid.NewGuid().ToString());
                 }
-                
+
                 if (keyboard.WasPressed(Keyboard.Button.T))
                 {
                     exampleTextMesh.SetText(DateTime.Now.ToString());
@@ -382,12 +407,12 @@ namespace Abacus
 
                 if (up.IsPressed)
                 {
-                    direction.Y -= 1;
+                    direction.Y += 1;
                 }
 
                 if (down.IsPressed)
                 {
-                    direction.Y += 1;
+                    direction.Y -= 1;
                 }
 
                 if (shift.IsPressed)
@@ -395,30 +420,46 @@ namespace Abacus
                     direction *= 3;
                 }
 
-                //either move the window, or resize the window, controlled by the control key
-                float speed = 120f;
-                direction *= speed;
-                if (alt.IsPressed)
+                if (keyboard.IsPressed(Keyboard.Button.B))
                 {
-                    windowSize += direction * delta;
-                    windowPosition -= direction * delta * 0.5f;
+                    float speed = 20f;
+                    Transform squareBoxTransform = ((Entity)squareBox).As<Transform>();
+                    if (alt.IsPressed)
+                    {
+                        squareBoxTransform.Position += new Vector3(direction, 0) * delta * speed;
+                    }
+                    else
+                    {
+                        squareBoxTransform.Scale += new Vector3(direction, 0) * delta * speed;
+                    }
                 }
                 else
                 {
-                    windowPosition += direction * delta;
-                }
-
-                //lerp window to a fixed position and size when holding the V key
-                if (reset.IsPressed)
-                {
-                    float resetSpeed = 2f;
+                    //either move the window, or resize the window, controlled by the control key
+                    float speed = 120f;
+                    direction *= speed;
                     if (alt.IsPressed)
                     {
-                        resetSpeed *= 3f;
+                        windowSize += direction * delta;
+                        windowPosition -= direction * delta * 0.5f;
+                    }
+                    else
+                    {
+                        windowPosition += direction * delta;
                     }
 
-                    windowPosition = Vector2.Lerp(windowPosition, new(300, 300), delta * resetSpeed);
-                    windowSize = Vector2.Lerp(windowSize, new(400, 400), delta * resetSpeed);
+                    //lerp window to a fixed position and size when holding the V key
+                    if (reset.IsPressed)
+                    {
+                        float resetSpeed = 2f;
+                        if (alt.IsPressed)
+                        {
+                            resetSpeed *= 3f;
+                        }
+
+                        windowPosition = Vector2.Lerp(windowPosition, new(300, 300), delta * resetSpeed);
+                        windowSize = Vector2.Lerp(windowSize, new(400, 400), delta * resetSpeed);
+                    }
                 }
             }
 
