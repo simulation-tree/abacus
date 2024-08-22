@@ -219,6 +219,22 @@ namespace Abacus
                 {
                     exampleTextMesh.SetText(DateTime.Now.ToString());
                 }
+                else if (keyboard.WasPressed(Keyboard.Button.L))
+                {
+                    string[] options = [
+                        "hey boo",
+                        "hi sugar",
+                        "hello sweetie",
+                        "sup hun",
+                        "yo babe",
+                        "aye fam",
+                        "hiya love",
+                        "hey darling",
+                        "hi dear"
+                    ];
+                    using RandomGenerator rng = new();
+                    exampleTextMesh.SetText(options[rng.NextInt(options.Length)]);
+                }
             }
         }
 
