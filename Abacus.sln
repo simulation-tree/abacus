@@ -33,13 +33,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Serialization", "..\seriali
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Serialization Tests", "..\serialization\tests\Serialization Tests.csproj", "{448F224B-233C-4512-B139-2972218D440E}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Shaders", "..\shaders\Shaders.csproj", "{69BB28E5-90C4-4962-8576-C2D716608BB3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Shaders", "..\shaders\source\Shaders.csproj", "{69BB28E5-90C4-4962-8576-C2D716608BB3}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Shader Systems", "..\shader-systems\source\Shader Systems.csproj", "{D3CEF030-1DE5-44C4-BCB1-D02B9346989B}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Shader Systems Tests", "..\shader-systems\tests\Shader Systems Tests.csproj", "{CC777039-9EE7-4899-8521-37B3838E987D}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Textures", "..\textures\Textures.csproj", "{840FA434-5A83-42BF-93CE-5A1BE940BF93}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Textures", "..\textures\source\Textures.csproj", "{840FA434-5A83-42BF-93CE-5A1BE940BF93}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Texture Systems", "..\texture-systems\source\Texture Systems.csproj", "{EBB2C2FC-A07D-4121-8553-BE0631B51A31}"
 EndProject
@@ -49,13 +49,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Meshes", "..\meshes\source\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Mesh Tests", "..\meshes\tests\Mesh Tests.csproj", "{2CCDC102-59A5-4034-A145-C19960187A93}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Models", "..\models\Models.csproj", "{33D9A598-60C0-445D-AF89-FAF8C4C5E477}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Models", "..\models\source\Models.csproj", "{33D9A598-60C0-445D-AF89-FAF8C4C5E477}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Model Systems", "..\model-systems\source\Model Systems.csproj", "{5DCB423D-934E-48CB-975B-8DA455F65EE5}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Model Tests", "..\model-systems\tests\Model Tests.csproj", "{AE847B99-7E91-4462-B7FD-24BE89AFFC94}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fonts", "..\fonts\Fonts.csproj", "{06C486AA-794A-44ED-A11F-1620FE4288D2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fonts", "..\fonts\source\Fonts.csproj", "{06C486AA-794A-44ED-A11F-1620FE4288D2}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Font Systems", "..\font-systems\source\Font Systems.csproj", "{DDA2F9DB-E40C-4D0F-BB6A-A81D87E57AD8}"
 EndProject
