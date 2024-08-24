@@ -14,6 +14,8 @@ git clone https://github.com/game-simulations/serialization.git
 git clone https://github.com/game-simulations/bin-packing.git
 git clone https://github.com/game-simulations/rendering.git
 git clone https://github.com/game-simulations/windows.git
+git clone https://github.com/game-simulations/input-devices.git
+git clone https://github.com/game-simulations/interaction-kit.git
 git clone https://github.com/game-simulations/programs.git
 git clone https://github.com/game-simulations/freetype.git
 git clone https://github.com/game-simulations/default-presentation-assets.git
@@ -26,5 +28,6 @@ git clone https://github.com/game-simulations/shader-systems.git
 git clone https://github.com/game-simulations/texture-systems.git
 git clone https://github.com/game-simulations/transform-systems.git
 git clone https://github.com/game-simulations/window-systems.git
+git clone https://github.com/game-simulations/input-device-systems.git
 git clone https://github.com/game-simulations/text-rendering-systems.git
 git clone https://github.com/game-simulations/vulkan-renderer.git

@@ -1,6 +1,8 @@
 ﻿using Data;
 using DefaultPresentationAssets;
 using Fonts;
+using InputDevices;
+using InputDevices.Components;
 using Meshes;
 using Models;
 using Programs;
@@ -15,7 +17,6 @@ using Transforms;
 using Transforms.Components;
 using Unmanaged;
 using Windows;
-using Windows.Components;
 
 namespace Abacus
 {
@@ -44,8 +45,8 @@ namespace Abacus
         public unsafe AbacusProgram(World world)
         {
             this.world = world;
-            moveSpeed = 4f;
-            lookSensitivity = 2f;
+            moveSpeed = 5f;
+            lookSensitivity = 0.9f;
             invertY = true;
             positionLerpSpeed = 12f;
 
@@ -238,9 +239,8 @@ namespace Abacus
 
         private readonly void ModifyText()
         {
-            foreach (eint keyboardEntity in world.GetAll<IsKeyboard>())
+            if (Entity.TryGetFirst(world, out Keyboard keyboard))
             {
-                Keyboard keyboard = new(world, keyboardEntity);
                 if (keyboard.IsPressed(Keyboard.Button.G))
                 {
                     exampleTextMesh.SetText(Guid.NewGuid().ToString());

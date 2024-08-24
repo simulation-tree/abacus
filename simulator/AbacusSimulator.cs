@@ -23,6 +23,10 @@ using Transforms.Events;
 using Transforms.Systems;
 using Windows.Events;
 using Windows.Systems;
+using InteractionKit.Systems;
+using InteractionKit.Events;
+using InputDevices.Systems;
+using InputDevices.Events;
 
 public static class AbacusSimulator
 {
@@ -38,6 +42,8 @@ public static class AbacusSimulator
             ModelImportSystem models = new(world);
             TransformSystem transforms = new(world);
             WindowSystem windows = new(world);
+            GlobalKeyboardAndMouseSystem kbm = new(world);
+            WindowDevicesSystems windowDevices = new(world);
             TextureImportSystem textures = new(world);
             ShaderImportSystem shaders = new(world);
             FontImportSystem fonts = new(world);
@@ -54,12 +60,14 @@ public static class AbacusSimulator
                 do
                 {
                     world.Submit(new WindowUpdate());
+                    world.Submit(new InputUpdate());
                     world.Submit(new TransformUpdate());
                     world.Submit(new DataUpdate());
                     world.Submit(new ModelUpdate());
                     world.Submit(new ShaderUpdate());
                     world.Submit(new TextureUpdate());
                     world.Submit(new FontUpdate());
+                    world.Submit(new InteractionUpdate());
                     world.Submit(new CameraUpdate());
                     world.Submit(new RenderUpdate());
                     world.Poll();
@@ -79,6 +87,8 @@ public static class AbacusSimulator
             fonts.Dispose();
             shaders.Dispose();
             textures.Dispose();
+            windowDevices.Dispose();
+            kbm.Dispose();
             windows.Dispose();
             transforms.Dispose();
             models.Dispose();
