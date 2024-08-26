@@ -80,8 +80,8 @@ namespace Abacus
 
             //build scene
             Transform cameraTransform = ((Entity)camera).Become<Transform>();
-            cameraTransform.Position = new(0f, 0f, -10f);
-            cameraPosition = cameraTransform.Position;
+            cameraTransform.LocalPosition = new(0f, 0f, -10f);
+            cameraPosition = cameraTransform.LocalPosition;
 
             Mesh manuallyBuiltMesh = new(world);
             Mesh.Collection<Vector3> positions = manuallyBuiltMesh.CreatePositions();
@@ -144,8 +144,8 @@ namespace Abacus
             squareBox = new(world, quadMesh, defaultSquareMaterial, camera);
             ((Entity)squareBox).AddComponent(Color.Red);
             Transform squareTransform = ((Entity)squareBox).Become<Transform>();
-            squareTransform.Position = new(8, 4, -2);
-            squareTransform.Scale = new(4, 4, 1);
+            squareTransform.LocalPosition = new(8, 4, -2);
+            squareTransform.LocalScale = new(4, 4, 1);
 
             //font entity (reusable)
             Font cascadiaMono = new(world, Address.Get<CascadiaMonoFont>());
@@ -166,7 +166,7 @@ namespace Abacus
             textEntity.AddComponent(Color.Green);
             textEntity.AddComponent(Anchor.BottomLeft);
             Transform textTransform = textEntity.Become<Transform>();
-            textTransform.Position = new(0f, 0f, -0.1f);
+            textTransform.LocalPosition = new(0f, 0f, -0.1f);
 
             TextMesh anotherTextMesh = new(world, "top right corner?", cascadiaMono, new(1f, 1f));
             TextRenderer anotherText = new(world, anotherTextMesh, textMaterial, camera);
@@ -175,7 +175,7 @@ namespace Abacus
             anotherTextEntity.AddComponent(Color.Blue);
             anotherTextEntity.AddComponent(Anchor.TopRight);
             Transform anotherTextTransform = anotherTextEntity.Become<Transform>();
-            anotherTextTransform.Position = new(0f, 0f, -0.1f);
+            anotherTextTransform.LocalPosition = new(0f, 0f, -0.1f);
 
             //to verify 2 renderers + 1 material + 1 shader + 2 meshes
             //Mesh testMesh = new(world);
@@ -196,8 +196,8 @@ namespace Abacus
             testRenderer = new(world, manuallyBuiltMesh, testMaterial, camera);
             ((Entity)testRenderer).AddComponent(Color.White);
             Transform testTransform = ((Entity)testRenderer).Become<Transform>();
-            testTransform.Position = new(-7, -4, -2);
-            testTransform.Scale = new(8f, 8f, 1f);
+            testTransform.LocalPosition = new(-7, -4, -2);
+            testTransform.LocalScale = new(8f, 8f, 1f);
 
             [UnmanagedCallersOnly]
             static void WindowClosed(World world, eint windowEntity)
@@ -426,11 +426,11 @@ namespace Abacus
                     Transform squareBoxTransform = ((Entity)squareBox).As<Transform>();
                     if (alt.IsPressed)
                     {
-                        squareBoxTransform.Position += new Vector3(direction, 0) * delta * speed;
+                        squareBoxTransform.LocalPosition += new Vector3(direction, 0) * delta * speed;
                     }
                     else
                     {
-                        squareBoxTransform.Scale += new Vector3(direction, 0) * delta * speed;
+                        squareBoxTransform.LocalScale += new Vector3(direction, 0) * delta * speed;
                     }
                 }
                 else
@@ -499,8 +499,8 @@ namespace Abacus
         private void MoveCameraAround(float delta)
         {
             Transform cameraTransform = ((Entity)camera).Become<Transform>();
-            Vector3 position = cameraTransform.Position;
-            Quaternion rotation = cameraTransform.Rotation;
+            Vector3 position = cameraTransform.LocalPosition;
+            Quaternion rotation = cameraTransform.LocalRotation;
 
             //move around with keyboard or gamepad
             bool moveLeft = false;
@@ -582,17 +582,17 @@ namespace Abacus
                 }
 
                 lastPointerPosition = pointerPosition;
-                cameraPitchYaw.X += pointerMoveDelta.X * 0.01f;
-                cameraPitchYaw.Y += pointerMoveDelta.Y * 0.01f;
-                cameraPitchYaw.Y = Math.Clamp(cameraPitchYaw.Y, -MathF.PI * 0.5f, MathF.PI * 0.5f);
+                cameraPitchYaw.Y += pointerMoveDelta.X * 0.01f;
+                cameraPitchYaw.X += pointerMoveDelta.Y * 0.01f;
+                cameraPitchYaw.X = Math.Clamp(cameraPitchYaw.X, -MathF.PI * 0.5f, MathF.PI * 0.5f);
             }
 
-            Quaternion pitch = Quaternion.CreateFromAxisAngle(Vector3.UnitY, cameraPitchYaw.X);
-            Quaternion yaw = Quaternion.CreateFromAxisAngle(Vector3.UnitX, cameraPitchYaw.Y);
+            Quaternion pitch = Quaternion.CreateFromAxisAngle(Vector3.UnitX, cameraPitchYaw.X);
+            Quaternion yaw = Quaternion.CreateFromAxisAngle(Vector3.UnitY, cameraPitchYaw.Y);
             rotation = pitch * yaw;
 
-            cameraTransform.Position = position;
-            cameraTransform.Rotation = rotation;
+            cameraTransform.WorldPosition = position;
+            cameraTransform.WorldRotation = rotation;
         }
 
         unsafe (StartFunction, FinishFunction, UpdateFunction) IProgram.GetFunctions()

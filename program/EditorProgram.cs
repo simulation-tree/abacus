@@ -41,8 +41,8 @@ namespace Abacus
             Camera worldCamera = new(world, window, CameraFieldOfView.FromDegrees(90));
             Entity worldCameraEntity = worldCamera;
             Transform cameraTransform = worldCameraEntity.Become<Transform>();
-            cameraTransform.Position = new(0, 0, -10);
-            cameraPosition = cameraTransform.Position;
+            cameraTransform.LocalPosition = new(0, 0, -10);
+            cameraPosition = cameraTransform.LocalPosition;
 
             Camera uiCamera = new(world, window, new CameraOrthographicSize(1f));
 
@@ -71,8 +71,8 @@ namespace Abacus
             Renderer waveRenderer = new(world, canvas.quadMesh, canvas.unlitWorldMaterial, worldCamera);
             Entity waveEntity = waveRenderer;
             Transform waveTransform = waveEntity.Become<Transform>();
-            waveTransform.Scale = new(2, 2, 1);
-            waveTransform.Position = new(2, 2, 1);
+            waveTransform.LocalScale = new(2, 2, 1);
+            waveTransform.LocalPosition = new(2, 2, 1);
             waveEntity.AddComponent(Color.Red);
 
             [UnmanagedCallersOnly]
@@ -105,15 +105,15 @@ namespace Abacus
         private void UpdateCanvasToMatchWindow()
         {
             Vector2 size = window.Size;
-            canvas.transform.Scale = new(size, 1);
-            canvas.transform.Position = new(0, 0, canvas.uiCamera.Depth.min + 0.1f);
+            canvas.transform.LocalScale = new(size, 1);
+            canvas.transform.LocalPosition = new(0, 0, canvas.uiCamera.Depth.min + 0.1f);
         }
 
         private void MoveCameraAround(TimeSpan delta)
         {
             Transform cameraTransform = ((Entity)canvas.worldCamera).Become<Transform>();
-            Vector3 position = cameraTransform.Position;
-            Quaternion rotation = cameraTransform.Rotation;
+            Vector3 position = cameraTransform.LocalPosition;
+            Quaternion rotation = cameraTransform.LocalRotation;
 
             //move around with keyboard or gamepad
             bool moveLeft = false;
@@ -207,8 +207,8 @@ namespace Abacus
             Quaternion yaw = Quaternion.CreateFromAxisAngle(Vector3.UnitX, cameraPitchYaw.Y);
             rotation = pitch * yaw;
 
-            cameraTransform.Position = position;
-            cameraTransform.Rotation = rotation;
+            cameraTransform.LocalPosition = position;
+            cameraTransform.LocalRotation = rotation;
         }
 
         readonly unsafe (StartFunction, FinishFunction, UpdateFunction) IProgram.GetFunctions()
@@ -269,14 +269,14 @@ namespace Abacus
                 get
                 {
                     Transform transform = entity.As<Transform>();
-                    Vector3 scale = transform.Scale;
+                    Vector3 scale = transform.LocalScale;
                     return new(scale.X, scale.Y);
                 }
                 set
                 {
                     Transform transform = entity.Become<Transform>();
-                    Vector3 scale = transform.Scale;
-                    transform.Scale = new(value.X, value.Y, scale.Z);
+                    Vector3 scale = transform.LocalScale;
+                    transform.LocalScale = new(value.X, value.Y, scale.Z);
                 }
             }
 
@@ -285,14 +285,14 @@ namespace Abacus
                 get
                 {
                     Transform transform = entity.As<Transform>();
-                    Vector3 position = transform.Position;
+                    Vector3 position = transform.LocalPosition;
                     return new(position.X, position.Y);
                 }
                 set
                 {
                     Transform transform = entity.Become<Transform>();
-                    Vector3 position = transform.Position;
-                    transform.Position = new(value.X, value.Y, position.Z);
+                    Vector3 position = transform.LocalPosition;
+                    transform.LocalPosition = new(value.X, value.Y, position.Z);
                 }
             }
 
