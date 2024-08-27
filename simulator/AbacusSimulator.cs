@@ -27,6 +27,8 @@ using InteractionKit.Systems;
 using InteractionKit.Events;
 using InputDevices.Systems;
 using InputDevices.Events;
+using Physics.Systems;
+using Physics.Events;
 
 public static class AbacusSimulator
 {
@@ -48,19 +50,22 @@ public static class AbacusSimulator
             ShaderImportSystem shaders = new(world);
             FontImportSystem fonts = new(world);
             TextRenderingSystem textMeshes = new(world);
+            PhysicsSystem physics = new(world);
             CameraSystem cameras = new(world);
             RenderEngineSystem rendering = new(world);
             rendering.RegisterSystem<VulkanRendererType>();
 
             //play the simulation
-            using (Program program = Program.Create<EditorProgram>(world))
+            using (Program program = Program.Create<PhysicsDemo>(world))
             {
                 DateTime time = DateTime.UtcNow;
-                TimeSpan delta;
+                TimeSpan delta = TimeSpan.Zero;
                 do
                 {
                     world.Submit(new WindowUpdate());
                     world.Submit(new InputUpdate());
+                    world.Submit(new TransformUpdate());
+                    world.Submit(new PhysicsUpdate(delta));
                     world.Submit(new TransformUpdate());
                     world.Submit(new DataUpdate());
                     world.Submit(new ModelUpdate());
@@ -83,6 +88,7 @@ public static class AbacusSimulator
             //finish
             rendering.Dispose();
             cameras.Dispose();
+            physics.Dispose();
             textMeshes.Dispose();
             fonts.Dispose();
             shaders.Dispose();

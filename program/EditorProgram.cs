@@ -1,7 +1,5 @@
 ﻿using Data;
 using DefaultPresentationAssets;
-using InputDevices.Components;
-using InputDevices;
 using Meshes;
 using Models;
 using Programs;
@@ -25,7 +23,6 @@ namespace Abacus
         private readonly Window window;
         private readonly Canvas canvas;
         private readonly Box testWindow;
-        private Vector2 lastPointerPosition;
         private Vector3 cameraPosition;
         private Vector2 cameraPitchYaw;
 
@@ -48,7 +45,7 @@ namespace Abacus
 
             //global references
             Texture squareTexture = new(world, Address.Get<SquareTexture>());
-            Model quadModel = new(world, Address.Get<QuadMesh>());
+            Model quadModel = new(world, Address.Get<QuadModel>());
             Mesh quadMesh = new(world, quadModel);
             Material unlitUiMaterial = new(world, Address.Get<UnlitTexturedMaterial>());
             unlitUiMaterial.AddPushBinding<Color>();
@@ -98,7 +95,8 @@ namespace Abacus
             }
 
             UpdateCanvasToMatchWindow();
-            MoveCameraAround(delta);
+            Transform cameraTransform = ((Entity)canvas.worldCamera).Become<Transform>();
+            SharedFunctions.MoveCameraAround(world, cameraTransform, delta, ref cameraPosition, ref cameraPitchYaw);
             return true;
         }
 
@@ -107,108 +105,6 @@ namespace Abacus
             Vector2 size = window.Size;
             canvas.transform.LocalScale = new(size, 1);
             canvas.transform.LocalPosition = new(0, 0, canvas.uiCamera.Depth.min + 0.1f);
-        }
-
-        private void MoveCameraAround(TimeSpan delta)
-        {
-            Transform cameraTransform = ((Entity)canvas.worldCamera).Become<Transform>();
-            Vector3 position = cameraTransform.LocalPosition;
-            Quaternion rotation = cameraTransform.LocalRotation;
-
-            //move around with keyboard or gamepad
-            bool moveLeft = false;
-            bool moveRight = false;
-            bool moveForward = false;
-            bool moveBackward = false;
-            bool moveUp = false;
-            bool moveDown = false;
-            foreach (eint keyboardEntity in world.GetAll<IsKeyboard>())
-            {
-                Keyboard keyboard = new(world, keyboardEntity);
-                ButtonState left = keyboard.GetButtonState(Keyboard.Button.A);
-                ButtonState right = keyboard.GetButtonState(Keyboard.Button.D);
-                ButtonState forward = keyboard.GetButtonState(Keyboard.Button.W);
-                ButtonState backward = keyboard.GetButtonState(Keyboard.Button.S);
-                ButtonState up = keyboard.GetButtonState(Keyboard.Button.Space);
-                ButtonState down = keyboard.GetButtonState(Keyboard.Button.LeftControl);
-                moveLeft |= left.IsPressed;
-                moveRight |= right.IsPressed;
-                moveForward |= forward.IsPressed;
-                moveBackward |= backward.IsPressed;
-                moveUp |= up.IsPressed;
-                moveDown |= down.IsPressed;
-            }
-
-            Vector3 moveDirection = default;
-            if (moveLeft)
-            {
-                moveDirection.X -= 1;
-            }
-
-            if (moveRight)
-            {
-                moveDirection.X += 1;
-            }
-
-            if (moveForward)
-            {
-                moveDirection.Z += 1;
-            }
-
-            if (moveBackward)
-            {
-                moveDirection.Z -= 1;
-            }
-
-            if (moveUp)
-            {
-                moveDirection.Y += 1;
-            }
-
-            if (moveDown)
-            {
-                moveDirection.Y -= 1;
-            }
-
-            float moveSpeed = 4f;
-            float positionLerpSpeed = 12f;
-            if (moveDirection.LengthSquared() > 0)
-            {
-                moveDirection = Vector3.Normalize(moveDirection) * moveSpeed;
-            }
-
-            cameraPosition += Vector3.Transform(moveDirection, rotation) * (float)delta.TotalSeconds;
-            position = Vector3.Lerp(position, cameraPosition, (float)delta.TotalSeconds * positionLerpSpeed);
-
-            //look around with mice
-            bool invertY = false;
-            float lookSensitivity = 0.9f;
-            if (Entity.TryGetFirst(world, out Mouse mouse))
-            {
-                Vector2 pointerPosition = mouse.Position;
-                if (lastPointerPosition == default)
-                {
-                    lastPointerPosition = pointerPosition;
-                }
-
-                Vector2 pointerMoveDelta = (pointerPosition - lastPointerPosition) * lookSensitivity;
-                if (invertY)
-                {
-                    pointerMoveDelta.Y *= -1;
-                }
-
-                lastPointerPosition = pointerPosition;
-                cameraPitchYaw.X += pointerMoveDelta.X * 0.01f;
-                cameraPitchYaw.Y += pointerMoveDelta.Y * 0.01f;
-                cameraPitchYaw.Y = Math.Clamp(cameraPitchYaw.Y, -MathF.PI * 0.5f, MathF.PI * 0.5f);
-            }
-
-            Quaternion pitch = Quaternion.CreateFromAxisAngle(Vector3.UnitY, cameraPitchYaw.X);
-            Quaternion yaw = Quaternion.CreateFromAxisAngle(Vector3.UnitX, cameraPitchYaw.Y);
-            rotation = pitch * yaw;
-
-            cameraTransform.LocalPosition = position;
-            cameraTransform.LocalRotation = rotation;
         }
 
         readonly unsafe (StartFunction, FinishFunction, UpdateFunction) IProgram.GetFunctions()
