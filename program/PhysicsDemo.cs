@@ -56,7 +56,7 @@ namespace Abacus
             Mesh sphereMesh = new(world, sphereModel);
 
             //create ball
-            Shape ballShape = new(world, new SphereShape(0.5f));
+            SphereShape ballShape = new(world, 0.5f);
             ballBody = new(world, ballShape, IsBody.Type.Dynamic, new Vector3(0f, 3f, 0f));
             Entity ballEntity = ballBody;
             Renderer ballRenderer = ballEntity.Become<Renderer>();
@@ -68,7 +68,7 @@ namespace Abacus
             ballTransform.LocalPosition = new(0f, 4f, 0f);
 
             //create floor
-            Shape floorShape = new(world, new CubeShape(0.5f, 0.5f, 0.5f));
+            CubeShape floorShape = new(world, 0.5f, 0.5f, 0.5f);
             floorBody = new(world, floorShape, IsBody.Type.Static);
             Entity floorEntity = floorBody;
             Renderer floorRenderer = floorEntity.Become<Renderer>();
@@ -78,7 +78,7 @@ namespace Abacus
             floorEntity.AddComponent(Color.Green);
 
             //create directional gravity
-            GravitySource downGravity = new(world, Quaternion.CreateFromAxisAngle(Vector3.UnitX, MathF.PI * 0.5f));
+            DirectionalGravity downGravity = new(world, Quaternion.CreateFromAxisAngle(Vector3.UnitX, MathF.PI * 0.5f));
 
             //create floating quad
             Model quadModel = new(world, Address.Get<QuadModel>());
@@ -103,7 +103,7 @@ namespace Abacus
         {
             if (!window.IsDestroyed)
             {
-                window.Dispose();
+                window.Destroy();
             }
         }
 

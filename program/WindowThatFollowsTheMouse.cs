@@ -32,7 +32,7 @@ namespace Abacus
         {
             if (!followerWindow.IsDestroyed)
             {
-                followerWindow.Dispose();
+                followerWindow.Destroy();
             }
         }
 

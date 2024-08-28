@@ -83,7 +83,7 @@ namespace Abacus
         {
             if (!window.IsDestroyed)
             {
-                window.Dispose();
+                window.Destroy();
             }
         }
 

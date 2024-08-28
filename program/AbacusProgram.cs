@@ -201,7 +201,7 @@ namespace Abacus
         {
             if (!window.IsDestroyed)
             {
-                window.Dispose();
+                window.Destroy();
             }
         }
 
@@ -328,7 +328,7 @@ namespace Abacus
                 if (keyboard.WasPressed(Keyboard.Button.X))
                 {
                     Console.WriteLine("Closed early");
-                    window.Dispose();
+                    window.Destroy();
                     return true; //finished this function early, theres already a conditional check for window destruction
                 }
 
