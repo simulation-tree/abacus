@@ -4,11 +4,36 @@ using System;
 using System.Numerics;
 using Transforms;
 
+public struct DestroyAfterTime
+{
+    public float time;
+
+    public DestroyAfterTime(float time)
+    {
+        this.time = time;
+    }
+}
+
 public static class SharedFunctions
 {
     private static Vector2 lastPointerPosition;
 
-    public static void MoveCameraAround(World world, Transform cameraTransform, TimeSpan delta, ref Vector3 position, ref Vector2 pitchYaw)
+    public static void DestroyTemporaryEntities(World world, TimeSpan delta)
+    {
+        using Query<DestroyAfterTime> query = new(world);
+        query.Update();
+        foreach (var r in query)
+        {
+            ref DestroyAfterTime destroyTimer = ref r.Component1;
+            destroyTimer.time -= (float)delta.TotalSeconds;
+            if (destroyTimer.time <= 0)
+            {
+                world.DestroyEntity(r.entity);
+            }
+        }
+    }
+
+    public static void MoveCameraAround(World world, Transform cameraTransform, TimeSpan delta, ref Vector3 position, ref Vector2 pitchYaw, Vector2 lookSensitivity)
     {
         Vector3 currentPosition = cameraTransform.LocalPosition;
         Quaternion rotation = cameraTransform.LocalRotation;
@@ -78,8 +103,6 @@ public static class SharedFunctions
         currentPosition = Vector3.Lerp(currentPosition, position, (float)delta.TotalSeconds * positionLerpSpeed);
 
         //look around with mice
-        bool invertY = false;
-        float lookSensitivity = 0.9f;
         if (Entity.TryGetFirst(world, out Mouse mouse))
         {
             Vector2 pointerPosition = mouse.Position;
@@ -89,11 +112,6 @@ public static class SharedFunctions
             }
 
             Vector2 pointerMoveDelta = (pointerPosition - lastPointerPosition) * lookSensitivity;
-            if (invertY)
-            {
-                pointerMoveDelta.Y *= -1;
-            }
-
             lastPointerPosition = pointerPosition;
             pitchYaw.X += pointerMoveDelta.X * 0.01f;
             pitchYaw.Y += pointerMoveDelta.Y * 0.01f;

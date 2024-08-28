@@ -96,7 +96,7 @@ namespace Abacus
 
             UpdateCanvasToMatchWindow();
             Transform cameraTransform = ((Entity)canvas.worldCamera).Become<Transform>();
-            SharedFunctions.MoveCameraAround(world, cameraTransform, delta, ref cameraPosition, ref cameraPitchYaw);
+            SharedFunctions.MoveCameraAround(world, cameraTransform, delta, ref cameraPosition, ref cameraPitchYaw, new(1f, 1f));
             return true;
         }
 

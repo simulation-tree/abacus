@@ -218,7 +218,7 @@ namespace Abacus
             TestMouseInputs();
             AnimateTestRenderer(deltaSeconds);
             Transform cameraTransform = ((Entity)camera).Become<Transform>();
-            SharedFunctions.MoveCameraAround(world, cameraTransform, delta, ref cameraPosition, ref cameraPitchYaw);
+            SharedFunctions.MoveCameraAround(world, cameraTransform, delta, ref cameraPosition, ref cameraPitchYaw, new(1f, 1f));
             ModifyText();
             if (!TestWindowEntity(deltaSeconds))
             {
