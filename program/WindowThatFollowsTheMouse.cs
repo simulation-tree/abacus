@@ -6,7 +6,6 @@ using System.Numerics;
 using System.Runtime.InteropServices;
 using Unmanaged;
 using Windows;
-using static Abacus.EditorProgram;
 
 namespace Abacus
 {

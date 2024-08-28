@@ -28,6 +28,7 @@ namespace Abacus
         private readonly Transform cameraTransform;
         private readonly Body ballBody;
         private readonly Body floorBody;
+        private readonly Entity quadEntity;
         private Vector3 cameraPosition;
         private Vector2 cameraPitchYaw;
 
@@ -83,7 +84,7 @@ namespace Abacus
             //create floating quad
             Model quadModel = new(world, Address.Get<QuadModel>());
             Mesh quadMesh = new(world, quadModel);
-            Entity quadEntity = new(world);
+            quadEntity = new(world);
             Renderer quadRenderer = quadEntity.Become<Renderer>();
             quadRenderer.Mesh = quadMesh;
             quadRenderer.Material = unlitMaterial;
@@ -180,7 +181,17 @@ namespace Abacus
                 {
                     floorTransform.LocalRotation = Quaternion.Identity;
                 }
-            }    
+            }
+            
+            if (Entity.TryGetFirst(world, out Mouse mouse))
+            {
+                if (mouse.WasPressed(Mouse.Button.LeftButton))
+                {
+                    //change color of quad when hovering over it
+                    Vector2 normalizedPosition = mouse.Position / window.Size;
+                    Console.WriteLine(normalizedPosition);
+                }
+            }
 
             SharedFunctions.MoveCameraAround(world, cameraTransform, delta, ref cameraPosition, ref cameraPitchYaw);
             return true;

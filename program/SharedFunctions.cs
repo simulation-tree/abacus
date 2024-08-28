@@ -1,5 +1,4 @@
 ﻿using InputDevices;
-using InputDevices.Components;
 using Simulation;
 using System;
 using System.Numerics;
@@ -21,9 +20,8 @@ public static class SharedFunctions
         bool moveBackward = false;
         bool moveUp = false;
         bool moveDown = false;
-        foreach (eint keyboardEntity in world.GetAll<IsKeyboard>())
+        if (Entity.TryGetFirst(world, out Keyboard keyboard))
         {
-            Keyboard keyboard = new(world, keyboardEntity);
             ButtonState left = keyboard.GetButtonState(Keyboard.Button.A);
             ButtonState right = keyboard.GetButtonState(Keyboard.Button.D);
             ButtonState forward = keyboard.GetButtonState(Keyboard.Button.W);
