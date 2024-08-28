@@ -3,8 +3,14 @@ using Data.Events;
 using Data.Systems;
 using Fonts.Events;
 using Fonts.Systems;
+using InputDevices.Events;
+using InputDevices.Systems;
+using InteractionKit.Events;
+using InteractionKit.Systems;
 using Models.Events;
 using Models.Systems;
+using Physics.Events;
+using Physics.Systems;
 using Programs;
 using Rendering.Events;
 using Rendering.Systems;
@@ -13,28 +19,17 @@ using Shaders.Events;
 using Shaders.Systems;
 using Simulation;
 using System;
-using System.Diagnostics;
-using System.IO;
-using System.Threading;
-using System.Threading.Tasks;
 using Textures.Events;
 using Textures.Systems;
 using Transforms.Events;
 using Transforms.Systems;
 using Windows.Events;
 using Windows.Systems;
-using InteractionKit.Systems;
-using InteractionKit.Events;
-using InputDevices.Systems;
-using InputDevices.Events;
-using Physics.Systems;
-using Physics.Events;
 
 public static class AbacusSimulator
 {
     public static int Main()
     {
-        RerouteConsoleOutputToDebug();
         uint returnCode = 0;
         using (World world = new())
         {
@@ -103,29 +98,5 @@ public static class AbacusSimulator
         }
 
         return (int)returnCode;
-    }
-
-    [Conditional("DEBUG")]
-    private static void RerouteConsoleOutputToDebug()
-    {
-        TextWriter consoleWriter = new StringWriter();
-        _ = Task.Run(() =>
-        {
-            string lastOutput = string.Empty;
-            while (true)
-            {
-                string output = consoleWriter.ToString() ?? string.Empty;
-                if (lastOutput != output)
-                {
-                    Debug.WriteLine(output);
-                }
-
-                lastOutput = output;
-                consoleWriter.Flush();
-                Thread.Sleep(8);
-            }
-        });
-
-        Console.SetOut(consoleWriter);
     }
 }
