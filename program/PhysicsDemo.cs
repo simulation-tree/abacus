@@ -83,7 +83,7 @@ namespace Abacus
             floorEntity.AddComponent(Color.Green);
 
             //create directional gravity
-            DirectionalGravity downGravity = new(world, Quaternion.CreateFromAxisAngle(Vector3.UnitX, MathF.PI * 0.5f));
+            DirectionalGravity downGravity = new(world, -Vector3.UnitY);
 
             //create floating quad
             Model quadModel = new(world, Address.Get<QuadModel>());

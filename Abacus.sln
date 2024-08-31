@@ -111,6 +111,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Phyics Systems", "..\physic
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Physics Systems Tests", "..\physics-systems\tests\Physics Systems Tests.csproj", "{49468477-DE41-4E03-A01E-47E33A5F19E2}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Transform Tests", "..\transforms\tests\Transform Tests.csproj", "{6C067D9E-2BE1-40FA-B983-C3CABF759C37}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -333,6 +335,10 @@ Global
 		{49468477-DE41-4E03-A01E-47E33A5F19E2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{49468477-DE41-4E03-A01E-47E33A5F19E2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{49468477-DE41-4E03-A01E-47E33A5F19E2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6C067D9E-2BE1-40FA-B983-C3CABF759C37}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6C067D9E-2BE1-40FA-B983-C3CABF759C37}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6C067D9E-2BE1-40FA-B983-C3CABF759C37}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6C067D9E-2BE1-40FA-B983-C3CABF759C37}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
