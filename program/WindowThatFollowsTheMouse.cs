@@ -21,7 +21,7 @@ namespace Abacus
             followerWindow.IsBorderless = true;
 
             [UnmanagedCallersOnly]
-            static void WindowClosed(World world, eint windowEntity)
+            static void WindowClosed(World world, uint windowEntity)
             {
                 world.DestroyEntity(windowEntity);
             }

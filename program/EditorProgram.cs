@@ -73,7 +73,7 @@ namespace Abacus
             waveEntity.AddComponent(Color.Red);
 
             [UnmanagedCallersOnly]
-            static void WindowClosed(World world, eint windowEntity)
+            static void WindowClosed(World world, uint windowEntity)
             {
                 world.DestroyEntity(windowEntity);
             }
@@ -192,7 +192,7 @@ namespace Abacus
                 }
             }
 
-            eint IEntity.Value => entity;
+            uint IEntity.Value => entity;
             World IEntity.World => entity;
 
 #if NET

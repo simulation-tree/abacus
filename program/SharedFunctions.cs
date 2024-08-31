@@ -17,6 +17,7 @@ public struct DestroyAfterTime
 public static class SharedFunctions
 {
     private static Vector2 lastPointerPosition;
+    private static bool hasLastPointerPosition;
 
     public static void DestroyTemporaryEntities(World world, TimeSpan delta)
     {
@@ -106,9 +107,10 @@ public static class SharedFunctions
         if (Entity.TryGetFirst(world, out Mouse mouse))
         {
             Vector2 pointerPosition = mouse.Position;
-            if (lastPointerPosition == default)
+            if (!hasLastPointerPosition && pointerPosition != default)
             {
                 lastPointerPosition = pointerPosition;
+                hasLastPointerPosition = true;
             }
 
             Vector2 pointerMoveDelta = (pointerPosition - lastPointerPosition) * lookSensitivity;

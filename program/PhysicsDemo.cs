@@ -5,6 +5,7 @@ using Meshes;
 using Models;
 using Physics;
 using Physics.Components;
+using Physics.Events;
 using Programs;
 using Rendering;
 using Rendering.Components;
@@ -32,7 +33,6 @@ namespace Abacus
         private readonly Mesh cubeMesh;
         private readonly Mesh sphereMesh;
         private readonly Material unlitMaterial;
-        private readonly Raycaster raycaster;
         private Vector3 cameraPosition;
         private Vector2 cameraPitchYaw;
 
@@ -97,11 +97,8 @@ namespace Abacus
             Transform quadTransform = quadEntity.Become<Transform>();
             quadTransform.LocalPosition = new(-2f, 2f, 0f);
 
-            raycaster = new(world, Vector3.Zero, Quaternion.Identity);
-            raycaster.Callback = new(&RaycastHitCallback);
-
             [UnmanagedCallersOnly]
-            static void WindowClosed(World world, eint windowEntity)
+            static void WindowClosed(World world, uint windowEntity)
             {
                 world.DestroyEntity(windowEntity);
             }
@@ -206,19 +203,26 @@ namespace Abacus
                 Matrix4x4.Invert(view, out Matrix4x4 invView);
                 GetRayFromMousePosition(normalizedMousePosition, invView, invProjection, out var o, out var d);
 
-                Vector3 right = Vector3.Normalize(Vector3.Cross(Vector3.UnitY, d));
-                Vector3 up = Vector3.Cross(d, right);
-                Matrix4x4 rotationMatrix = new(
-                    right.X, right.Y, right.Z, 0.0f,
-                    up.X, up.Y, up.Z, 0.0f,
-                    d.X, d.Y, d.Z, 0.0f,
-                    0.0f, 0.0f, 0.0f, 1.0f
-                );
+                //todo: qol: this here works perfectly, should be available as a function somewhere in these libs
+                //Vector3 right = Vector3.Normalize(Vector3.Cross(Vector3.UnitY, d));
+                //Vector3 up = Vector3.Cross(d, right);
+                //Matrix4x4 rotationMatrix = new(
+                //    right.X, right.Y, right.Z, 0.0f,
+                //    up.X, up.Y, up.Z, 0.0f,
+                //    d.X, d.Y, d.Z, 0.0f,
+                //    0.0f, 0.0f, 0.0f, 1.0f
+                //);
+                //
+                //Quaternion rayRotation = Quaternion.CreateFromRotationMatrix(rotationMatrix);
+                //Transform raycasterTransform = raycaster;
+                //raycasterTransform.WorldPosition = o;
+                //raycasterTransform.WorldRotation = rayRotation;
 
-                Quaternion rayRotation = Quaternion.CreateFromRotationMatrix(rotationMatrix);
-                Transform raycasterTransform = raycaster;
-                raycasterTransform.WorldPosition = o;
-                raycasterTransform.WorldRotation = rayRotation;
+                unsafe
+                {
+                    Raycast raycast = new(o, d, new(&RaycastHitCallback), 5f, (ulong)delta.Ticks);
+                    world.Submit(raycast);
+                }
 
                 if (mouse.WasPressed(Mouse.Button.RightButton))
                 {
@@ -259,28 +263,33 @@ namespace Abacus
         }
 
         [UnmanagedCallersOnly]
-        private static void RaycastHitCallback(World world, eint raycaster, RaycastHit hit, TimeSpan delta)
+        private unsafe static void RaycastHitCallback(World world, Raycast raycast, void* hitsPointer, int hitCount)
         {
-            eint entityHit = hit.targetEntity;
-            ref Color color = ref world.TryGetComponentRef<Color>(entityHit, out bool contains);
-            if (contains)
+            TimeSpan delta = new((long)raycast.identifier);
+            Span<RaycastHit> hits = new(hitsPointer, hitCount);
+            foreach (RaycastHit hit in hits)
             {
-                float hue = color.H;
-                hue += 0.3f * (float)delta.TotalSeconds;
-                while (hue > 1f)
+                uint entityHit = hit.entity;
+                ref Color color = ref world.TryGetComponentRef<Color>(entityHit, out bool contains);
+                if (contains)
                 {
-                    hue -= 1f;
+                    float hue = color.H;
+                    hue += 0.3f * (float)delta.TotalSeconds;
+                    while (hue > 1f)
+                    {
+                        hue -= 1f;
+                    }
+
+                    color.H = hue;
                 }
 
-                color.H = hue;
-            }
-
-            if (Entity.TryGetFirst(world, out Mouse mouse))
-            {
-                if (mouse.IsPressed(Mouse.Button.LeftButton))
+                if (Entity.TryGetFirst(world, out Mouse mouse))
                 {
-                    Transform transform = new(world, hit.targetEntity);
-                    transform.WorldPosition -= hit.normal * (float)delta.TotalSeconds * 4f;
+                    if (mouse.IsPressed(Mouse.Button.LeftButton))
+                    {
+                        Transform transform = new(world, hit.entity);
+                        transform.WorldPosition -= hit.normal * (float)delta.TotalSeconds * 4f;
+                    }
                 }
             }
         }

@@ -59,7 +59,7 @@ namespace Abacus
             window = new(world, "Window", new(100, 100), new(900, 720), "vulkan", new(&WindowClosed));
 
             //find existing camera or create new one
-            if (!world.TryGetFirst<IsCamera>(out eint cameraEntity))
+            if (!world.TryGetFirst<IsCamera>(out uint cameraEntity))
             {
                 camera = new(world, window, CameraFieldOfView.FromDegrees(90f));
             }
@@ -191,7 +191,7 @@ namespace Abacus
             testTransform.LocalScale = new(8f, 8f, 1f);
 
             [UnmanagedCallersOnly]
-            static void WindowClosed(World world, eint windowEntity)
+            static void WindowClosed(World world, uint windowEntity)
             {
                 world.DestroyEntity(windowEntity);
             }
@@ -263,7 +263,7 @@ namespace Abacus
 
         private readonly void AnimateTestRenderer(float delta)
         {
-            foreach (eint keyboardEntity in world.GetAll<IsKeyboard>())
+            foreach (uint keyboardEntity in world.GetAll<IsKeyboard>())
             {
                 Keyboard keyboard = new(world, keyboardEntity);
                 if (keyboard.WasPressed(Keyboard.Button.J))
@@ -290,7 +290,7 @@ namespace Abacus
                 {
                     Material dummyMaterial = dummyRenderer.Material;
                     ref MaterialTextureBinding textureBinding = ref dummyMaterial.GetTextureBindingRef(1, 0);
-                    bool shouldToggle = textureBinding.TextureEntity == waveImage;
+                    bool shouldToggle = textureBinding.TextureEntity == (Entity)waveImage;
                     textureBinding.SetTexture(shouldToggle ? testImage : waveImage);
 
                     using RandomGenerator rng = new();
@@ -317,7 +317,7 @@ namespace Abacus
         {
             Vector2 windowPosition = window.Position;
             Vector2 windowSize = window.Size;
-            foreach (eint keyboardEntity in world.GetAll<IsKeyboard>())
+            foreach (uint keyboardEntity in world.GetAll<IsKeyboard>())
             {
                 Keyboard keyboard = new(world, keyboardEntity);
                 if (keyboard.WasPressed(Keyboard.Button.Escape))
@@ -462,7 +462,7 @@ namespace Abacus
 
         private readonly void TestMouseInputs()
         {
-            foreach (eint mouseEntity in world.GetAll<IsMouse>())
+            foreach (uint mouseEntity in world.GetAll<IsMouse>())
             {
                 Mouse mouse = new(world, mouseEntity);
                 Vector2 position = mouse.Position;
