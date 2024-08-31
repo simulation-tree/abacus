@@ -1,4 +1,5 @@
-﻿using Data;
+﻿using Cameras.Components;
+using Data;
 using DefaultPresentationAssets;
 using InputDevices;
 using Meshes;
@@ -190,37 +191,12 @@ namespace Abacus
 
             if (Entity.TryGetFirst(world, out Mouse mouse))
             {
-                Vector2 normalizedMousePosition = mouse.Position / window.Size;
-                normalizedMousePosition.X = normalizedMousePosition.X * 2 - 1;
-                normalizedMousePosition.Y = 1 - normalizedMousePosition.Y * 2;
-
-                //calculate pointing direction
-                Entity cameraEntity = camera;
-                CameraProjection cameraMatrices = cameraEntity.GetComponent<CameraProjection>();
-                Matrix4x4 projection = cameraMatrices.projection;
-                Matrix4x4 view = cameraMatrices.view;
-                Matrix4x4.Invert(projection, out Matrix4x4 invProjection);
-                Matrix4x4.Invert(view, out Matrix4x4 invView);
-                GetRayFromMousePosition(normalizedMousePosition, invView, invProjection, out var o, out var d);
-
-                //todo: qol: this here works perfectly, should be available as a function somewhere in these libs
-                //Vector3 right = Vector3.Normalize(Vector3.Cross(Vector3.UnitY, d));
-                //Vector3 up = Vector3.Cross(d, right);
-                //Matrix4x4 rotationMatrix = new(
-                //    right.X, right.Y, right.Z, 0.0f,
-                //    up.X, up.Y, up.Z, 0.0f,
-                //    d.X, d.Y, d.Z, 0.0f,
-                //    0.0f, 0.0f, 0.0f, 1.0f
-                //);
-                //
-                //Quaternion rayRotation = Quaternion.CreateFromRotationMatrix(rotationMatrix);
-                //Transform raycasterTransform = raycaster;
-                //raycasterTransform.WorldPosition = o;
-                //raycasterTransform.WorldRotation = rayRotation;
-
+                Vector2 screenPoint = camera.Destination.GetScreenPointFromPosition(mouse.Position);
+                CameraProjection cameraProjection = camera.GetProjection();
+                (Vector3 origin, Vector3 direction) = cameraProjection.GetRayFromScreenPoint(screenPoint);
                 unsafe
                 {
-                    Raycast raycast = new(o, d, new(&RaycastHitCallback), 5f, (ulong)delta.Ticks);
+                    Raycast raycast = new(origin, direction, new(&RaycastHitCallback), 5f, (ulong)delta.Ticks);
                     world.Submit(raycast);
                 }
 
@@ -229,16 +205,16 @@ namespace Abacus
                     //debug line
                     //Renderer startCube = new(world, sphereMesh, unlitMaterial, camera);
                     //((Entity)startCube).AddComponent(Color.Yellow);
-                    //((Entity)startCube).AddComponent(new DestroyAfterTime(2f));
+                    //((Entity)startCube).AddComponent(new DestroyAfterTime(1f));
                     //Transform debugTransform = ((Entity)startCube).Become<Transform>();
-                    //debugTransform.LocalPosition = o;
+                    //debugTransform.LocalPosition = origin;
                     //debugTransform.LocalScale = new(0.1f, 0.1f, 0.1f);
                     //
                     //Renderer endCube = new(world, sphereMesh, unlitMaterial, camera);
                     //((Entity)endCube).AddComponent(Color.Red);
-                    //((Entity)endCube).AddComponent(new DestroyAfterTime(2f));
+                    //((Entity)endCube).AddComponent(new DestroyAfterTime(1f));
                     //Transform debugTransform2 = ((Entity)endCube).Become<Transform>();
-                    //debugTransform2.LocalPosition = o + Vector3.Transform(Vector3.UnitZ, rayRotation);
+                    //debugTransform2.LocalPosition = origin + direction;
                     //debugTransform2.LocalScale = new(0.1f, 0.1f, 0.1f);
 
                     SphereShape projectileShape = new(world, 0.5f);
@@ -292,29 +268,6 @@ namespace Abacus
                     }
                 }
             }
-        }
-
-        public static void GetRayFromMousePosition(Vector2 normalizedMousePosition, Matrix4x4 invViewMatrix, Matrix4x4 invProjectionMatrix, out Vector3 rayOrigin, out Vector3 rayDirection)
-        {
-            // Create a point in normalized device coordinates
-            Vector4 nearPointNDC = new Vector4(normalizedMousePosition, 0f, 1f);
-            Vector4 farPointNDC = new Vector4(normalizedMousePosition, 1f, 1f);
-
-            // Transform to view space
-            Vector4 nearPointView = Vector4.Transform(nearPointNDC, invProjectionMatrix);
-            Vector4 farPointView = Vector4.Transform(farPointNDC, invProjectionMatrix);
-
-            // Perspective divide (i.e., convert from homogeneous to 3D coordinates)
-            nearPointView /= nearPointView.W;
-            farPointView /= farPointView.W;
-
-            // Transform to world space
-            Vector4 nearPointWorld = Vector4.Transform(nearPointView, invViewMatrix);
-            Vector4 farPointWorld = Vector4.Transform(farPointView, invViewMatrix);
-
-            // Output the ray origin and direction
-            rayOrigin = new Vector3(nearPointWorld.X, nearPointWorld.Y, nearPointWorld.Z);
-            rayDirection = Vector3.Normalize(new Vector3(farPointWorld.X, farPointWorld.Y, farPointWorld.Z) - rayOrigin);
         }
 
         readonly unsafe (StartFunction, FinishFunction, UpdateFunction) IProgram.GetFunctions()

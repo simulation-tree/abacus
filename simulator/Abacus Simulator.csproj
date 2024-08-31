@@ -17,6 +17,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<ProjectReference Include="..\..\cameras\source\Cameras.csproj" />
 		<ProjectReference Include="..\..\data-systems\source\Data Systems.csproj" />
 		<ProjectReference Include="..\..\data\source\Data.csproj" />
 		<ProjectReference Include="..\..\font-systems\source\Font Systems.csproj" />

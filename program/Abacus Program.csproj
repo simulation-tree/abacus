@@ -41,6 +41,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<ProjectReference Include="..\..\cameras\source\Cameras.csproj" />
 		<ProjectReference Include="..\..\data\source\Data.csproj" />
 		<ProjectReference Include="..\..\default-presentation-assets\source\Default Presentation Assets.csproj" />
 		<ProjectReference Include="..\..\input-devices\source\Input Devices.csproj" />

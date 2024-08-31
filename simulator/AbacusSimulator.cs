@@ -1,4 +1,5 @@
 ﻿using Abacus;
+using Cameras.Systems;
 using Data.Events;
 using Data.Systems;
 using Fonts.Events;
@@ -47,6 +48,7 @@ public static class AbacusSimulator
             TextRenderingSystem textMeshes = new(world);
             PhysicsSystem physics = new(world);
             CameraSystem cameras = new(world);
+            InvokeTriggersSystem triggers = new(world);
             RenderEngineSystem rendering = new(world);
             rendering.RegisterSystem<VulkanRendererType>();
 
@@ -82,6 +84,7 @@ public static class AbacusSimulator
 
             //finish
             rendering.Dispose();
+            triggers.Dispose();
             cameras.Dispose();
             physics.Dispose();
             textMeshes.Dispose();
