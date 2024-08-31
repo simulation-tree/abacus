@@ -3,6 +3,7 @@ using Data;
 using DefaultPresentationAssets;
 using Meshes;
 using Models;
+using Physics;
 using Programs;
 using Rendering;
 using Rendering.Components;
@@ -48,11 +49,13 @@ namespace Abacus
             Texture squareTexture = new(world, Address.Get<SquareTexture>());
             Model quadModel = new(world, Address.Get<QuadModel>());
             Mesh quadMesh = new(world, quadModel);
+            
             Material unlitUiMaterial = new(world, Address.Get<UnlitTexturedMaterial>());
             unlitUiMaterial.AddPushBinding<Color>();
             unlitUiMaterial.AddPushBinding<LocalToWorld>();
             unlitUiMaterial.AddComponentBinding<CameraProjection>(0, 0, uiCamera);
             unlitUiMaterial.AddTextureBinding(1, 0, squareTexture);
+            
             Material unlitWorldMaterial = new(world, Address.Get<UnlitTexturedMaterial>());
             unlitWorldMaterial.AddPushBinding<Color>();
             unlitWorldMaterial.AddPushBinding<LocalToWorld>();
@@ -64,6 +67,7 @@ namespace Abacus
             //create window
             testWindow = new(world, canvas);
             testWindow.Size = new(300, 300);
+            testWindow.Position = new(20, 20);
 
             //crate test image
             Renderer waveRenderer = new(world, canvas.quadMesh, canvas.unlitWorldMaterial, worldCamera);
@@ -209,6 +213,7 @@ namespace Abacus
                 entity = new(world);
                 entity.Become<Box>();
                 entity.Become<Transform>();
+                entity.Become<Body>();
                 entity.AddComponent(Color.White);
 
                 ref IsRenderer renderer = ref entity.AddComponentRef<IsRenderer>();
@@ -225,6 +230,16 @@ namespace Abacus
             public static implicit operator Entity(Box window)
             {
                 return window.entity;
+            }
+
+            public static implicit operator Transform(Box window)
+            {
+                return window.entity.As<Transform>();
+            }
+
+            public static implicit operator Body(Box window)
+            {
+                return window.entity.As<Body>();
             }
         }
 

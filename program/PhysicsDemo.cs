@@ -62,8 +62,7 @@ namespace Abacus
             sphereMesh = new(world, sphereModel);
 
             //create ball
-            SphereShape ballShape = new(world, 0.5f);
-            ballBody = new(world, ballShape, IsBody.Type.Dynamic, new Vector3(0f, 3f, 0f));
+            ballBody = new(world, new SphereShape(0.5f), IsBody.Type.Dynamic, new Vector3(0f, 3f, 0f));
             Entity ballEntity = ballBody;
             Renderer ballRenderer = ballEntity.Become<Renderer>();
             ballRenderer.Mesh = sphereMesh;
@@ -74,8 +73,7 @@ namespace Abacus
             ballTransform.LocalPosition = new(0f, 4f, 0f);
 
             //create floor
-            CubeShape floorShape = new(world, 0.5f, 0.5f, 0.5f);
-            floorBody = new(world, floorShape, IsBody.Type.Static);
+            floorBody = new(world, new CubeShape(0.5f, 0.5f, 0.5f), IsBody.Type.Static);
             Entity floorEntity = floorBody;
             Renderer floorRenderer = floorEntity.Become<Renderer>();
             floorRenderer.Mesh = cubeMesh;
@@ -217,9 +215,8 @@ namespace Abacus
                     //debugTransform2.LocalPosition = origin + direction;
                     //debugTransform2.LocalScale = new(0.1f, 0.1f, 0.1f);
 
-                    SphereShape projectileShape = new(world, 0.5f);
                     Vector3 launchForce = Vector3.Normalize(cameraTransform.WorldForward + Vector3.UnitY * 0.2f) * 8f;
-                    Body projectile = new(world, projectileShape, IsBody.Type.Dynamic, launchForce);
+                    Body projectile = new(world, new SphereShape(0.5f), IsBody.Type.Dynamic, launchForce);
                     Entity projectileEntity = projectile;
                     Renderer projectileRenderer = projectileEntity.Become<Renderer>();
                     projectileRenderer.Mesh = sphereMesh;
