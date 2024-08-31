@@ -53,7 +53,7 @@ public static class AbacusSimulator
             rendering.RegisterSystem<VulkanRendererType>();
 
             //play the simulation
-            using (Program program = Program.Create<PhysicsDemo>(world))
+            using (Program program = Program.Create<EditorProgram>(world))
             {
                 DateTime time = DateTime.UtcNow;
                 TimeSpan delta = TimeSpan.Zero;

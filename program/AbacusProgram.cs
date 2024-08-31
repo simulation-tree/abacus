@@ -303,7 +303,7 @@ namespace Abacus
                 }
             }
 
-            ref Color color = ref ((Entity)dummyRenderer).GetComponent<Color>();
+            ref Color color = ref ((Entity)dummyRenderer).GetComponentRef<Color>();
             float hue = color.H;
             hue += delta * 0.2f;
             while (hue > 1f)

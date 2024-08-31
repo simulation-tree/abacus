@@ -53,7 +53,9 @@ namespace Abacus
 
             if (Entity.TryGetFirst(world, out Mouse mouse))
             {
-                Vector2 desiredPosition = mouse.Position - followerWindow.Size * 0.5f;
+                Vector2 mousePosition = mouse.Position;
+                mousePosition.Y = followerWindow.Size.Y - mousePosition.Y;
+                Vector2 desiredPosition = mousePosition - followerWindow.Size * 0.5f;
                 Vector2 windowPosition = followerWindow.Position;
                 windowPosition = Vector2.Lerp(windowPosition, desiredPosition, (float)delta.TotalSeconds * speed);
                 followerWindow.Position = windowPosition;

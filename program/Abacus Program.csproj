@@ -45,6 +45,7 @@
 		<ProjectReference Include="..\..\data\source\Data.csproj" />
 		<ProjectReference Include="..\..\default-presentation-assets\source\Default Presentation Assets.csproj" />
 		<ProjectReference Include="..\..\input-devices\source\Input Devices.csproj" />
+		<ProjectReference Include="..\..\interaction-kit\source\Interaction Kit.csproj" />
 		<ProjectReference Include="..\..\models\source\Models.csproj" />
 		<ProjectReference Include="..\..\physics\source\Physics.csproj" />
 		<ProjectReference Include="..\..\programs\source\Programs.csproj" />

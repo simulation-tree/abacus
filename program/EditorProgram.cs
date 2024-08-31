@@ -1,6 +1,9 @@
 ﻿using Cameras.Components;
 using Data;
 using DefaultPresentationAssets;
+using InputDevices;
+using InteractionKit.Components;
+using InteractionKit.Functions;
 using Meshes;
 using Models;
 using Physics;
@@ -49,13 +52,13 @@ namespace Abacus
             Texture squareTexture = new(world, Address.Get<SquareTexture>());
             Model quadModel = new(world, Address.Get<QuadModel>());
             Mesh quadMesh = new(world, quadModel);
-            
+
             Material unlitUiMaterial = new(world, Address.Get<UnlitTexturedMaterial>());
             unlitUiMaterial.AddPushBinding<Color>();
             unlitUiMaterial.AddPushBinding<LocalToWorld>();
             unlitUiMaterial.AddComponentBinding<CameraProjection>(0, 0, uiCamera);
             unlitUiMaterial.AddTextureBinding(1, 0, squareTexture);
-            
+
             Material unlitWorldMaterial = new(world, Address.Get<UnlitTexturedMaterial>());
             unlitWorldMaterial.AddPushBinding<Color>();
             unlitWorldMaterial.AddPushBinding<LocalToWorld>();
@@ -68,6 +71,11 @@ namespace Abacus
             testWindow = new(world, canvas);
             testWindow.Size = new(300, 300);
             testWindow.Position = new(20, 20);
+
+            Box anotherBox = new(world, canvas);
+            anotherBox.Size = new(100, 100);
+            anotherBox.Position = new(0, 0);
+            anotherBox.Anchor = Anchor.Centered;
 
             //crate test image
             Renderer waveRenderer = new(world, canvas.quadMesh, canvas.unlitWorldMaterial, worldCamera);
@@ -92,7 +100,7 @@ namespace Abacus
             }
         }
 
-        public bool Update(TimeSpan delta)
+        public unsafe bool Update(TimeSpan delta)
         {
             if (window.IsDestroyed)
             {
@@ -102,12 +110,31 @@ namespace Abacus
             UpdateCanvasToMatchWindow();
             Transform cameraTransform = ((Entity)canvas.worldCamera).Become<Transform>();
             SharedFunctions.MoveCameraAround(world, cameraTransform, delta, ref cameraPosition, ref cameraPitchYaw, new(1f, 1f));
+            AnimateBoxColours();
             return true;
+        }
+
+        private void AnimateBoxColours()
+        {
+            world.ForEach((in uint entity, ref IsBox box, ref Color color) =>
+            {
+                color = box.isHoveringOver ? Color.Yellow : Color.White;
+                if (box.isPressed)
+                {
+                    color = Color.Red;
+                }
+            });
         }
 
         private void UpdateCanvasToMatchWindow()
         {
             Vector2 size = window.Size;
+            if (window.IsMaximized || window.IsFullscreen)
+            {
+                (uint width, uint height, uint refreshRate) display = window.Display;
+                size = new(display.width, display.height);
+            }
+
             canvas.transform.LocalScale = new(size, 1);
             canvas.transform.LocalPosition = new(0, 0, canvas.uiCamera.Depth.min + 0.1f);
         }
@@ -197,6 +224,8 @@ namespace Abacus
                 }
             }
 
+            public readonly ref Anchor Anchor => ref entity.GetComponentRef<Anchor>();
+
             uint IEntity.Value => entity;
             World IEntity.World => entity;
 
@@ -208,18 +237,68 @@ namespace Abacus
             }
 #endif
 
-            public Box(World world, Canvas canvas)
+            public unsafe Box(World world, Canvas canvas)
             {
                 entity = new(world);
+                entity.Parent = canvas.transform;
                 entity.Become<Box>();
                 entity.Become<Transform>();
-                entity.Become<Body>();
+                entity.AddComponent(new Anchor());
                 entity.AddComponent(Color.White);
+                entity.AddComponent(new Position(0f, 0f, -0.1f));
+                entity.AddComponent(new Trigger(new(&Filter), new(&Callback)));
 
                 ref IsRenderer renderer = ref entity.AddComponentRef<IsRenderer>();
                 renderer.mesh = entity.AddReference(canvas.quadMesh);
                 renderer.material = entity.AddReference(canvas.unlitUiMaterial);
                 renderer.camera = entity.AddReference(canvas.uiCamera);
+
+                [UnmanagedCallersOnly]
+                static void Filter(FilterFunction.Input input)
+                {
+                    World world = input.world;
+                    if (Entity.TryGetFirst(world, out Mouse mouse))
+                    {
+                        Vector2 mousePosition = mouse.Position;
+                        foreach (ref uint entity in input.Entities)
+                        {
+                            ref IsBox box = ref world.TryGetComponentRef<IsBox>(entity, out bool contains);
+                            if (contains)
+                            {
+                                box.isHoveringOver = false;
+                                LocalToWorld ltw = input.world.GetComponent<LocalToWorld>(entity);
+                                Vector3 min = ltw.Position;
+                                Vector3 max = ltw.Position + ltw.Scale;
+                                contains = mousePosition.X >= min.X && mousePosition.X <= max.X && mousePosition.Y >= min.Y && mousePosition.Y <= max.Y;
+                                if (!contains)
+                                {
+                                    entity = default;
+                                }
+                            }
+                            else
+                            {
+                                entity = default;
+                            }
+                        }
+
+                        return;
+                    }
+
+                    foreach (ref uint entity in input.Entities)
+                    {
+                        entity = default;
+                    }
+                }
+
+                [UnmanagedCallersOnly]
+                static void Callback(World world, uint entity)
+                {
+                    Mouse mouse = Entity.GetFirst<Mouse>(world);
+                    ref IsBox box = ref world.GetComponentRef<IsBox>(entity);
+                    bool isPressed = mouse.IsPressed(Mouse.Button.LeftButton);
+                    box.isPressed = isPressed;
+                    box.isHoveringOver = true;
+                }
             }
 
             Query IEntity.GetQuery(World world)
@@ -245,7 +324,8 @@ namespace Abacus
 
         public struct IsBox
         {
-
+            public bool isHoveringOver;
+            public bool isPressed;
         }
     }
 }
