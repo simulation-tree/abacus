@@ -11,7 +11,7 @@ git clone https://github.com/game-simulations/textures.git
 git clone https://github.com/game-simulations/fonts.git
 git clone https://github.com/game-simulations/transforms.git
 git clone https://github.com/game-simulations/serialization.git
-git clone https://github.com/game-simulations/bin-packing.git
+git clone https://github.com/game-simulations/bin-packer.git
 git clone https://github.com/game-simulations/rendering.git
 git clone https://github.com/game-simulations/windows.git
 git clone https://github.com/game-simulations/input-devices.git

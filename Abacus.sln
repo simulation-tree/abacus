@@ -61,9 +61,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Font Systems", "..\font-sys
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Font System Tests", "..\font-systems\tests\Font System Tests.csproj", "{0C5CDCE6-7C0E-4D23-99C9-0743ACA906AA}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bin Packing", "..\bin-packing\source\Bin Packing.csproj", "{3D8D114D-D887-4641-AB7A-77AA0CED95AF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bin Packer", "..\bin-packer\source\Bin Packer.csproj", "{3D8D114D-D887-4641-AB7A-77AA0CED95AF}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bin Packing Tests", "..\bin-packing\tests\Bin Packing Tests.csproj", "{C8F6D419-0357-4123-ABED-B493A8168D36}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bin Packer Tests", "..\bin-packer\tests\Bin Packer Tests.csproj", "{C8F6D419-0357-4123-ABED-B493A8168D36}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Vulkan Renderer", "..\vulkan-renderer\source\Vulkan Renderer.csproj", "{97DD8320-13BC-4D81-BDFF-D96B46C0A99C}"
 EndProject
