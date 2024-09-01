@@ -246,7 +246,7 @@ namespace Abacus
                 entity.AddComponent(new Anchor());
                 entity.AddComponent(Color.White);
                 entity.AddComponent(new Position(0f, 0f, -0.1f));
-                entity.AddComponent(new Trigger(new(&Filter), new(&Callback)));
+                entity.AddComponent(new Trigger(new(&Filter), new(&OnHoverOver)));
 
                 ref IsRenderer renderer = ref entity.AddComponentRef<IsRenderer>();
                 renderer.mesh = entity.AddReference(canvas.quadMesh);
@@ -289,21 +289,21 @@ namespace Abacus
                         entity = default;
                     }
                 }
-
-                [UnmanagedCallersOnly]
-                static void Callback(World world, uint entity)
-                {
-                    Mouse mouse = Entity.GetFirst<Mouse>(world);
-                    ref IsBox box = ref world.GetComponentRef<IsBox>(entity);
-                    bool isPressed = mouse.IsPressed(Mouse.Button.LeftButton);
-                    box.isPressed = isPressed;
-                    box.isHoveringOver = true;
-                }
             }
 
             Query IEntity.GetQuery(World world)
             {
                 return new(world, RuntimeType.Get<IsBox>());
+            }
+
+            [UnmanagedCallersOnly]
+            private static void OnHoverOver(World world, uint entity)
+            {
+                Mouse mouse = Entity.GetFirst<Mouse>(world);
+                ref IsBox box = ref world.GetComponentRef<IsBox>(entity);
+                bool isPressed = mouse.IsPressed(Mouse.Button.LeftButton);
+                box.isPressed = isPressed;
+                box.isHoveringOver = true;
             }
 
             public static implicit operator Entity(Box window)
