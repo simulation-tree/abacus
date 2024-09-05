@@ -21,8 +21,8 @@ public static class SharedFunctions
 
     public static void DestroyTemporaryEntities(World world, TimeSpan delta)
     {
-        using Query<DestroyAfterTime> query = new(world);
-        query.Update();
+        using ComponentQuery<DestroyAfterTime> query = new();
+        query.Update(world);
         foreach (var r in query)
         {
             ref DestroyAfterTime destroyTimer = ref r.Component1;
@@ -46,7 +46,7 @@ public static class SharedFunctions
         bool moveBackward = false;
         bool moveUp = false;
         bool moveDown = false;
-        if (Entity.TryGetFirst(world, out Keyboard keyboard))
+        if (world.TryGetFirst(out Keyboard keyboard))
         {
             ButtonState left = keyboard.GetButtonState(Keyboard.Button.A);
             ButtonState right = keyboard.GetButtonState(Keyboard.Button.D);
@@ -104,7 +104,7 @@ public static class SharedFunctions
         currentPosition = Vector3.Lerp(currentPosition, position, (float)delta.TotalSeconds * positionLerpSpeed);
 
         //look around with mice
-        if (Entity.TryGetFirst(world, out Mouse mouse))
+        if (world.TryGetFirst(out Mouse mouse))
         {
             Vector2 pointerPosition = mouse.Position;
             if (!hasLastPointerPosition && pointerPosition != default)

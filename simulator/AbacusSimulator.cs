@@ -1,4 +1,6 @@
 ﻿using Abacus;
+using Automations.Events;
+using Automations.Systems;
 using Cameras.Systems;
 using Data.Events;
 using Data.Systems;
@@ -27,16 +29,18 @@ using Transforms.Systems;
 using Windows.Events;
 using Windows.Systems;
 
-public static class AbacusSimulator
+public class AbacusSimulator
 {
-    public static int Main()
+    public int Run()
     {
         uint returnCode = 0;
         using (World world = new())
         {
             //systems part of the simulation
             DataImportSystem data = new(world);
-            MaterialImportSystem materials = new(world);
+            AutomationPlayingSystem automations = new(world);
+            StateMachineSystem stateMachines = new(world);
+            StateAutomationSystem stateAutomation = new(world);
             ModelImportSystem models = new(world);
             TransformSystem transforms = new(world);
             WindowSystem windows = new(world);
@@ -48,9 +52,9 @@ public static class AbacusSimulator
             TextRenderingSystem textMeshes = new(world);
             PhysicsSystem physics = new(world);
             CameraSystem cameras = new(world);
-            InvokeTriggersSystem triggers = new(world);
-            RenderEngineSystem rendering = new(world);
-            rendering.RegisterSystem<VulkanRendererType>();
+            InteractionSystems interactions = new(world);
+            RenderingSystems rendering = new(world);
+            rendering.renderEngine.RegisterSystem<VulkanRendererType>();
 
             //play the simulation
             using (Program program = Program.Create<EditorProgram>(world))
@@ -61,6 +65,9 @@ public static class AbacusSimulator
                 {
                     world.Submit(new WindowUpdate());
                     world.Submit(new InputUpdate());
+                    world.Submit(new StateUpdate());
+                    world.Submit(new AutomationUpdate(delta));
+                    world.Submit(new MixingUpdate());
                     world.Submit(new TransformUpdate());
                     world.Submit(new PhysicsUpdate(delta));
                     world.Submit(new TransformUpdate());
@@ -84,7 +91,7 @@ public static class AbacusSimulator
 
             //finish
             rendering.Dispose();
-            triggers.Dispose();
+            interactions.Dispose();
             cameras.Dispose();
             physics.Dispose();
             textMeshes.Dispose();
@@ -96,7 +103,9 @@ public static class AbacusSimulator
             windows.Dispose();
             transforms.Dispose();
             models.Dispose();
-            materials.Dispose();
+            stateAutomation.Dispose();
+            stateMachines.Dispose();
+            automations.Dispose();
             data.Dispose();
         }
 

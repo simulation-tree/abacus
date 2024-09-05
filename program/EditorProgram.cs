@@ -1,17 +1,21 @@
 ﻿using Cameras.Components;
 using Data;
 using DefaultPresentationAssets;
+using Fonts;
 using InputDevices;
+using InteractionKit;
 using InteractionKit.Components;
-using InteractionKit.Functions;
 using Meshes;
 using Models;
 using Physics;
+using Physics.Components;
+using Physics.Events;
 using Programs;
 using Rendering;
 using Rendering.Components;
 using Simulation;
 using System;
+using System.Diagnostics;
 using System.Numerics;
 using System.Runtime.InteropServices;
 using Textures;
@@ -26,8 +30,8 @@ namespace Abacus
     {
         private readonly World world;
         private readonly Window window;
-        private readonly Canvas canvas;
-        private readonly Box testWindow;
+        public readonly InteractiveContext context;
+        public readonly Camera worldCamera;
         private Vector3 cameraPosition;
         private Vector2 cameraPitchYaw;
 
@@ -40,50 +44,71 @@ namespace Abacus
             window.IsResizable = true;
             window.BecomeMaximized();
 
-            Camera worldCamera = new(world, window, CameraFieldOfView.FromDegrees(90));
-            Entity worldCameraEntity = worldCamera;
-            Transform cameraTransform = worldCameraEntity.Become<Transform>();
+            worldCamera = new(world, window.destination, CameraFieldOfView.FromDegrees(90));
+            Transform cameraTransform = worldCamera.entity.Become<Transform>();
             cameraTransform.LocalPosition = new(0, 0, -10);
             cameraPosition = cameraTransform.LocalPosition;
 
-            Camera uiCamera = new(world, window, new CameraOrthographicSize(1f));
+            Camera uiCamera = new(world, window.destination, new CameraOrthographicSize(1f));
 
             //global references
             Texture squareTexture = new(world, Address.Get<SquareTexture>());
-            Model quadModel = new(world, Address.Get<QuadModel>());
-            Mesh quadMesh = new(world, quadModel);
-
-            Material unlitUiMaterial = new(world, Address.Get<UnlitTexturedMaterial>());
-            unlitUiMaterial.AddPushBinding<Color>();
-            unlitUiMaterial.AddPushBinding<LocalToWorld>();
-            unlitUiMaterial.AddComponentBinding<CameraProjection>(0, 0, uiCamera);
-            unlitUiMaterial.AddTextureBinding(1, 0, squareTexture);
+            Model cubeModel = new(world, Address.Get<CubeModel>());
+            Mesh cubeMesh = new(world, cubeModel.entity);
+            Font robotoFont = new(world, Address.Get<RobotoFont>());
 
             Material unlitWorldMaterial = new(world, Address.Get<UnlitTexturedMaterial>());
             unlitWorldMaterial.AddPushBinding<Color>();
             unlitWorldMaterial.AddPushBinding<LocalToWorld>();
-            unlitWorldMaterial.AddComponentBinding<CameraProjection>(0, 0, worldCamera);
+            unlitWorldMaterial.AddComponentBinding<CameraProjection>(0, 0, worldCamera.entity);
             unlitWorldMaterial.AddTextureBinding(1, 0, squareTexture);
-            Transform canvasTransform = new(world);
-            canvas = new(quadMesh, unlitUiMaterial, unlitWorldMaterial, worldCamera, uiCamera, squareTexture, canvasTransform);
 
-            //create window
-            testWindow = new(world, canvas);
+            Canvas canvas = new(world, uiCamera);
+            context = new(canvas);
+
+            Material textMaterial = new(world, Address.Get<TextMaterial>());
+            textMaterial.AddComponentBinding<CameraProjection>(1, 0, uiCamera.entity);
+            textMaterial.AddPushBinding<Color>();
+            textMaterial.AddPushBinding<LocalToWorld>();
+
+            //crate test cube
+            Renderer waveRenderer = new(world, cubeMesh, unlitWorldMaterial, worldCamera);
+            Transform waveTransform = waveRenderer.entity.Become<Transform>();
+            waveRenderer.entity.AddComponent(Color.Red);
+            waveRenderer.entity.AddComponent(new IsBody(new CubeShape(0.5f), IsBody.Type.Static));
+
+            //create ui boxes
+            Button testWindow = new(world, new(&TestBoxPressed), context);
             testWindow.Size = new(300, 300);
             testWindow.Position = new(20, 20);
 
-            Box anotherBox = new(world, canvas);
-            anotherBox.Size = new(100, 100);
+            Button anotherBox = new(world, new(&AnotherBoxPressed), context);
+            anotherBox.Size = new(190, 100);
             anotherBox.Position = new(0, 0);
             anotherBox.Anchor = Anchor.Centered;
+            anotherBox.Pivot = new(0.5f, 0.5f, 0f);
+            anotherBox.Color = Color.SkyBlue;
 
-            //crate test image
-            Renderer waveRenderer = new(world, canvas.quadMesh, canvas.unlitWorldMaterial, worldCamera);
-            Entity waveEntity = waveRenderer;
-            Transform waveTransform = waveEntity.Become<Transform>();
-            waveTransform.LocalScale = new(2, 2, 1);
-            waveTransform.LocalPosition = new(2, 2, 1);
-            waveEntity.AddComponent(Color.Red);
+            TextMesh textMesh = new(world, "abacus 123 hiii", robotoFont, new(0f, 1f));
+            TextRenderer textRenderer = new(world, textMesh, textMaterial, uiCamera);
+            textRenderer.Parent = anotherBox.selectable.transform.entity;
+            Transform textTransform = textRenderer.renderer.entity.Become<Transform>();
+            textTransform.LocalPosition = new(4f, -4f, 0.1f);
+            textTransform.LocalScale = Vector3.One * 32f;
+            textRenderer.renderer.entity.AddComponent(Color.Orange);
+            textRenderer.renderer.entity.AddComponent(Anchor.TopLeft);
+
+            [UnmanagedCallersOnly]
+            static void TestBoxPressed(World world, uint entity)
+            {
+                Debug.WriteLine("Test box pressed");
+            }
+
+            [UnmanagedCallersOnly]
+            static void AnotherBoxPressed(World world, uint entity)
+            {
+                Debug.WriteLine("Another box pressed");
+            }
 
             [UnmanagedCallersOnly]
             static void WindowClosed(World world, uint windowEntity)
@@ -94,7 +119,7 @@ namespace Abacus
 
         public void Dispose()
         {
-            if (!window.IsDestroyed)
+            if (!window.IsDestroyed())
             {
                 window.Destroy();
             }
@@ -102,41 +127,57 @@ namespace Abacus
 
         public unsafe bool Update(TimeSpan delta)
         {
-            if (window.IsDestroyed)
+            if (window.IsDestroyed())
             {
                 return false;
             }
 
-            UpdateCanvasToMatchWindow();
-            Transform cameraTransform = ((Entity)canvas.worldCamera).Become<Transform>();
+            Transform cameraTransform = worldCamera.entity.Become<Transform>();
             SharedFunctions.MoveCameraAround(world, cameraTransform, delta, ref cameraPosition, ref cameraPitchYaw, new(1f, 1f));
-            AnimateBoxColours();
-            return true;
-        }
 
-        private void AnimateBoxColours()
-        {
-            world.ForEach((in uint entity, ref IsBox box, ref Color color) =>
+            if (world.TryGetFirst(out Mouse mouse))
             {
-                color = box.isHoveringOver ? Color.Yellow : Color.White;
-                if (box.isPressed)
+                if (!mouse.device.entity.ContainsComponent<IsPointer>())
                 {
-                    color = Color.Red;
+                    mouse.device.entity.AddComponent(new IsPointer(mouse.Position, default));
                 }
-            });
-        }
 
-        private void UpdateCanvasToMatchWindow()
-        {
-            Vector2 size = window.Size;
-            if (window.IsMaximized || window.IsFullscreen)
-            {
-                (uint width, uint height, uint refreshRate) display = window.Display;
-                size = new(display.width, display.height);
+                ref IsPointer pointer = ref mouse.device.entity.GetComponentRef<IsPointer>();
+                pointer.position = mouse.Position;
+                pointer.action = default;
+                if (mouse.IsPressed(Mouse.Button.LeftButton))
+                {
+                    pointer.HasPrimaryIntent = true;
+                }
+
+                if (mouse.IsPressed(Mouse.Button.RightButton))
+                {
+                    pointer.HasSecondaryIntent = true;
+                }
+
+                if (mouse.WasPressed(Mouse.Button.LeftButton))
+                {
+                    Vector2 screenPoint = worldCamera.Destination.GetScreenPointFromPosition(mouse.Position);
+                    (Vector3 origin, Vector3 direction) ray = worldCamera.GetProjection().GetRayFromScreenPoint(screenPoint);
+                    world.Submit(new Raycast(ray.origin, ray.direction, new(&OnRaycastHit)));
+
+                    [UnmanagedCallersOnly]
+                    static void OnRaycastHit(World world, Raycast raycast, RaycastHit* hits, uint hitsCount)
+                    {
+                        for (uint i = 0; i < hitsCount; i++)
+                        {
+                            RaycastHit hit = hits[i];
+                            ref Position position = ref world.TryGetComponentRef<Position>(hit.entity, out bool contains);
+                            if (contains)
+                            {
+                                position.value.X += 0.1f;
+                            }
+                        }
+                    }
+                }
             }
 
-            canvas.transform.LocalScale = new(size, 1);
-            canvas.transform.LocalPosition = new(0, 0, canvas.uiCamera.Depth.min + 0.1f);
+            return true;
         }
 
         readonly unsafe (StartFunction, FinishFunction, UpdateFunction) IProgram.GetFunctions()
@@ -164,168 +205,6 @@ namespace Abacus
                 ref EditorProgram program = ref allocation.Read<EditorProgram>();
                 return program.Update(delta) ? 0u : 1u;
             }
-        }
-
-        public readonly struct Canvas
-        {
-            public readonly Mesh quadMesh;
-            public readonly Material unlitUiMaterial;
-            public readonly Material unlitWorldMaterial;
-            public readonly Camera worldCamera;
-            public readonly Camera uiCamera;
-            public readonly Texture squareTexture;
-            public readonly Transform transform;
-
-            public Canvas(Mesh quadMesh, Material unlitUiMaterial, Material unlitWorldMaterial, Camera worldCamera, Camera uiCamera, Texture squareTexture, Transform canvas)
-            {
-                this.quadMesh = quadMesh;
-                this.unlitUiMaterial = unlitUiMaterial;
-                this.unlitWorldMaterial = unlitWorldMaterial;
-                this.worldCamera = worldCamera;
-                this.uiCamera = uiCamera;
-                this.squareTexture = squareTexture;
-                this.transform = canvas;
-            }
-        }
-
-        public readonly struct Box : IEntity
-        {
-            private readonly Entity entity;
-
-            public readonly Vector2 Size
-            {
-                get
-                {
-                    Transform transform = entity.As<Transform>();
-                    Vector3 scale = transform.LocalScale;
-                    return new(scale.X, scale.Y);
-                }
-                set
-                {
-                    Transform transform = entity.Become<Transform>();
-                    Vector3 scale = transform.LocalScale;
-                    transform.LocalScale = new(value.X, value.Y, scale.Z);
-                }
-            }
-
-            public readonly Vector2 Position
-            {
-                get
-                {
-                    Transform transform = entity.As<Transform>();
-                    Vector3 position = transform.LocalPosition;
-                    return new(position.X, position.Y);
-                }
-                set
-                {
-                    Transform transform = entity.Become<Transform>();
-                    Vector3 position = transform.LocalPosition;
-                    transform.LocalPosition = new(value.X, value.Y, position.Z);
-                }
-            }
-
-            public readonly ref Anchor Anchor => ref entity.GetComponentRef<Anchor>();
-
-            uint IEntity.Value => entity;
-            World IEntity.World => entity;
-
-#if NET
-            [Obsolete("Not available", true)]
-            public Box()
-            {
-
-            }
-#endif
-
-            public unsafe Box(World world, Canvas canvas)
-            {
-                entity = new(world);
-                entity.Parent = canvas.transform;
-                entity.Become<Box>();
-                entity.Become<Transform>();
-                entity.AddComponent(new Anchor());
-                entity.AddComponent(Color.White);
-                entity.AddComponent(new Position(0f, 0f, -0.1f));
-                entity.AddComponent(new Trigger(new(&Filter), new(&OnHoverOver)));
-
-                ref IsRenderer renderer = ref entity.AddComponentRef<IsRenderer>();
-                renderer.mesh = entity.AddReference(canvas.quadMesh);
-                renderer.material = entity.AddReference(canvas.unlitUiMaterial);
-                renderer.camera = entity.AddReference(canvas.uiCamera);
-
-                [UnmanagedCallersOnly]
-                static void Filter(FilterFunction.Input input)
-                {
-                    World world = input.world;
-                    if (Entity.TryGetFirst(world, out Mouse mouse))
-                    {
-                        Vector2 mousePosition = mouse.Position;
-                        foreach (ref uint entity in input.Entities)
-                        {
-                            ref IsBox box = ref world.TryGetComponentRef<IsBox>(entity, out bool contains);
-                            if (contains)
-                            {
-                                box.isHoveringOver = false;
-                                LocalToWorld ltw = input.world.GetComponent<LocalToWorld>(entity);
-                                Vector3 min = ltw.Position;
-                                Vector3 max = ltw.Position + ltw.Scale;
-                                contains = mousePosition.X >= min.X && mousePosition.X <= max.X && mousePosition.Y >= min.Y && mousePosition.Y <= max.Y;
-                                if (!contains)
-                                {
-                                    entity = default;
-                                }
-                            }
-                            else
-                            {
-                                entity = default;
-                            }
-                        }
-
-                        return;
-                    }
-
-                    foreach (ref uint entity in input.Entities)
-                    {
-                        entity = default;
-                    }
-                }
-            }
-
-            Query IEntity.GetQuery(World world)
-            {
-                return new(world, RuntimeType.Get<IsBox>());
-            }
-
-            [UnmanagedCallersOnly]
-            private static void OnHoverOver(World world, uint entity)
-            {
-                Mouse mouse = Entity.GetFirst<Mouse>(world);
-                ref IsBox box = ref world.GetComponentRef<IsBox>(entity);
-                bool isPressed = mouse.IsPressed(Mouse.Button.LeftButton);
-                box.isPressed = isPressed;
-                box.isHoveringOver = true;
-            }
-
-            public static implicit operator Entity(Box window)
-            {
-                return window.entity;
-            }
-
-            public static implicit operator Transform(Box window)
-            {
-                return window.entity.As<Transform>();
-            }
-
-            public static implicit operator Body(Box window)
-            {
-                return window.entity.As<Body>();
-            }
-        }
-
-        public struct IsBox
-        {
-            public bool isHoveringOver;
-            public bool isPressed;
         }
     }
 }

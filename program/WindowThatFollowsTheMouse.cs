@@ -29,7 +29,7 @@ namespace Abacus
 
         public void Dispose()
         {
-            if (!followerWindow.IsDestroyed)
+            if (!followerWindow.IsDestroyed())
             {
                 followerWindow.Destroy();
             }
@@ -37,13 +37,13 @@ namespace Abacus
 
         public bool Update(TimeSpan delta)
         {
-            if (followerWindow.IsDestroyed)
+            if (followerWindow.IsDestroyed())
             {
                 return false;
             }
 
             float speed = 1f;
-            if (Entity.TryGetFirst(world, out Keyboard keyboard))
+            if (world.TryGetFirst(out Keyboard keyboard))
             {
                 if (keyboard.IsPressed(Keyboard.Button.LeftShift))
                 {
@@ -51,7 +51,7 @@ namespace Abacus
                 }
             }
 
-            if (Entity.TryGetFirst(world, out Mouse mouse))
+            if (world.TryGetFirst(out Mouse mouse))
             {
                 Vector2 mousePosition = mouse.Position;
                 mousePosition.Y = followerWindow.Size.Y - mousePosition.Y;

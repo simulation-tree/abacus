@@ -43,8 +43,8 @@ namespace Abacus
             window = new(world, "Physics Demo", new Vector2(400, 200), new(900, 720), "vulkan", new(&WindowClosed));
             window.IsResizable = true;
 
-            camera = new(world, window, CameraFieldOfView.FromDegrees(90f));
-            cameraTransform = ((Entity)camera).Become<Transform>();
+            camera = new(world, window.destination, CameraFieldOfView.FromDegrees(90f));
+            cameraTransform = camera.entity.Become<Transform>();
             cameraTransform.LocalPosition = new(-1f, 2f, -10f);
             cameraPosition = cameraTransform.LocalPosition;
 
@@ -53,17 +53,17 @@ namespace Abacus
             unlitMaterial = new(world, Address.Get<UnlitTexturedMaterial>());
             unlitMaterial.AddPushBinding<Color>();
             unlitMaterial.AddPushBinding<LocalToWorld>();
-            unlitMaterial.AddComponentBinding<CameraProjection>(0, 0, camera);
+            unlitMaterial.AddComponentBinding<CameraProjection>(0, 0, camera.entity);
             unlitMaterial.AddTextureBinding(1, 0, squareTexture);
 
             Model cubeModel = new(world, Address.Get<CubeModel>());
-            cubeMesh = new Mesh(world, cubeModel);
+            cubeMesh = new Mesh(world, cubeModel.entity);
             Model sphereModel = new(world, Address.Get<SphereModel>());
-            sphereMesh = new(world, sphereModel);
+            sphereMesh = new(world, sphereModel.entity);
 
             //create ball
             ballBody = new(world, new SphereShape(0.5f), IsBody.Type.Dynamic, new Vector3(0f, 3f, 0f));
-            Entity ballEntity = ballBody;
+            Entity ballEntity = ballBody.transform.entity;
             Renderer ballRenderer = ballEntity.Become<Renderer>();
             ballRenderer.Mesh = sphereMesh;
             ballRenderer.Material = unlitMaterial;
@@ -74,7 +74,7 @@ namespace Abacus
 
             //create floor
             floorBody = new(world, new CubeShape(0.5f, 0.5f, 0.5f), IsBody.Type.Static);
-            Entity floorEntity = floorBody;
+            Entity floorEntity = floorBody.transform.entity;
             Renderer floorRenderer = floorEntity.Become<Renderer>();
             floorRenderer.Mesh = cubeMesh;
             floorRenderer.Material = unlitMaterial;
@@ -86,7 +86,7 @@ namespace Abacus
 
             //create floating quad
             Model quadModel = new(world, Address.Get<QuadModel>());
-            Mesh quadMesh = new(world, quadModel);
+            Mesh quadMesh = new(world, quadModel.entity);
             quadEntity = new(world);
             Renderer quadRenderer = quadEntity.Become<Renderer>();
             quadRenderer.Mesh = quadMesh;
@@ -105,7 +105,7 @@ namespace Abacus
 
         public void Dispose()
         {
-            if (!window.IsDestroyed)
+            if (!window.IsDestroyed())
             {
                 window.Destroy();
             }
@@ -113,14 +113,14 @@ namespace Abacus
 
         public bool Update(TimeSpan delta)
         {
-            if (window.IsDestroyed)
+            if (window.IsDestroyed())
             {
                 return false;
             }
 
-            if (Entity.TryGetFirst(world, out Keyboard keyboard))
+            if (world.TryGetFirst(out Keyboard keyboard))
             {
-                Transform floorTransform = floorBody;
+                Transform floorTransform = floorBody.transform;
                 if (keyboard.WasPressed(Keyboard.Button.G))
                 {
                     using RandomGenerator rng = new();
@@ -176,7 +176,7 @@ namespace Abacus
                 {
                     ballBody.LinearVelocity = Vector3.Zero;
                     ballBody.AngularVelocity = Vector3.Zero;
-                    Transform ballTransform = ballBody;
+                    Transform ballTransform = ballBody.transform;
                     ballTransform.WorldPosition = new Vector3(0f, 4f, 0f) + floorTransform.WorldPosition;
                 }
 
@@ -187,7 +187,7 @@ namespace Abacus
                 }
             }
 
-            if (Entity.TryGetFirst(world, out Mouse mouse))
+            if (world.TryGetFirst(out Mouse mouse))
             {
                 Vector2 screenPoint = camera.Destination.GetScreenPointFromPosition(mouse.Position);
                 CameraProjection cameraProjection = camera.GetProjection();
@@ -217,14 +217,14 @@ namespace Abacus
 
                     Vector3 launchForce = Vector3.Normalize(cameraTransform.WorldForward + Vector3.UnitY * 0.2f) * 8f;
                     Body projectile = new(world, new SphereShape(0.5f), IsBody.Type.Dynamic, launchForce);
-                    Entity projectileEntity = projectile;
+                    Entity projectileEntity = projectile.transform.entity;
                     Renderer projectileRenderer = projectileEntity.Become<Renderer>();
                     projectileRenderer.Mesh = sphereMesh;
                     projectileRenderer.Material = unlitMaterial;
                     projectileRenderer.Camera = camera;
                     projectileEntity.AddComponent(Color.White);
                     projectileEntity.AddComponent(new DestroyAfterTime(5f));
-                    Transform projectileTransform = projectile;
+                    Transform projectileTransform = projectile.transform;
                     projectileTransform.LocalPosition = cameraTransform.WorldPosition;
                     projectileTransform.LocalScale = new(0.4f, 0.4f, 0.4f);
                 }
@@ -236,10 +236,10 @@ namespace Abacus
         }
 
         [UnmanagedCallersOnly]
-        private unsafe static void RaycastHitCallback(World world, Raycast raycast, void* hitsPointer, int hitCount)
+        private unsafe static void RaycastHitCallback(World world, Raycast raycast, RaycastHit* hitsPointer, uint hitCount)
         {
             TimeSpan delta = new((long)raycast.identifier);
-            Span<RaycastHit> hits = new(hitsPointer, hitCount);
+            USpan<RaycastHit> hits = new(hitsPointer, hitCount);
             foreach (RaycastHit hit in hits)
             {
                 uint entityHit = hit.entity;
@@ -256,7 +256,7 @@ namespace Abacus
                     color.H = hue;
                 }
 
-                if (Entity.TryGetFirst(world, out Mouse mouse))
+                if (world.TryGetFirst(out Mouse mouse))
                 {
                     if (mouse.IsPressed(Mouse.Button.LeftButton))
                     {
