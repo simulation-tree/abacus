@@ -22,7 +22,7 @@ using Windows;
 
 namespace Abacus
 {
-    public struct PhysicsDemo : IDisposable, IProgram
+    public struct PhysicsDemo : IDisposable, IProgramType
     {
         private readonly World world;
         private readonly Window window;
@@ -111,11 +111,11 @@ namespace Abacus
             }
         }
 
-        public bool Update(TimeSpan delta)
+        public uint Update(TimeSpan delta)
         {
             if (window.IsDestroyed())
             {
-                return false;
+                return default;
             }
 
             if (world.TryGetFirst(out Keyboard keyboard))
@@ -232,7 +232,7 @@ namespace Abacus
 
             SharedFunctions.MoveCameraAround(world, cameraTransform, delta, ref cameraPosition, ref cameraPitchYaw, new(1f, 1f));
             SharedFunctions.DestroyTemporaryEntities(world, delta);
-            return true;
+            return 1;
         }
 
         [UnmanagedCallersOnly]
@@ -267,7 +267,7 @@ namespace Abacus
             }
         }
 
-        readonly unsafe (StartFunction, FinishFunction, UpdateFunction) IProgram.GetFunctions()
+        readonly unsafe (StartFunction, FinishFunction, UpdateFunction) IProgramType.GetFunctions()
         {
             return (new(&Start), new(&Finish), new(&Update));
 
@@ -290,7 +290,7 @@ namespace Abacus
             static uint Update(Allocation allocation, TimeSpan delta)
             {
                 ref PhysicsDemo program = ref allocation.Read<PhysicsDemo>();
-                return program.Update(delta) ? 0u : 1u;
+                return program.Update(delta);
             }
         }
     }

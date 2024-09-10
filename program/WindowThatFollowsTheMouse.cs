@@ -9,7 +9,7 @@ using Windows;
 
 namespace Abacus
 {
-    public struct WindowThatFollowsTheMouse : IDisposable, IProgram
+    public struct WindowThatFollowsTheMouse : IDisposable, IProgramType
     {
         private readonly World world;
         private readonly Window followerWindow;
@@ -35,11 +35,11 @@ namespace Abacus
             }
         }
 
-        public bool Update(TimeSpan delta)
+        public uint Update(TimeSpan delta)
         {
             if (followerWindow.IsDestroyed())
             {
-                return false;
+                return default;
             }
 
             float speed = 1f;
@@ -61,10 +61,10 @@ namespace Abacus
                 followerWindow.Position = windowPosition;
             }
 
-            return true;
+            return 1;
         }
 
-        readonly unsafe (StartFunction, FinishFunction, UpdateFunction) IProgram.GetFunctions()
+        readonly unsafe (StartFunction, FinishFunction, UpdateFunction) IProgramType.GetFunctions()
         {
             return (new(&Start), new(&Finish), new(&Update));
 
@@ -87,7 +87,7 @@ namespace Abacus
             static uint Update(Allocation allocation, TimeSpan delta)
             {
                 ref WindowThatFollowsTheMouse program = ref allocation.Read<WindowThatFollowsTheMouse>();
-                return program.Update(delta) ? 0u : 1u;
+                return program.Update(delta);
             }
         }
     }

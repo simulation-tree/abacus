@@ -1,186 +1,97 @@
-﻿using Cameras.Components;
-using Data;
-using DefaultPresentationAssets;
-using Fonts;
+﻿using Data;
 using InputDevices;
 using InteractionKit;
 using InteractionKit.Components;
-using Meshes;
-using Models;
-using Physics;
-using Physics.Components;
-using Physics.Events;
+using InteractionKit.Functions;
 using Programs;
 using Rendering;
 using Rendering.Components;
 using Simulation;
 using System;
-using System.Diagnostics;
 using System.Numerics;
 using System.Runtime.InteropServices;
-using Textures;
-using Transforms;
 using Transforms.Components;
 using Unmanaged;
 using Windows;
 
 namespace Abacus
 {
-    public struct EditorProgram : IDisposable, IProgram
+    public struct EditorProgram : IDisposable, IProgramType
     {
         private readonly World world;
-        private readonly Window window;
-        public readonly InteractiveContext context;
-        public readonly Camera worldCamera;
-        private Vector3 cameraPosition;
-        private Vector2 cameraPitchYaw;
+        private readonly InteractiveContext context;
 
         public unsafe EditorProgram(World world)
         {
             this.world = world;
-
-            //window to render everything
-            window = new(world, "Fly", default, new(900, 600), "vulkan", new(&WindowClosed));
+            Window window = new(world, "Editor", new(200, 200), new(900, 720), "vulkan", new(&OnWindowClosed));
             window.IsResizable = true;
-            window.BecomeMaximized();
+            //window.IsBorderless = true;
+            //window.IsMaximized = true;
 
-            worldCamera = new(world, window.destination, CameraFieldOfView.FromDegrees(90));
-            Transform cameraTransform = worldCamera.entity.Become<Transform>();
-            cameraTransform.LocalPosition = new(0, 0, -10);
-            cameraPosition = cameraTransform.LocalPosition;
-
-            Camera uiCamera = new(world, window.destination, new CameraOrthographicSize(1f));
-
-            //global references
-            Texture squareTexture = new(world, Address.Get<SquareTexture>());
-            Model cubeModel = new(world, Address.Get<CubeModel>());
-            Mesh cubeMesh = new(world, cubeModel.entity);
-            Font robotoFont = new(world, Address.Get<RobotoFont>());
-
-            Material unlitWorldMaterial = new(world, Address.Get<UnlitTexturedMaterial>());
-            unlitWorldMaterial.AddPushBinding<Color>();
-            unlitWorldMaterial.AddPushBinding<LocalToWorld>();
-            unlitWorldMaterial.AddComponentBinding<CameraProjection>(0, 0, worldCamera.entity);
-            unlitWorldMaterial.AddTextureBinding(1, 0, squareTexture);
-
-            Canvas canvas = new(world, uiCamera);
+            Camera camera = new(world, window.destination, new CameraOrthographicSize(1f));
+            Canvas canvas = new(world, camera);
             context = new(canvas);
 
-            Material textMaterial = new(world, Address.Get<TextMaterial>());
-            textMaterial.AddComponentBinding<CameraProjection>(1, 0, uiCamera.entity);
-            textMaterial.AddPushBinding<Color>();
-            textMaterial.AddPushBinding<LocalToWorld>();
-
-            //crate test cube
-            Renderer waveRenderer = new(world, cubeMesh, unlitWorldMaterial, worldCamera);
-            Transform waveTransform = waveRenderer.entity.Become<Transform>();
-            waveRenderer.entity.AddComponent(Color.Red);
-            waveRenderer.entity.AddComponent(new IsBody(new CubeShape(0.5f), IsBody.Type.Static));
-
-            //create ui boxes
-            Button testWindow = new(world, new(&TestBoxPressed), context);
-            testWindow.Size = new(300, 300);
-            testWindow.Position = new(20, 20);
-
-            Button anotherBox = new(world, new(&AnotherBoxPressed), context);
-            anotherBox.Size = new(190, 100);
-            anotherBox.Position = new(0, 0);
-            anotherBox.Anchor = Anchor.Centered;
-            anotherBox.Pivot = new(0.5f, 0.5f, 0f);
-            anotherBox.Color = Color.SkyBlue;
-
-            TextMesh textMesh = new(world, "abacus 123 hiii", robotoFont, new(0f, 1f));
-            TextRenderer textRenderer = new(world, textMesh, textMaterial, uiCamera);
-            textRenderer.Parent = anotherBox.selectable.transform.entity;
-            Transform textTransform = textRenderer.renderer.entity.Become<Transform>();
-            textTransform.LocalPosition = new(4f, -4f, 0.1f);
-            textTransform.LocalScale = Vector3.One * 32f;
-            textRenderer.renderer.entity.AddComponent(Color.Orange);
-            textRenderer.renderer.entity.AddComponent(Anchor.TopLeft);
-
-            [UnmanagedCallersOnly]
-            static void TestBoxPressed(World world, uint entity)
-            {
-                Debug.WriteLine("Test box pressed");
-            }
-
-            [UnmanagedCallersOnly]
-            static void AnotherBoxPressed(World world, uint entity)
-            {
-                Debug.WriteLine("Another box pressed");
-            }
-
-            [UnmanagedCallersOnly]
-            static void WindowClosed(World world, uint windowEntity)
-            {
-                world.DestroyEntity(windowEntity);
-            }
+            VirtualWindow box = VirtualWindow.Create<ControlsDemoWindow>(world, context);
+            box.Size = new(300, 300);
+            box.Position = new(40, 40);
+            //box.Anchor = new(new(2f, true), new(2f, true), new(0f, false), new(2f, true), new(2f, true), new(0f, false));
         }
 
-        public void Dispose()
+        public readonly void Dispose()
         {
-            if (!window.IsDestroyed())
-            {
-                window.Destroy();
-            }
         }
 
-        public unsafe bool Update(TimeSpan delta)
+        public uint Update(TimeSpan delta)
         {
-            if (window.IsDestroyed())
+            if (!IsAnyVirtualWindowOpen())
             {
-                return false;
+                return default;
             }
 
-            Transform cameraTransform = worldCamera.entity.Become<Transform>();
-            SharedFunctions.MoveCameraAround(world, cameraTransform, delta, ref cameraPosition, ref cameraPitchYaw, new(1f, 1f));
+            if (!IsAnyWindowOpen())
+            {
+                return default;
+            }
 
+            MakeFirstMouseAPointer();
+            return 1;
+        }
+
+        private readonly bool IsAnyVirtualWindowOpen()
+        {
+            return world.TryGetFirst(out VirtualWindow _);
+        }
+
+        private readonly bool IsAnyWindowOpen()
+        {
+            return world.TryGetFirst(out Window _);
+        }
+
+        private readonly void MakeFirstMouseAPointer()
+        {
             if (world.TryGetFirst(out Mouse mouse))
             {
-                if (!mouse.device.entity.ContainsComponent<IsPointer>())
+                if (!mouse.AsEntity().Is<Pointer>())
                 {
-                    mouse.device.entity.AddComponent(new IsPointer(mouse.Position, default));
+                    mouse.AsEntity().Become<Pointer>();
                 }
 
-                ref IsPointer pointer = ref mouse.device.entity.GetComponentRef<IsPointer>();
-                pointer.position = mouse.Position;
-                pointer.action = default;
-                if (mouse.IsPressed(Mouse.Button.LeftButton))
-                {
-                    pointer.HasPrimaryIntent = true;
-                }
-
-                if (mouse.IsPressed(Mouse.Button.RightButton))
-                {
-                    pointer.HasSecondaryIntent = true;
-                }
-
-                if (mouse.WasPressed(Mouse.Button.LeftButton))
-                {
-                    Vector2 screenPoint = worldCamera.Destination.GetScreenPointFromPosition(mouse.Position);
-                    (Vector3 origin, Vector3 direction) ray = worldCamera.GetProjection().GetRayFromScreenPoint(screenPoint);
-                    world.Submit(new Raycast(ray.origin, ray.direction, new(&OnRaycastHit)));
-
-                    [UnmanagedCallersOnly]
-                    static void OnRaycastHit(World world, Raycast raycast, RaycastHit* hits, uint hitsCount)
-                    {
-                        for (uint i = 0; i < hitsCount; i++)
-                        {
-                            RaycastHit hit = hits[i];
-                            ref Position position = ref world.TryGetComponentRef<Position>(hit.entity, out bool contains);
-                            if (contains)
-                            {
-                                position.value.X += 0.1f;
-                            }
-                        }
-                    }
-                }
+                Pointer pointer = mouse.AsEntity().As<Pointer>();
+                pointer.Position = mouse.Position;
+                pointer.HasPrimaryIntent = mouse.IsPressed(Mouse.Button.LeftButton);
+                pointer.HasSecondaryIntent = mouse.IsPressed(Mouse.Button.RightButton);
             }
-
-            return true;
         }
 
-        readonly unsafe (StartFunction, FinishFunction, UpdateFunction) IProgram.GetFunctions()
+        [UnmanagedCallersOnly]
+        private static void OnWindowClosed(World world, uint windowEntity)
+        {
+            world.DestroyEntity(windowEntity);
+        }
+
+        unsafe readonly (StartFunction, FinishFunction, UpdateFunction) IProgramType.GetFunctions()
         {
             return (new(&Start), new(&Finish), new(&Update));
 
@@ -203,8 +114,146 @@ namespace Abacus
             static uint Update(Allocation allocation, TimeSpan delta)
             {
                 ref EditorProgram program = ref allocation.Read<EditorProgram>();
-                return program.Update(delta) ? 0u : 1u;
+                return program.Update(delta);
             }
+        }
+    }
+
+    public unsafe readonly struct ControlsDemoWindow : IVirtualWindow
+    {
+        readonly FixedString IVirtualWindow.Title => "Controls Demo";
+        readonly VirtualWindowCloseFunction IVirtualWindow.CloseCallback => new(&Closed);
+
+        readonly void IVirtualWindow.OnCreated(VirtualWindow window, InteractiveContext context)
+        {
+            World world = window.GetWorld();
+
+            float singleLineHeight = 24f;
+            float gap = 4f;
+            float y = -gap;
+
+            Label testLabel = new(world, context, "Hello, World!");
+            testLabel.Parent = window.Container;
+            testLabel.Anchor = Anchor.TopLeft;
+            testLabel.Color = Color.Black;
+            testLabel.Position = new(4f, y);
+
+            y -= singleLineHeight + gap;
+
+            Button testButton = new(world, new(&PressedTestButton), context);
+            testButton.Parent = window.Container;
+            testButton.Color = new Color(0.2f, 0.2f, 0.2f);
+            testButton.Anchor = Anchor.TopLeft;
+            testButton.Pivot = new(0f, 1f, 0f);
+            testButton.Size = new(180f, singleLineHeight);
+            testButton.Position = new(4f, y);
+
+            Label testButtonLabel = new(world, context, "Press count: 0");
+            testButtonLabel.Parent = testButton.AsEntity();
+            testButtonLabel.Anchor = Anchor.TopLeft;
+            testButtonLabel.Position = new(4f, -4f);
+
+            y -= singleLineHeight + gap;
+
+            Toggle testToggle = new(world, context);
+            testToggle.Parent = window.Container;
+            testToggle.Position = new(4f, y);
+            testToggle.Size = new(24, singleLineHeight);
+            testToggle.Anchor = Anchor.TopLeft;
+            testToggle.Pivot = new(0f, 1f, 0f);
+            testToggle.BackgroundColor = new(0.2f, 0.2f, 0.2f);
+            testToggle.CheckmarkColor = Color.White;
+
+            y -= singleLineHeight + gap;
+
+            ScrollBar horizontalScrollBar = new(world, context, Vector2.UnitX, 0.25f);
+            horizontalScrollBar.Parent = window.Container;
+            horizontalScrollBar.Position = new(4f, y);
+            horizontalScrollBar.Size = new(180f, singleLineHeight);
+            horizontalScrollBar.Anchor = Anchor.TopLeft;
+            horizontalScrollBar.Pivot = new(0f, 1f, 0f);
+            horizontalScrollBar.BackgroundColor = new(0.2f, 0.2f, 0.2f);
+            horizontalScrollBar.ScrollHandleColor = Color.White;
+
+            ScrollBar verticalScrollBar = new(world, context, Vector2.UnitY, 0.666f);
+            verticalScrollBar.Parent = window.Container;
+            verticalScrollBar.Position = new(-gap, -gap);
+            verticalScrollBar.Size = new(24f, 270f - gap);
+            verticalScrollBar.Anchor = Anchor.TopRight;
+            verticalScrollBar.Pivot = new(1f, 1f, 0f);
+            verticalScrollBar.BackgroundColor = new(0.2f, 0.2f, 0.2f);
+            verticalScrollBar.ScrollHandleColor = Color.White;
+
+            View view = new(world, context);
+            view.Parent = window.Container;
+            view.ViewPosition = new(0f, 0f);
+            view.Anchor = new(new(0f, false), new(0, false), default, new(1f, false), new(1f, false), default);
+            view.ContentSize = new(100f, 20 * 26f);
+            view.SetScrollBar(verticalScrollBar);
+
+            for (int i = 0; i < 20; i++)
+            {
+                Box box = new(world, context);
+                box.Parent = view.Content;
+                box.Size = new(60f, 20f);
+                box.Position = new(200f, i * 26f);
+                box.Color = Color.FromHSV((i * 0.1f) % 1, 1, 1);
+            }
+        }
+
+        [UnmanagedCallersOnly]
+        private static void PressedTestButton(World world, uint buttonEntity)
+        {
+            uint containerEntity = world.GetParent(buttonEntity);
+            USpan<uint> children = world.GetChildren(containerEntity);
+            bool toggleValue = default;
+            for (uint i = 0; i < children.length; i++)
+            {
+                uint child = children[i];
+                if (world.ContainsComponent<IsToggle>(child))
+                {
+                    Toggle toggle = new(world, child);
+                    //toggle.Value = !toggle.Value;
+                    toggleValue = toggle.Value;
+                    break;
+                }
+            }
+
+            children = world.GetChildren(buttonEntity);
+            for (uint i = 0; i < children.length; i++)
+            {
+                uint child = children[i];
+                if (world.ContainsComponent<IsLabel>(child))
+                {
+                    Label label = new(world, child);
+                    USpan<char> text = label.Text;
+                    uint startIndex = text.IndexOf(':') + 1;
+                    int countValue = int.Parse(text.Slice(startIndex).AsSystemSpan());
+                    USpan<char> countText = stackalloc char[10];
+
+                    if (!toggleValue)
+                    {
+                        countValue++;
+                    }
+                    else
+                    {
+                        countValue--;
+                    }
+
+                    uint countTextLength = countValue.ToString(countText);
+                    FixedString textValue = new(text);
+                    textValue.Length = startIndex + 1;
+                    textValue.Append(countText.Slice(0, countTextLength));
+                    label.SetText(textValue);
+                    break;
+                }
+            }
+        }
+
+        [UnmanagedCallersOnly]
+        private static void Closed(VirtualWindow virtualWindow)
+        {
+            virtualWindow.Destroy();
         }
     }
 }

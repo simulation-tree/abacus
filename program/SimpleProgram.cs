@@ -6,7 +6,7 @@ using Unmanaged;
 
 namespace Abacus
 {
-    public struct SimpleProgram : IProgram, IDisposable
+    public struct SimpleProgram : IProgramType, IDisposable
     {
         private readonly World world;
         private TimeSpan time;
@@ -21,18 +21,18 @@ namespace Abacus
 
         }
 
-        private bool Update(TimeSpan delta)
+        private uint Update(TimeSpan delta)
         {
             time += delta;
             if (time >= TimeSpan.FromSeconds(5f))
             {
-                return false;
+                return default;
             }
 
-            return true;
+            return 1;
         }
 
-        readonly unsafe (StartFunction, FinishFunction, UpdateFunction) IProgram.GetFunctions()
+        readonly unsafe (StartFunction, FinishFunction, UpdateFunction) IProgramType.GetFunctions()
         {
             return (new(&Start), new(&Finish), new(&Update));
 
@@ -55,7 +55,7 @@ namespace Abacus
             static uint Update(Allocation allocation, TimeSpan delta)
             {
                 ref SimpleProgram program = ref allocation.Read<SimpleProgram>();
-                return program.Update(delta) ? 0u : 1u;
+                return program.Update(delta);
             }
         }
     }

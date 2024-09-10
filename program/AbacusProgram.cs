@@ -21,7 +21,7 @@ using Windows;
 
 namespace Abacus
 {
-    public struct AbacusProgram : IDisposable, IProgram
+    public struct AbacusProgram : IDisposable, IProgramType
     {
         private readonly World world;
 
@@ -155,7 +155,7 @@ namespace Abacus
             //render request itself (not reusable)
             TextRenderer text = new(world, exampleTextMesh, textMaterial, camera);
             text.Parent = squareBox.entity;
-            Entity textEntity = text.renderer.entity;
+            Entity textEntity = text.entity;
             textEntity.AddComponent(Color.Green);
             textEntity.AddComponent(Anchor.BottomLeft);
             Transform textTransform = textEntity.Become<Transform>();
@@ -164,7 +164,7 @@ namespace Abacus
             TextMesh anotherTextMesh = new(world, "top right corner?", cascadiaMono, new(1f, 1f));
             TextRenderer anotherText = new(world, anotherTextMesh, textMaterial, camera);
             anotherText.Parent = squareBox.entity;
-            Entity anotherTextEntity = anotherText.renderer.entity;
+            Entity anotherTextEntity = anotherText.entity;
             anotherTextEntity.AddComponent(Color.Blue);
             anotherTextEntity.AddComponent(Anchor.TopRight);
             Transform anotherTextTransform = anotherTextEntity.Become<Transform>();
@@ -191,6 +191,7 @@ namespace Abacus
             Transform testTransform = testRenderer.entity.Become<Transform>();
             testTransform.LocalPosition = new(-7, -4, -2);
             testTransform.LocalScale = new(8f, 8f, 1f);
+            testRenderer.AsEntity().AddComponent(new RendererScissor(0.25f, 0.25f, 0.5f, 0.5f));
 
             [UnmanagedCallersOnly]
             static void WindowClosed(World world, uint windowEntity)
@@ -207,13 +208,13 @@ namespace Abacus
             }
         }
 
-        public bool Update(TimeSpan delta)
+        public uint Update(TimeSpan delta)
         {
             time += delta;
             if (time.TotalSeconds > 120f || window.IsDestroyed())
             {
                 Console.WriteLine("Conditions reached for finishing the demo");
-                return false; //source of "shutdown" event
+                return default; //source of "shutdown" event
             }
 
             float deltaSeconds = (float)delta.TotalSeconds;
@@ -225,10 +226,10 @@ namespace Abacus
             if (!TestWindowEntity(deltaSeconds))
             {
                 //propagating upwards
-                return false;
+                return default;
             }
 
-            return true;
+            return 1;
         }
 
         private readonly void ModifyText()
@@ -490,7 +491,7 @@ namespace Abacus
             }
         }
 
-        readonly unsafe (StartFunction, FinishFunction, UpdateFunction) IProgram.GetFunctions()
+        readonly unsafe (StartFunction, FinishFunction, UpdateFunction) IProgramType.GetFunctions()
         {
             return (new(&Start), new(&Finish), new(&Update));
 
@@ -513,7 +514,7 @@ namespace Abacus
             static uint Update(Allocation allocation, TimeSpan delta)
             {
                 ref AbacusProgram program = ref allocation.Read<AbacusProgram>();
-                return program.Update(delta) ? 0u : 1u;
+                return program.Update(delta);
             }
         }
     }

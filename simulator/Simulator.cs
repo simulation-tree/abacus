@@ -29,9 +29,9 @@ using Transforms.Systems;
 using Windows.Events;
 using Windows.Systems;
 
-public class AbacusSimulator
+public static class Simulator
 {
-    public int Run()
+    private static int Main(string[] args)
     {
         uint returnCode = 0;
         using (World world = new())
@@ -86,10 +86,11 @@ public class AbacusSimulator
                     time = now;
                     returnCode = program.Update(delta);
                 }
-                while (returnCode == 0);
+                while (returnCode != default);
             }
 
             //finish
+            windows.Dispose();
             rendering.Dispose();
             interactions.Dispose();
             cameras.Dispose();
@@ -100,7 +101,6 @@ public class AbacusSimulator
             textures.Dispose();
             windowDevices.Dispose();
             kbm.Dispose();
-            windows.Dispose();
             transforms.Dispose();
             models.Dispose();
             stateAutomation.Dispose();

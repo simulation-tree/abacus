@@ -121,6 +121,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Automation Tests", "..\auto
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Camera Tests", "..\cameras\tests\Camera Tests.csproj", "{B60DF5DC-E91A-44B0-9D59-542C524DC4A5}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Language", "..\language\source\Language.csproj", "{BE39B0B0-2A82-40EF-8B39-023929388450}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Language Tests", "..\language\tests\Language Tests.csproj", "{52EA731D-067E-4174-8DA9-9CA2B8F1AA9B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -363,6 +367,14 @@ Global
 		{B60DF5DC-E91A-44B0-9D59-542C524DC4A5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B60DF5DC-E91A-44B0-9D59-542C524DC4A5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B60DF5DC-E91A-44B0-9D59-542C524DC4A5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BE39B0B0-2A82-40EF-8B39-023929388450}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BE39B0B0-2A82-40EF-8B39-023929388450}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BE39B0B0-2A82-40EF-8B39-023929388450}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BE39B0B0-2A82-40EF-8B39-023929388450}.Release|Any CPU.Build.0 = Release|Any CPU
+		{52EA731D-067E-4174-8DA9-9CA2B8F1AA9B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{52EA731D-067E-4174-8DA9-9CA2B8F1AA9B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{52EA731D-067E-4174-8DA9-9CA2B8F1AA9B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{52EA731D-067E-4174-8DA9-9CA2B8F1AA9B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

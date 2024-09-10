@@ -9,7 +9,6 @@
 		<ProduceReferenceAssembly>False</ProduceReferenceAssembly>
 		<PublishAot>True</PublishAot>
 		<PublishTrimmed>True</PublishTrimmed>
-		<StartupObject>Bootstrap</StartupObject>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
