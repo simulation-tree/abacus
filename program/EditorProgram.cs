@@ -132,48 +132,68 @@ namespace Abacus
             float gap = 4f;
             float y = -gap;
 
-            Label testLabel = new(world, context, "Hello, World!");
-            testLabel.Parent = window.Container;
-            testLabel.Anchor = Anchor.TopLeft;
-            testLabel.Color = Color.Black;
-            testLabel.Position = new(4f, y);
+            //Label testLabel = new(world, context, "Hello, World!");
+            //testLabel.Parent = window.Container;
+            //testLabel.Anchor = Anchor.TopLeft;
+            //testLabel.Color = Color.Black;
+            //testLabel.Position = new(4f, y);
 
             y -= singleLineHeight + gap;
 
-            Button testButton = new(world, new(&PressedTestButton), context);
-            testButton.Parent = window.Container;
-            testButton.Color = new Color(0.2f, 0.2f, 0.2f);
-            testButton.Anchor = Anchor.TopLeft;
-            testButton.Pivot = new(0f, 1f, 0f);
-            testButton.Size = new(180f, singleLineHeight);
-            testButton.Position = new(4f, y);
-
-            Label testButtonLabel = new(world, context, "Press count: 0");
-            testButtonLabel.Parent = testButton.AsEntity();
-            testButtonLabel.Anchor = Anchor.TopLeft;
-            testButtonLabel.Position = new(4f, -4f);
-
-            y -= singleLineHeight + gap;
-
-            Toggle testToggle = new(world, context);
-            testToggle.Parent = window.Container;
-            testToggle.Position = new(4f, y);
-            testToggle.Size = new(24, singleLineHeight);
-            testToggle.Anchor = Anchor.TopLeft;
-            testToggle.Pivot = new(0f, 1f, 0f);
-            testToggle.BackgroundColor = new(0.2f, 0.2f, 0.2f);
-            testToggle.CheckmarkColor = Color.White;
+            //Button testButton = new(world, new(&PressedTestButton), context);
+            //testButton.Parent = window.Container;
+            //testButton.Color = new Color(0.2f, 0.2f, 0.2f);
+            //testButton.Anchor = Anchor.TopLeft;
+            //testButton.Pivot = new(0f, 1f, 0f);
+            //testButton.Size = new(180f, singleLineHeight);
+            //testButton.Position = new(4f, y);
+            //
+            //Label testButtonLabel = new(world, context, "Press count: 0");
+            //testButtonLabel.Parent = testButton.AsEntity();
+            //testButtonLabel.Anchor = Anchor.TopLeft;
+            //testButtonLabel.Position = new(4f, -4f);
 
             y -= singleLineHeight + gap;
 
-            ScrollBar horizontalScrollBar = new(world, context, Vector2.UnitX, 0.25f);
-            horizontalScrollBar.Parent = window.Container;
-            horizontalScrollBar.Position = new(4f, y);
-            horizontalScrollBar.Size = new(180f, singleLineHeight);
-            horizontalScrollBar.Anchor = Anchor.TopLeft;
-            horizontalScrollBar.Pivot = new(0f, 1f, 0f);
-            horizontalScrollBar.BackgroundColor = new(0.2f, 0.2f, 0.2f);
-            horizontalScrollBar.ScrollHandleColor = Color.White;
+            //Toggle testToggle = new(world, context);
+            //testToggle.Parent = window.Container;
+            //testToggle.Position = new(4f, y);
+            //testToggle.Size = new(24, singleLineHeight);
+            //testToggle.Anchor = Anchor.TopLeft;
+            //testToggle.Pivot = new(0f, 1f, 0f);
+            //testToggle.BackgroundColor = new(0.2f, 0.2f, 0.2f);
+            //testToggle.CheckmarkColor = Color.White;
+
+            y -= singleLineHeight + gap;
+
+            //ScrollBar horizontalScrollBar = new(world, context, Vector2.UnitX, 0.25f);
+            //horizontalScrollBar.Parent = window.Container;
+            //horizontalScrollBar.Position = new(4f, y);
+            //horizontalScrollBar.Size = new(180f, singleLineHeight);
+            //horizontalScrollBar.Anchor = Anchor.TopLeft;
+            //horizontalScrollBar.Pivot = new(0f, 1f, 0f);
+            //horizontalScrollBar.BackgroundColor = new(0.2f, 0.2f, 0.2f);
+            //horizontalScrollBar.ScrollHandleColor = Color.White;
+
+            y -= singleLineHeight + gap;
+
+            Dropdown testDropdown = new(world, context);
+            testDropdown.Parent = window.Container;
+            testDropdown.Position = new(4f, y);
+            testDropdown.Size = new(180f, singleLineHeight);
+            testDropdown.Anchor = Anchor.TopLeft;
+            testDropdown.Pivot = new(0f, 1f, 0f);
+            testDropdown.BackgroundColor = new(0.2f, 0.2f, 0.2f);
+            testDropdown.LabelColor = Color.White;
+            testDropdown.TriangleColor = Color.White;
+
+            testDropdown.AddOption("Option A", context);
+            testDropdown.AddOption("Option B", context);
+            uint lastOption = testDropdown.AddOption("Option C", context);
+
+            testDropdown.SelectedOption = lastOption;
+
+            y -= singleLineHeight + gap;
 
             ScrollBar verticalScrollBar = new(world, context, Vector2.UnitY, 0.666f);
             verticalScrollBar.Parent = window.Container;
