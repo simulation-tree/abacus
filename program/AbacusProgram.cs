@@ -191,7 +191,7 @@ namespace Abacus
             Transform testTransform = testRenderer.entity.Become<Transform>();
             testTransform.LocalPosition = new(-7, -4, -2);
             testTransform.LocalScale = new(8f, 8f, 1f);
-            testRenderer.AsEntity().AddComponent(new RendererScissor(0.25f, 0.25f, 0.5f, 0.5f));
+            testRenderer.AsEntity().AddComponent(new RendererScissor(100, 100, 200, 200));
 
             [UnmanagedCallersOnly]
             static void WindowClosed(World world, uint windowEntity)
