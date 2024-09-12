@@ -26,7 +26,7 @@ using Windows;
 
 namespace Abacus
 {
-    public struct UICheck : IDisposable, IProgramType
+    public struct ButtonsAndProjectiles : IDisposable, IProgramType
     {
         private readonly World world;
         private readonly Window window;
@@ -35,7 +35,7 @@ namespace Abacus
         private Vector3 cameraPosition;
         private Vector2 cameraPitchYaw;
 
-        public unsafe UICheck(World world)
+        public unsafe ButtonsAndProjectiles(World world)
         {
             this.world = world;
 
@@ -187,14 +187,14 @@ namespace Abacus
             [UnmanagedCallersOnly]
             static Allocation Start(World world)
             {
-                UICheck program = new(world);
+                ButtonsAndProjectiles program = new(world);
                 return Allocation.Create(program);
             }
 
             [UnmanagedCallersOnly]
             static void Finish(Allocation allocation)
             {
-                ref UICheck program = ref allocation.Read<UICheck>();
+                ref ButtonsAndProjectiles program = ref allocation.Read<ButtonsAndProjectiles>();
                 program.Dispose();
                 allocation.Dispose();
             }
@@ -202,7 +202,7 @@ namespace Abacus
             [UnmanagedCallersOnly]
             static uint Update(Allocation allocation, TimeSpan delta)
             {
-                ref UICheck program = ref allocation.Read<UICheck>();
+                ref ButtonsAndProjectiles program = ref allocation.Read<ButtonsAndProjectiles>();
                 return program.Update(delta);
             }
         }

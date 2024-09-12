@@ -8,6 +8,7 @@ using Rendering;
 using Rendering.Components;
 using Simulation;
 using System;
+using System.Diagnostics;
 using System.Numerics;
 using System.Runtime.InteropServices;
 using Transforms.Components;
@@ -192,8 +193,19 @@ namespace Abacus
             testDropdown.AddOption("Option A", context);
             testDropdown.AddOption("Option B", context);
             uint lastOption = testDropdown.AddOption("Option C", context);
+            testDropdown.AddOption("Option D/Apple", context);
+            testDropdown.AddOption("Option D/Banana", context);
+            testDropdown.AddOption("Option D/Cherry", context);
 
             testDropdown.SelectedOption = lastOption;
+            testDropdown.Callback = new(&DropdownOptionChanged);
+
+            [UnmanagedCallersOnly]
+            static void DropdownOptionChanged(Dropdown dropdown, uint previous, uint current)
+            {
+                DropdownOption option = dropdown.Options[current];
+                Debug.WriteLine($"Selected option: {option.text}");
+            }
 
             y -= singleLineHeight + gap;
 
