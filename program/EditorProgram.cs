@@ -190,12 +190,16 @@ namespace Abacus
             testDropdown.LabelColor = Color.White;
             testDropdown.TriangleColor = Color.White;
 
-            testDropdown.AddOption("Option A", context);
-            testDropdown.AddOption("Option B", context);
-            uint lastOption = testDropdown.AddOption("Option C", context);
-            testDropdown.AddOption("Option D/Apple", context);
-            testDropdown.AddOption("Option D/Banana", context);
-            testDropdown.AddOption("Option D/Cherry", context);
+            Menu testDropdownMenu = testDropdown.Menu;
+            testDropdownMenu.AddOption("Option A", context);
+            testDropdownMenu.AddOption("Option B", context);
+            FixedString lastOption = testDropdownMenu.AddOption("Option C", context);
+            var applePath = testDropdownMenu.AddOption("Option D/Apple", context);
+            var bananaPath = testDropdownMenu.AddOption("Option D/Banana", context);
+            var cherryPath = testDropdownMenu.AddOption("Option D/Cherry", context);
+            Debug.WriteLine(applePath.ToString());
+            Debug.WriteLine(bananaPath.ToString());
+            Debug.WriteLine(cherryPath.ToString());
 
             testDropdown.SelectedOption = lastOption;
             testDropdown.Callback = new(&DropdownOptionChanged);
@@ -203,7 +207,7 @@ namespace Abacus
             [UnmanagedCallersOnly]
             static void DropdownOptionChanged(Dropdown dropdown, uint previous, uint current)
             {
-                DropdownOption option = dropdown.Options[current];
+                MenuOption option = dropdown.Options[current];
                 Debug.WriteLine($"Selected option: {option.text}");
             }
 
