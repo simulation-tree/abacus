@@ -193,7 +193,7 @@ namespace Abacus
             Menu testDropdownMenu = testDropdown.Menu;
             testDropdownMenu.AddOption("Option A", context);
             testDropdownMenu.AddOption("Option B", context);
-            FixedString lastOption = testDropdownMenu.AddOption("Option C", context);
+            MenuOptionPath lastOption = testDropdownMenu.AddOption("Option C", context);
             testDropdownMenu.AddOption("Option D/Apple", context);
             testDropdownMenu.AddOption("Option D/Banana", context);
             testDropdownMenu.AddOption("Option D/Cherry", context);
