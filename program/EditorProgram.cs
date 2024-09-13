@@ -42,6 +42,7 @@ namespace Abacus
 
         public readonly void Dispose()
         {
+            context.Dispose();
         }
 
         public uint Update(TimeSpan delta)
@@ -57,6 +58,7 @@ namespace Abacus
             }
 
             MakeFirstMouseAPointer();
+            UpdateInteractiveContext();
             return 1;
         }
 
@@ -83,6 +85,14 @@ namespace Abacus
                 pointer.Position = mouse.Position;
                 pointer.HasPrimaryIntent = mouse.IsPressed(Mouse.Button.LeftButton);
                 pointer.HasSecondaryIntent = mouse.IsPressed(Mouse.Button.RightButton);
+            }
+        }
+
+        private readonly void UpdateInteractiveContext()
+        {
+            if (world.TryGetFirst(out Keyboard keyboard))
+            {
+                context.SelectMultiple = keyboard.IsPressed(Keyboard.Button.LeftShift);
             }
         }
 
@@ -149,7 +159,7 @@ namespace Abacus
             testButton.Pivot = new(0f, 1f, 0f);
             testButton.Size = new(180f, singleLineHeight);
             testButton.Position = new(4f, y);
-            
+
             Label testButtonLabel = new(world, context, "Press count: 0");
             testButtonLabel.Parent = testButton.AsEntity();
             testButtonLabel.Anchor = Anchor.TopLeft;
@@ -193,7 +203,7 @@ namespace Abacus
             Menu testDropdownMenu = testDropdown.Menu;
             testDropdownMenu.AddOption("Option A", context);
             testDropdownMenu.AddOption("Option B", context);
-            MenuOptionPath lastOption = testDropdownMenu.AddOption("Option C", context);
+            OptionPath lastOption = testDropdownMenu.AddOption("Option C", context);
             testDropdownMenu.AddOption("Option D/Apple", context);
             testDropdownMenu.AddOption("Option D/Banana", context);
             testDropdownMenu.AddOption("Option D/Cherry", context);
@@ -213,6 +223,21 @@ namespace Abacus
             }
 
             y -= singleLineHeight + gap;
+
+            Tree testTree = new(world, context);
+            testTree.Parent = window.Container;
+            testTree.Position = new(4f, y);
+            testTree.Size = new(180f, singleLineHeight);
+            testTree.Anchor = Anchor.TopLeft;
+            testTree.Pivot = new(0f, 1f, 0f);
+
+            testTree.AddLeaf("Game Object");
+            testTree.AddLeaf("Game Object (1)");
+            testTree.AddLeaf("Game Object (2)");
+
+            TreeNode canvasLeaf = testTree.AddLeaf("Canvas");
+            canvasLeaf.AddLeaf("Button");
+            canvasLeaf.AddLeaf("Toggle");
 
             ScrollBar verticalScrollBar = new(world, context, Vector2.UnitY, 0.666f);
             verticalScrollBar.Parent = window.Container;
