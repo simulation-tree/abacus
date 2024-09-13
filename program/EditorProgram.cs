@@ -194,12 +194,13 @@ namespace Abacus
             testDropdownMenu.AddOption("Option A", context);
             testDropdownMenu.AddOption("Option B", context);
             FixedString lastOption = testDropdownMenu.AddOption("Option C", context);
-            var applePath = testDropdownMenu.AddOption("Option D/Apple", context);
-            var bananaPath = testDropdownMenu.AddOption("Option D/Banana", context);
-            var cherryPath = testDropdownMenu.AddOption("Option D/Cherry", context);
-            Debug.WriteLine(applePath.ToString());
-            Debug.WriteLine(bananaPath.ToString());
-            Debug.WriteLine(cherryPath.ToString());
+            testDropdownMenu.AddOption("Option D/Apple", context);
+            testDropdownMenu.AddOption("Option D/Banana", context);
+            testDropdownMenu.AddOption("Option D/Cherry", context);
+            testDropdownMenu.AddOption("Option D/More.../Toyota", context);
+            testDropdownMenu.AddOption("Option D/More.../Honda", context);
+            testDropdownMenu.AddOption("Option D/More.../Hyndai", context);
+            testDropdownMenu.AddOption("Option D/More.../Mitsubishi", context);
 
             testDropdown.SelectedOption = lastOption;
             testDropdown.Callback = new(&DropdownOptionChanged);
