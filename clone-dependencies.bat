@@ -10,6 +10,8 @@ git clone https://github.com/game-simulations/shaders.git
 git clone https://github.com/game-simulations/textures.git
 git clone https://github.com/game-simulations/fonts.git
 git clone https://github.com/game-simulations/transforms.git
+git clone https://github.com/game-simulations/automations.git
+git clone https://github.com/game-simulations/cameras.git
 git clone https://github.com/game-simulations/serialization.git
 git clone https://github.com/game-simulations/bin-packer.git
 git clone https://github.com/game-simulations/rendering.git
