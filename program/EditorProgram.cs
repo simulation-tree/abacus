@@ -30,7 +30,7 @@ namespace Abacus
             //window.IsBorderless = true;
             //window.IsMaximized = true;
 
-            Camera camera = new(world, window.destination, new CameraOrthographicSize(1f));
+            Camera camera = new(world, window, new CameraOrthographicSize(1f));
             Canvas canvas = new(world, camera);
             context = new(canvas);
 
@@ -130,12 +130,12 @@ namespace Abacus
         }
     }
 
-    public unsafe readonly struct ControlsDemoWindow : IVirtualWindow
+    public readonly struct ControlsDemoWindow : IVirtualWindow
     {
         readonly FixedString IVirtualWindow.Title => "Controls Demo";
-        readonly VirtualWindowCloseFunction IVirtualWindow.CloseCallback => new(&Closed);
+        readonly unsafe VirtualWindowCloseFunction IVirtualWindow.CloseCallback => new(&Closed);
 
-        readonly void IVirtualWindow.OnCreated(VirtualWindow window, InteractiveContext context)
+        readonly unsafe void IVirtualWindow.OnCreated(VirtualWindow window, InteractiveContext context)
         {
             World world = window.GetWorld();
 
