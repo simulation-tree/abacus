@@ -57,7 +57,7 @@ public static class Simulator
             rendering.renderEngine.RegisterSystem<VulkanRendererType>();
 
             //play the simulation
-            using (Program program = Program.Create<EditorProgram>(world))
+            using (Program program = Program.Create<AbacusProgram>(world))
             {
                 DateTime time = DateTime.UtcNow;
                 TimeSpan delta = TimeSpan.Zero;

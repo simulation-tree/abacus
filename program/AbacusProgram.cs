@@ -76,31 +76,31 @@ namespace Abacus
             cameraPosition = cameraTransform.LocalPosition;
 
             Mesh manuallyBuiltMesh = new(world);
-            Mesh.Collection<Vector3> positions = manuallyBuiltMesh.CreatePositions();
-            Mesh.Collection<Vector2> uvs = manuallyBuiltMesh.CreateUVs();
-            Mesh.Collection<Vector3> normals = manuallyBuiltMesh.CreateNormals();
-            Mesh.Collection<Color> colors = manuallyBuiltMesh.CreateColors();
+            USpan<Vector3> positions = manuallyBuiltMesh.CreatePositions(4);
+            USpan<Vector2> uvs = manuallyBuiltMesh.CreateUVs(4);
+            USpan<Vector3> normals = manuallyBuiltMesh.CreateNormals(4);
+            USpan<Color> colors = manuallyBuiltMesh.CreateColors(4);
 
             //simple quad
-            positions.Add(new(0, 0, 0));
-            positions.Add(new(1, 0, 0));
-            positions.Add(new(1, 1, 0));
-            positions.Add(new(0, 1, 0));
+            positions[0] = new(0, 0, 0);
+            positions[1] = new(1, 0, 0);
+            positions[2] = new(1, 1, 0);
+            positions[3] = new(0, 1, 0);
 
-            uvs.Add(new(0, 0));
-            uvs.Add(new(1, 0));
-            uvs.Add(new(1, 1));
-            uvs.Add(new(0, 1));
+            uvs[0] = new(0, 0);
+            uvs[1] = new(1, 0);
+            uvs[2] = new(1, 1);
+            uvs[3] = new(0, 1);
 
-            normals.Add(new(0, 0, 1));
-            normals.Add(new(0, 0, 1));
-            normals.Add(new(0, 0, 1));
-            normals.Add(new(0, 0, 1));
+            normals[0] = new(0, 0, 1);
+            normals[1] = new(0, 0, 1);
+            normals[2] = new(0, 0, 1);
+            normals[3] = new(0, 0, 1);
 
-            colors.Add(new(1, 1, 1, 1));
-            colors.Add(new(1, 1, 1, 1));
-            colors.Add(new(1, 1, 1, 1));
-            colors.Add(new(1, 1, 1, 1));
+            colors[0] = new(1, 1, 1, 1);
+            colors[1] = new(1, 1, 1, 1);
+            colors[2] = new(1, 1, 1, 1);
+            colors[3] = new(1, 1, 1, 1);
 
             manuallyBuiltMesh.AddTriangle(0, 1, 2);
             manuallyBuiltMesh.AddTriangle(2, 3, 0);
@@ -277,7 +277,7 @@ namespace Abacus
                 if (keyboard.IsPressed(Keyboard.Button.O))
                 {
                     Mesh mesh = dummyRenderer.Mesh;
-                    Mesh.Collection<Vector3> positions = mesh.Positions;
+                    USpan<Vector3> positions = mesh.Positions;
                     float revolveSpeed = 2f;
                     float revolveDistance = 0.7f;
                     float x = MathF.Sin((float)time.TotalSeconds * revolveSpeed) * revolveDistance;
@@ -286,6 +286,7 @@ namespace Abacus
                     positions[1] = Vector3.Lerp(positions[1], new(x + 1, y, 0), delta * 4f);
                     positions[2] = Vector3.Lerp(positions[2], new(x + 1, y + 1, 0), delta * 2f);
                     positions[3] = Vector3.Lerp(positions[3], new(x, y + 1, 0), delta * 5f);
+                    mesh.IncrementVersion();
                     //would look a lot lot cooler with many more vertices :o
                 }
 

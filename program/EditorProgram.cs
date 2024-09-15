@@ -271,7 +271,7 @@ namespace Abacus
             uint containerEntity = world.GetParent(buttonEntity);
             USpan<uint> children = world.GetChildren(containerEntity);
             bool toggleValue = default;
-            for (uint i = 0; i < children.length; i++)
+            for (uint i = 0; i < children.Length; i++)
             {
                 uint child = children[i];
                 if (world.ContainsComponent<IsToggle>(child))
@@ -284,7 +284,7 @@ namespace Abacus
             }
 
             children = world.GetChildren(buttonEntity);
-            for (uint i = 0; i < children.length; i++)
+            for (uint i = 0; i < children.Length; i++)
             {
                 uint child = children[i];
                 if (world.ContainsComponent<IsLabel>(child))
