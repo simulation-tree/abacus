@@ -28,12 +28,22 @@
 
 	<ItemGroup>
 		<None Remove="Assets\Cav.world" />
+		<None Remove="Assets\Textures\Blocks\Cobblestone.png" />
+		<None Remove="Assets\Textures\Blocks\Dirt.png" />
+		<None Remove="Assets\Textures\Blocks\Grass.png" />
+		<None Remove="Assets\Textures\Blocks\GrassSide.png" />
+		<None Remove="Assets\Textures\Blocks\Stone.png" />
 		<None Remove="Assets\Textures\texture.jpg" />
 		<None Remove="Assets\Textures\wave.png" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<EmbeddedResource Include="Assets\Cav.world" />
+		<EmbeddedResource Include="Assets\Textures\Blocks\Cobblestone.png" />
+		<EmbeddedResource Include="Assets\Textures\Blocks\Dirt.png" />
+		<EmbeddedResource Include="Assets\Textures\Blocks\Grass.png" />
+		<EmbeddedResource Include="Assets\Textures\Blocks\GrassSide.png" />
+		<EmbeddedResource Include="Assets\Textures\Blocks\Stone.png" />
 		<EmbeddedResource Include="Assets\Textures\texture.jpg" />
 		<EmbeddedResource Include="Assets\Textures\wave.png" />
 	</ItemGroup>

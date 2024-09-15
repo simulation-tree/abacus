@@ -19,6 +19,9 @@ namespace Abacus
             this.world = world;
             followerWindow = new(world, "Fly", default, new(100, 100), "vulkan", new(&WindowClosed));
             followerWindow.IsBorderless = true;
+            followerWindow.AlwaysOnTop = true;
+
+            new GlobalMouse(world);
 
             [UnmanagedCallersOnly]
             static void WindowClosed(World world, uint windowEntity)
@@ -27,41 +30,48 @@ namespace Abacus
             }
         }
 
+        public uint Update(TimeSpan delta)
+        {
+            if (followerWindow.IsDestroyed())
+            {
+                return 0;
+            }
+
+            bool holdingShift = false;
+            if (world.TryGetFirst(out Keyboard keyboard))
+            {
+                holdingShift = keyboard.IsPressed(Keyboard.Button.LeftShift);
+            }
+
+            if (world.TryGetFirst(out GlobalMouse mouse))
+            {
+                Vector2 mousePosition = mouse.Position;
+                Vector2 desiredPosition = mousePosition - followerWindow.Size * 0.5f;
+                if (holdingShift)
+                {
+                    followerWindow.Position = Vector2.Lerp(followerWindow.Position, desiredPosition, (float)delta.TotalSeconds * 2f);
+                }
+                else
+                {
+                    Vector2 positionDelta = desiredPosition - followerWindow.Position;
+                    if (positionDelta.LengthSquared() > 0)
+                    {
+                        positionDelta = Vector2.Normalize(positionDelta);
+                    }
+
+                    followerWindow.Position += positionDelta * (float)delta.TotalSeconds * 120f;
+                }
+            }
+
+            return 1;
+        }
+
         public void Dispose()
         {
             if (!followerWindow.IsDestroyed())
             {
                 followerWindow.Destroy();
             }
-        }
-
-        public uint Update(TimeSpan delta)
-        {
-            if (followerWindow.IsDestroyed())
-            {
-                return default;
-            }
-
-            float speed = 1f;
-            if (world.TryGetFirst(out Keyboard keyboard))
-            {
-                if (keyboard.IsPressed(Keyboard.Button.LeftShift))
-                {
-                    speed *= 6f;
-                }
-            }
-
-            if (world.TryGetFirst(out Mouse mouse))
-            {
-                Vector2 mousePosition = mouse.Position;
-                mousePosition.Y = followerWindow.Size.Y - mousePosition.Y;
-                Vector2 desiredPosition = mousePosition - followerWindow.Size * 0.5f;
-                Vector2 windowPosition = followerWindow.Position;
-                windowPosition = Vector2.Lerp(windowPosition, desiredPosition, (float)delta.TotalSeconds * speed);
-                followerWindow.Position = windowPosition;
-            }
-
-            return 1;
         }
 
         readonly unsafe (StartFunction, FinishFunction, UpdateFunction) IProgramType.GetFunctions()

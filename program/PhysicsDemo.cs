@@ -43,7 +43,7 @@ namespace Abacus
             window = new(world, "Physics Demo", new Vector2(400, 200), new(900, 720), "vulkan", new(&WindowClosed));
             window.IsResizable = true;
 
-            camera = new(world, window.destination, CameraFieldOfView.FromDegrees(90f));
+            camera = new(world, window, CameraFieldOfView.FromDegrees(90f));
             cameraTransform = camera.entity.Become<Transform>();
             cameraTransform.LocalPosition = new(-1f, 2f, -10f);
             cameraPosition = cameraTransform.LocalPosition;
