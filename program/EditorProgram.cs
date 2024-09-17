@@ -257,7 +257,7 @@ namespace Abacus
 
             for (int i = 0; i < 20; i++)
             {
-                Box box = new(world, context);
+                Image box = new(world, context);
                 box.Parent = view.Content;
                 box.Size = new(60f, 20f);
                 box.Position = new(200f, i * 26f);

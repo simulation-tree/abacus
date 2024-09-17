@@ -60,14 +60,14 @@ namespace Abacus
             Material unlitWorldMaterial = new(world, Address.Get<UnlitTexturedMaterial>());
             unlitWorldMaterial.AddPushBinding<Color>();
             unlitWorldMaterial.AddPushBinding<LocalToWorld>();
-            unlitWorldMaterial.AddComponentBinding<CameraProjection>(0, 0, worldCamera.entity);
+            unlitWorldMaterial.AddComponentBinding<CameraProjection>(0, 0, worldCamera);
             unlitWorldMaterial.AddTextureBinding(1, 0, squareTexture);
 
             Canvas canvas = new(world, uiCamera);
             context = new(canvas);
 
             Material textMaterial = new(world, Address.Get<TextMaterial>());
-            textMaterial.AddComponentBinding<CameraProjection>(1, 0, uiCamera.entity);
+            textMaterial.AddComponentBinding<CameraProjection>(1, 0, uiCamera);
             textMaterial.AddPushBinding<Color>();
             textMaterial.AddPushBinding<LocalToWorld>();
 

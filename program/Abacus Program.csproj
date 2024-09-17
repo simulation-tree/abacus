@@ -33,6 +33,13 @@
 		<None Remove="Assets\Textures\Blocks\Grass.png" />
 		<None Remove="Assets\Textures\Blocks\GrassSide.png" />
 		<None Remove="Assets\Textures\Blocks\Stone.png" />
+		<None Remove="Assets\Textures\Spaceman\Falling.png" />
+		<None Remove="Assets\Textures\Spaceman\Idle.png" />
+		<None Remove="Assets\Textures\Spaceman\Idle2.png" />
+		<None Remove="Assets\Textures\Spaceman\JumpingUp.png" />
+		<None Remove="Assets\Textures\Spaceman\Skid.png" />
+		<None Remove="Assets\Textures\Spaceman\Walk.png" />
+		<None Remove="Assets\Textures\Spaceman\Walk2.png" />
 		<None Remove="Assets\Textures\texture.jpg" />
 		<None Remove="Assets\Textures\wave.png" />
 	</ItemGroup>
@@ -44,6 +51,13 @@
 		<EmbeddedResource Include="Assets\Textures\Blocks\Grass.png" />
 		<EmbeddedResource Include="Assets\Textures\Blocks\GrassSide.png" />
 		<EmbeddedResource Include="Assets\Textures\Blocks\Stone.png" />
+		<EmbeddedResource Include="Assets\Textures\Spaceman\Falling.png" />
+		<EmbeddedResource Include="Assets\Textures\Spaceman\Idle.png" />
+		<EmbeddedResource Include="Assets\Textures\Spaceman\Idle2.png" />
+		<EmbeddedResource Include="Assets\Textures\Spaceman\JumpingUp.png" />
+		<EmbeddedResource Include="Assets\Textures\Spaceman\Skid.png" />
+		<EmbeddedResource Include="Assets\Textures\Spaceman\Walk.png" />
+		<EmbeddedResource Include="Assets\Textures\Spaceman\Walk2.png" />
 		<EmbeddedResource Include="Assets\Textures\texture.jpg" />
 		<EmbeddedResource Include="Assets\Textures\wave.png" />
 	</ItemGroup>
