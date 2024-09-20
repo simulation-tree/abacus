@@ -24,6 +24,7 @@ git clone https://github.com/game-simulations/freetype.git
 git clone https://github.com/game-simulations/default-presentation-assets.git
 git clone https://github.com/game-simulations/expression-machine.git
 git clone https://github.com/game-simulations/text-rendering.git
+git clone https://github.com/game-simulations/http.git
 git clone https://github.com/game-simulations/data-systems.git
 git clone https://github.com/game-simulations/font-systems.git
 git clone https://github.com/game-simulations/model-systems.git
