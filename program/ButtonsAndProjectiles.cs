@@ -123,6 +123,8 @@ namespace Abacus
             {
                 window.Destroy();
             }
+
+            context.Dispose();
         }
 
         public unsafe uint Update(TimeSpan delta)

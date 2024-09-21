@@ -61,7 +61,7 @@ namespace Abacus
             Transform ballTransform = quadRenderer.AsEntity().Become<Transform>();
             ballTransform.LocalPosition = new(0f, 4f, 0f);
 
-            int chunkRadius = 2;
+            int chunkRadius = 5;
             for (int cx = -chunkRadius; cx < chunkRadius; cx++)
             {
                 for (int cz = -chunkRadius; cz < chunkRadius; cz++)

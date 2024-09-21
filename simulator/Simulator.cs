@@ -44,7 +44,7 @@ public static class Simulator
             ModelImportSystem models = new(world);
             TransformSystem transforms = new(world);
             WindowSystem windows = new(world);
-            GlobalKeyboardAndMouseSystem kbm = new(world);
+            GlobalKeyboardAndMouseSystem globalDevices = new(world);
             WindowDevicesSystems windowDevices = new(world);
             TextureImportSystem textures = new(world);
             ShaderImportSystem shaders = new(world);
@@ -100,7 +100,7 @@ public static class Simulator
             shaders.Dispose();
             textures.Dispose();
             windowDevices.Dispose();
-            kbm.Dispose();
+            globalDevices.Dispose();
             transforms.Dispose();
             models.Dispose();
             stateAutomation.Dispose();
