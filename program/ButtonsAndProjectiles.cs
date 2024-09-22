@@ -147,6 +147,7 @@ namespace Abacus
                 ref IsPointer pointer = ref mouse.device.entity.GetComponentRef<IsPointer>();
                 pointer.position = mouse.Position;
                 pointer.action = default;
+                pointer.scroll = mouse.Scroll;
                 if (mouse.IsPressed(Mouse.Button.LeftButton))
                 {
                     pointer.HasPrimaryIntent = true;

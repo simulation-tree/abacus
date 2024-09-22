@@ -85,6 +85,26 @@ namespace Abacus
                 pointer.Position = mouse.Position;
                 pointer.HasPrimaryIntent = mouse.IsPressed(Mouse.Button.LeftButton);
                 pointer.HasSecondaryIntent = mouse.IsPressed(Mouse.Button.RightButton);
+                Vector2 scroll = mouse.Scroll;
+                if (scroll.X > 0)
+                {
+                    scroll.X = 1;
+                }
+                else if (scroll.X < 0)
+                {
+                    scroll.X = -1;
+                }
+
+                if (scroll.Y > 0)
+                {
+                    scroll.Y = 1;
+                }
+                else if (scroll.Y < 0)
+                {
+                    scroll.Y = -1;
+                }
+
+                pointer.Scroll = scroll * 0.1f;
             }
         }
 
@@ -244,25 +264,10 @@ namespace Abacus
             testTree.AddLeaf("Game Object (1)");
             testTree.AddLeaf("Game Object (2)");
 
-            ScrollBar verticalScrollBar = new(world, context, Vector2.UnitY, 0.666f);
-            verticalScrollBar.Parent = window.Container;
-            verticalScrollBar.Size = new(24f, 1f);
-            verticalScrollBar.Anchor = new(new(1f, false), new(0f, false), default, new(1f, false), new(1f, false), default);
-            verticalScrollBar.Pivot = new(1f, 0f, 0f);
-            verticalScrollBar.BackgroundColor = new(0.2f, 0.2f, 0.2f);
-            verticalScrollBar.ScrollHandleColor = Color.White;
-
-            View view = new(world, context);
-            view.Parent = window.Container;
-            view.ViewPosition = new(0f, 0f);
-            view.Anchor = new(new(0f, false), new(0, false), default, new(1f, false), new(1f, false), default);
-            view.ContentSize = new(100f, 20 * 26f);
-            view.SetScrollBar(verticalScrollBar);
-
             for (int i = 0; i < 20; i++)
             {
                 Image box = new(world, context);
-                box.Parent = view.Content;
+                box.Parent = window.Container;
                 box.Size = new(60f, 20f);
                 box.Position = new(200f, i * 26f);
                 box.Color = Color.FromHSV((i * 0.1f) % 1, 1, 1);
