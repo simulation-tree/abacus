@@ -232,19 +232,23 @@ namespace Abacus
             testTree.Pivot = new(0f, 1f, 0f);
 
             testTree.AddLeaf("Game Object");
-            testTree.AddLeaf("Game Object (1)");
-            testTree.AddLeaf("Game Object (2)");
-
+            
             TreeNode canvasLeaf = testTree.AddLeaf("Canvas");
             canvasLeaf.AddLeaf("Button");
             canvasLeaf.AddLeaf("Toggle");
 
+            TreeNode playerLeaf = canvasLeaf.AddLeaf("Player");
+            playerLeaf.AddLeaf("Health");
+            playerLeaf.AddLeaf("Score");
+
+            testTree.AddLeaf("Game Object (1)");
+            testTree.AddLeaf("Game Object (2)");
+
             ScrollBar verticalScrollBar = new(world, context, Vector2.UnitY, 0.666f);
             verticalScrollBar.Parent = window.Container;
-            verticalScrollBar.Position = new(-gap, -gap);
-            verticalScrollBar.Size = new(24f, 270f - gap);
-            verticalScrollBar.Anchor = Anchor.TopRight;
-            verticalScrollBar.Pivot = new(1f, 1f, 0f);
+            verticalScrollBar.Size = new(24f, 1f);
+            verticalScrollBar.Anchor = new(new(1f, false), new(0f, false), default, new(1f, false), new(1f, false), default);
+            verticalScrollBar.Pivot = new(1f, 0f, 0f);
             verticalScrollBar.BackgroundColor = new(0.2f, 0.2f, 0.2f);
             verticalScrollBar.ScrollHandleColor = Color.White;
 
