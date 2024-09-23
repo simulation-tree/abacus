@@ -49,12 +49,12 @@ namespace Abacus
         {
             if (!IsAnyVirtualWindowOpen())
             {
-                return default;
+                return 0;
             }
 
             if (!IsAnyWindowOpen())
             {
-                return default;
+                return 0;
             }
 
             MakeFirstMouseAPointer();
