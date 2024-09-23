@@ -49,7 +49,7 @@ public static class Simulator
             TextureImportSystem textures = new(world);
             ShaderImportSystem shaders = new(world);
             FontImportSystem fonts = new(world);
-            TextRenderingSystem textMeshes = new(world);
+            TextRasterizationSystem textMeshes = new(world);
             PhysicsSystem physics = new(world);
             CameraSystem cameras = new(world);
             InteractionSystems interactions = new(world);
@@ -57,7 +57,7 @@ public static class Simulator
             rendering.renderEngine.RegisterSystem<VulkanRendererType>();
 
             //play the simulation
-            using (Program program = Program.Create<EditorProgram>(world))
+            using (Program program = Program.Create<ControlsTest>(world))
             {
                 DateTime time = DateTime.UtcNow;
                 TimeSpan delta = TimeSpan.Zero;

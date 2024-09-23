@@ -17,12 +17,12 @@ using Windows;
 
 namespace Abacus
 {
-    public struct EditorProgram : IDisposable, IProgramType
+    public struct ControlsTest : IDisposable, IProgramType
     {
         private readonly World world;
         private readonly InteractiveContext context;
 
-        public unsafe EditorProgram(World world)
+        public unsafe ControlsTest(World world)
         {
             this.world = world;
             Window window = new(world, "Editor", new(200, 200), new(900, 720), "vulkan", new(&OnWindowClosed));
@@ -113,6 +113,17 @@ namespace Abacus
             if (world.TryGetFirst(out Keyboard keyboard))
             {
                 context.SelectMultiple = keyboard.IsPressed(Keyboard.Button.LeftShift);
+
+                USpan<Keyboard.Button> pressedBuffer = stackalloc Keyboard.Button[128];
+                uint pressedCount = keyboard.GetPressedControls(pressedBuffer);
+                USpan<char> pressedChars = stackalloc char[(int)pressedCount];
+                for (uint i = 0; i < pressedCount; i++)
+                {
+                    Keyboard.Button pressedControl = pressedBuffer[i];
+                    pressedChars[i] = pressedControl.GetChar();
+                }
+
+                context.SetPressedChars(pressedChars);
             }
         }
 
@@ -129,14 +140,14 @@ namespace Abacus
             [UnmanagedCallersOnly]
             static Allocation Start(World world)
             {
-                EditorProgram program = new(world);
+                ControlsTest program = new(world);
                 return Allocation.Create(program);
             }
 
             [UnmanagedCallersOnly]
             static void Finish(Allocation allocation)
             {
-                ref EditorProgram program = ref allocation.Read<EditorProgram>();
+                ref ControlsTest program = ref allocation.Read<ControlsTest>();
                 program.Dispose();
                 allocation.Dispose();
             }
@@ -144,7 +155,7 @@ namespace Abacus
             [UnmanagedCallersOnly]
             static uint Update(Allocation allocation, TimeSpan delta)
             {
-                ref EditorProgram program = ref allocation.Read<EditorProgram>();
+                ref ControlsTest program = ref allocation.Read<ControlsTest>();
                 return program.Update(delta);
             }
         }
@@ -241,6 +252,17 @@ namespace Abacus
                 MenuOption option = dropdown.Options[current];
                 Debug.WriteLine($"Selected option: {option.text}");
             }
+
+            y -= singleLineHeight + gap;
+
+            TextField testTextField = new(world, context);
+            testTextField.Parent = window.Container;
+            testTextField.Position = new(4f, y);
+            testTextField.Size = new(180f, singleLineHeight);
+            testTextField.Anchor = Anchor.TopLeft;
+            testTextField.Pivot = new(0f, 1f, 0f);
+            testTextField.BackgroundColor = new(0.2f, 0.2f, 0.2f);
+            testTextField.TextColor = Color.White;
 
             y -= singleLineHeight + gap;
 
