@@ -17,7 +17,6 @@ namespace Abacus
     public struct SelectionTest : IDisposable, IProgramType
     {
         private readonly World world;
-        private readonly InteractiveContext context;
 
         public unsafe SelectionTest(World world)
         {
@@ -25,21 +24,21 @@ namespace Abacus
             Window window = new(world, "Selection Test", new(200, 200), new(900, 720), "vulkan", new(&OnWindowClosed));
             window.IsResizable = true;
 
+            Settings settings = new(world);
             Camera camera = new(world, window, new CameraOrthographicSize(1f));
             Canvas canvas = new(world, camera);
-            context = new(canvas);
 
-            Button buttonA = new(world, new(&Pressed), context);
+            Button buttonA = new(world, new(&Pressed), canvas);
             buttonA.Position = new(100, 60);
             buttonA.Size = new(32, 32);
             buttonA.Color = Color.Red;
 
-            Button buttonB = new(world, new(&Pressed), context);
+            Button buttonB = new(world, new(&Pressed), canvas);
             buttonB.Position = new(200, 60);
             buttonB.Size = new(32, 32);
             buttonB.Color = Color.Green;
 
-            Button buttonC = new(world, new(&Pressed), context);
+            Button buttonC = new(world, new(&Pressed), canvas);
             buttonC.Position = new(300, 60);
             buttonC.Size = new(32, 32);
             buttonC.Color = Color.Blue;
@@ -53,7 +52,6 @@ namespace Abacus
 
         public readonly void Dispose()
         {
-            context.Dispose();
         }
 
         public readonly uint Update(TimeSpan delta)
@@ -113,7 +111,7 @@ namespace Abacus
         {
             if (world.TryGetFirst(out Keyboard keyboard))
             {
-                context.SelectMultiple = keyboard.IsPressed(Keyboard.Button.LeftShift);
+                //context.SelectMultiple = keyboard.IsPressed(Keyboard.Button.LeftShift);
             }
         }
 

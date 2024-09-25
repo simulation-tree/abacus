@@ -161,12 +161,13 @@ namespace Abacus
             Transform textTransform = textEntity.Become<Transform>();
             textTransform.LocalPosition = new(0f, 0f, -0.1f);
 
-            TextMesh anotherTextMesh = new(world, "top right corner?", cascadiaMono, new(1f, 1f));
+            TextMesh anotherTextMesh = new(world, "top right corner?", cascadiaMono);
             TextRenderer anotherText = new(world, anotherTextMesh, textMaterial, camera);
             anotherText.Parent = squareBox.entity;
             Entity anotherTextEntity = anotherText.entity;
             anotherTextEntity.AddComponent(Color.Blue);
             anotherTextEntity.AddComponent(Anchor.TopRight);
+            anotherTextEntity.AddComponent(new Pivot(1f, 1f));
             Transform anotherTextTransform = anotherTextEntity.Become<Transform>();
             anotherTextTransform.LocalPosition = new(0f, 0f, -0.1f);
 

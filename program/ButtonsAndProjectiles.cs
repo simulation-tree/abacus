@@ -30,7 +30,6 @@ namespace Abacus
     {
         private readonly World world;
         private readonly Window window;
-        public readonly InteractiveContext context;
         public readonly Camera worldCamera;
         private Vector3 cameraPosition;
         private Vector2 cameraPitchYaw;
@@ -64,7 +63,7 @@ namespace Abacus
             unlitWorldMaterial.AddTextureBinding(1, 0, squareTexture);
 
             Canvas canvas = new(world, uiCamera);
-            context = new(canvas);
+            Settings settings = new(world);
 
             Material textMaterial = new(world, Address.Get<TextMaterial>());
             textMaterial.AddComponentBinding<CameraProjection>(1, 0, uiCamera);
@@ -78,25 +77,26 @@ namespace Abacus
             waveRenderer.entity.AddComponent(new IsBody(new CubeShape(0.5f), IsBody.Type.Static));
 
             //create ui boxes
-            Button testWindow = new(world, new(&TestBoxPressed), context);
+            Button testWindow = new(world, new(&TestBoxPressed), canvas);
             testWindow.Size = new(300, 300);
             testWindow.Position = new(20, 20);
 
-            Button anotherBox = new(world, new(&AnotherBoxPressed), context);
+            Button anotherBox = new(world, new(&AnotherBoxPressed), canvas);
             anotherBox.Size = new(190, 100);
             anotherBox.Position = new(0, 0);
             anotherBox.Anchor = Anchor.Centered;
             anotherBox.Pivot = new(0.5f, 0.5f, 0f);
             anotherBox.Color = Color.SkyBlue;
 
-            TextMesh textMesh = new(world, "abacus 123 hiii", robotoFont, new(0f, 1f));
+            TextMesh textMesh = new(world, "abacus 123 hiii", robotoFont);
             TextRenderer textRenderer = new(world, textMesh, textMaterial, uiCamera);
             textRenderer.Parent = anotherBox.AsEntity();
             Transform textTransform = textRenderer.entity.Become<Transform>();
             textTransform.LocalPosition = new(4f, -4f, 0.1f);
             textTransform.LocalScale = Vector3.One * 32f;
-            textRenderer.entity.AddComponent(Color.Orange);
-            textRenderer.entity.AddComponent(Anchor.TopLeft);
+            textRenderer.AddComponent(Color.Orange);
+            textRenderer.AddComponent(Anchor.TopLeft);
+            textRenderer.AddComponent(Pivot.TopLeft);
 
             [UnmanagedCallersOnly]
             static void TestBoxPressed(World world, uint entity)
@@ -123,8 +123,6 @@ namespace Abacus
             {
                 window.Destroy();
             }
-
-            context.Dispose();
         }
 
         public unsafe uint Update(TimeSpan delta)
