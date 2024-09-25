@@ -4,6 +4,7 @@ using Data;
 using Data.Events;
 using DefaultPresentationAssets;
 using InputDevices;
+using InteractionKit;
 using Meshes;
 using Models;
 using Physics;
@@ -46,7 +47,9 @@ namespace Abacus
             window.IsTransparent = true;
             window.IsBorderless = true;
             window.AlwaysOnTop = true;
+            window.ClearColor = new(0, 0, 0, 0);
 
+            Settings settings = new(world);
             camera = new(world, window.destination, CameraFieldOfView.FromDegrees(60));
             Transform cameraTransform = camera.entity.Become<Transform>();
             cameraTransform.LocalPosition = new(0, 0, -1);
