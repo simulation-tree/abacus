@@ -262,6 +262,21 @@ namespace Abacus
 
                 y -= singleLineHeight + gap;
 
+                Entity dataEntity = new(world);
+                dataEntity.AddComponent(false);
+                dataEntity.AddComponent(0f);
+                dataEntity.AddComponent(new FixedString("babash"));
+
+                ControlField testControlField = new(world, canvas, "Test", dataEntity, RuntimeType.Get<bool>());
+                testControlField.LabelColor = Color.Black;
+                testControlField.Parent = window.Container;
+                testControlField.Anchor = Anchor.TopLeft;
+                testControlField.Pivot = new(0f, 1f, 0f);
+                testControlField.Position = new(4f, y);
+                testControlField.Size = new(180f, singleLineHeight);
+
+                y -= singleLineHeight + gap;
+
                 Tree testTree = new(world, canvas);
                 testTree.Parent = window.Container;
                 testTree.Position = new(4f, y);
