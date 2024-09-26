@@ -39,9 +39,9 @@ namespace Abacus
             buttonB.Color = Color.Green;
 
             Button buttonC = new(world, new(&Pressed), canvas);
-            buttonC.Position = new(300, 60);
+            buttonC.Position = new(200 + 16, 60 + 16);
             buttonC.Size = new(32, 32);
-            buttonC.Color = Color.Blue;
+            buttonC.Color = Color.Blue * new Color(1f, 1f, 1f, 0.5f);
 
             [UnmanagedCallersOnly]
             static void Pressed(World world, uint buttonEntity)
