@@ -26,8 +26,6 @@ namespace Abacus
             this.world = world;
             Window window = new(world, "Editor", new(200, 200), new(900, 720), "vulkan", new(&OnWindowClosed));
             window.IsResizable = true;
-            //window.IsBorderless = true;
-            //window.IsMaximized = true;
 
             Settings settings = new(world);
             Camera camera = new(world, window, new CameraOrthographicSize(1f));
@@ -74,9 +72,9 @@ namespace Abacus
         {
             if (world.TryGetFirst(out Mouse mouse))
             {
-                if (!mouse.AsEntity().Is<Pointer>())
+                if (!mouse.Is(Definition.Get<Pointer>()))
                 {
-                    mouse.AsEntity().Become<Pointer>();
+                    mouse.Become(Definition.Get<Pointer>());
                 }
 
                 Pointer pointer = mouse.AsEntity().As<Pointer>();
