@@ -29,32 +29,28 @@ using Windows.Systems;
 
 namespace AbacusSimulator
 {
-    public class AbacusSimulator : IDisposable
+    public struct AbacusSimulator
     {
-        public readonly World world;
-        public readonly DataImportSystem data;
-        public readonly AutomationPlayingSystem automations;
-        public readonly StateMachineSystem stateMachines;
-        public readonly StateAutomationSystem stateAutomation;
-        public readonly ModelImportSystem models;
-        public readonly TransformSystem transforms;
-        public readonly WindowSystem windows;
-        public readonly GlobalKeyboardAndMouseSystem globalDevices;
-        public readonly WindowDevicesSystems windowDevices;
-        public readonly TextureImportSystem textures;
-        public readonly ShaderImportSystem shaders;
-        public readonly FontImportSystem fonts;
-        public readonly TextRasterizationSystem textMeshes;
-        public readonly PhysicsSystem physics;
-        public readonly CameraSystem cameras;
-        public readonly InteractionSystems interactions;
-        public readonly RenderingSystems rendering;
+        public DataImportSystem data;
+        public AutomationPlayingSystem automations;
+        public StateMachineSystem stateMachines;
+        public StateAutomationSystem stateAutomation;
+        public ModelImportSystem models;
+        public TransformSystem transforms;
+        public WindowSystem windows;
+        public GlobalKeyboardAndMouseSystem globalDevices;
+        public WindowDevicesSystems windowDevices;
+        public TextureImportSystem textures;
+        public ShaderImportSystem shaders;
+        public FontImportSystem fonts;
+        public TextRasterizationSystem textMeshes;
+        public PhysicsSystem physics;
+        public CameraSystem cameras;
+        public InteractionSystems interactions;
+        public RenderingSystems rendering;
 
-        private DateTime lastTime;
-
-        public AbacusSimulator()
+        public void Start(World world)
         {
-            world = new();
             data = new(world);
             automations = new(world);
             stateMachines = new(world);
@@ -73,10 +69,9 @@ namespace AbacusSimulator
             interactions = new(world);
             rendering = new(world);
             rendering.renderEngine.RegisterSystem<VulkanRendererType>();
-            lastTime = DateTime.UtcNow;
         }
 
-        public void Dispose()
+        public readonly void Dispose(World world)
         {
             rendering.Dispose();
             interactions.Dispose();
@@ -97,12 +92,8 @@ namespace AbacusSimulator
             data.Dispose();
         }
 
-        public TimeSpan Update()
+        public readonly void Update(World world, TimeSpan delta)
         {
-            DateTime now = DateTime.UtcNow;
-            TimeSpan delta = now - lastTime;
-            lastTime = now;
-
             world.Submit(new WindowUpdate());
             world.Submit(new InputUpdate());
             world.Submit(new StateUpdate());
@@ -120,8 +111,6 @@ namespace AbacusSimulator
             world.Submit(new CameraUpdate());
             world.Submit(new RenderUpdate());
             world.Poll();
-
-            return delta;
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using Abacus;
 using Programs;
+using Simulation;
 using System;
 
 namespace AbacusSimulator
@@ -8,20 +9,37 @@ namespace AbacusSimulator
     {
         private static int Main(string[] args)
         {
-            using (AbacusSimulator simulator = new())
+            AbacusSimulator simulator = new();
+            World gameWorld = new();
+            World editorWorld = new();
+            simulator.Start(gameWorld);
+            simulator.Start(editorWorld);
+            Program game = Program.Create<ControlsTest>(gameWorld);
+            Program editor = Program.Create<VoxelGame>(editorWorld);
+            
+            uint gameReturnCode;
+            uint editorReturnCode;
+            DateTime lastTime = DateTime.UtcNow;
+            do
             {
-                using (Program program = Program.Create<ControlsTest>(simulator.world))
-                {
-                    uint returnCode = 0;
-                    do
-                    {
-                        TimeSpan delta = simulator.Update();
-                        returnCode = program.Update(delta);
-                    }
-                    while (returnCode != default);
-                    return (int)returnCode;
-                }
+                DateTime now = DateTime.UtcNow;
+                TimeSpan delta = now - lastTime;
+                lastTime = now;
+
+                simulator.Update(gameWorld, delta);
+                gameReturnCode = game.Update(delta);
+
+                simulator.Update(editorWorld, delta);
+                editorReturnCode = editor.Update(delta);
             }
+            while (gameReturnCode != default && editorReturnCode != default);
+
+            editor.Dispose();
+            game.Dispose();
+            simulator.Dispose(editorWorld);
+            simulator.Dispose(gameWorld);
+
+            return (int)gameReturnCode;
         }
     }
 }
