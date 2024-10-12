@@ -1,5 +1,4 @@
-﻿using Abacus;
-using Automations.Events;
+﻿using Automations.Events;
 using Automations.Systems;
 using Cameras.Systems;
 using Data.Events;
@@ -14,7 +13,6 @@ using Models.Events;
 using Models.Systems;
 using Physics.Events;
 using Physics.Systems;
-using Programs;
 using Rendering.Events;
 using Rendering.Systems;
 using Rendering.Vulkan;
@@ -29,99 +27,101 @@ using Transforms.Systems;
 using Windows.Events;
 using Windows.Systems;
 
-public static class AbacusSimulator
+namespace AbacusSimulator
 {
-    private static int Main(string[] args)
+    public class AbacusSimulator : IDisposable
     {
-        uint returnCode = 0;
-        using (World programWorld = new())
+        public readonly World world;
+        public readonly DataImportSystem data;
+        public readonly AutomationPlayingSystem automations;
+        public readonly StateMachineSystem stateMachines;
+        public readonly StateAutomationSystem stateAutomation;
+        public readonly ModelImportSystem models;
+        public readonly TransformSystem transforms;
+        public readonly WindowSystem windows;
+        public readonly GlobalKeyboardAndMouseSystem globalDevices;
+        public readonly WindowDevicesSystems windowDevices;
+        public readonly TextureImportSystem textures;
+        public readonly ShaderImportSystem shaders;
+        public readonly FontImportSystem fonts;
+        public readonly TextRasterizationSystem textMeshes;
+        public readonly PhysicsSystem physics;
+        public readonly CameraSystem cameras;
+        public readonly InteractionSystems interactions;
+        public readonly RenderingSystems rendering;
+
+        private DateTime lastTime;
+
+        public AbacusSimulator()
         {
-            InitializeSystems(programWorld);
-
-            //play the simulation
-            using (Program program = Program.Create<ControlsTest>(programWorld))
-            {
-                DateTime time = DateTime.UtcNow;
-                TimeSpan delta = TimeSpan.Zero;
-                do
-                {
-                    DateTime now = DateTime.UtcNow;
-                    delta = now - time;
-                    time = now;
-
-                    UpdateAndPoll(programWorld, delta);
-                    returnCode = program.Update(delta);
-                }
-                while (returnCode != default);
-            }
-
-            FinalizeSystems(programWorld);
+            world = new();
+            data = new(world);
+            automations = new(world);
+            stateMachines = new(world);
+            stateAutomation = new(world);
+            models = new(world);
+            transforms = new(world);
+            windows = new(world);
+            globalDevices = new(world);
+            windowDevices = new(world);
+            textures = new(world);
+            shaders = new(world);
+            fonts = new(world);
+            textMeshes = new(world);
+            physics = new(world);
+            cameras = new(world);
+            interactions = new(world);
+            rendering = new(world);
+            rendering.renderEngine.RegisterSystem<VulkanRendererType>();
+            lastTime = DateTime.UtcNow;
         }
 
-        return (int)returnCode;
-    }
+        public void Dispose()
+        {
+            rendering.Dispose();
+            interactions.Dispose();
+            cameras.Dispose();
+            physics.Dispose();
+            textMeshes.Dispose();
+            fonts.Dispose();
+            shaders.Dispose();
+            textures.Dispose();
+            windowDevices.Dispose();
+            globalDevices.Dispose();
+            windows.Dispose();
+            transforms.Dispose();
+            models.Dispose();
+            stateAutomation.Dispose();
+            stateMachines.Dispose();
+            automations.Dispose();
+            data.Dispose();
+        }
 
-    private static void InitializeSystems(World world)
-    {
-        DataImportSystem data = new(world);
-        AutomationPlayingSystem automations = new(world);
-        StateMachineSystem stateMachines = new(world);
-        StateAutomationSystem stateAutomation = new(world);
-        ModelImportSystem models = new(world);
-        TransformSystem transforms = new(world);
-        WindowSystem windows = new(world);
-        GlobalKeyboardAndMouseSystem globalDevices = new(world);
-        WindowDevicesSystems windowDevices = new(world);
-        TextureImportSystem textures = new(world);
-        ShaderImportSystem shaders = new(world);
-        FontImportSystem fonts = new(world);
-        TextRasterizationSystem textMeshes = new(world);
-        PhysicsSystem physics = new(world);
-        CameraSystem cameras = new(world);
-        InteractionSystems interactions = new(world);
-        RenderingSystems rendering = new(world);
-        rendering.renderEngine.RegisterSystem<VulkanRendererType>();
-    }
+        public TimeSpan Update()
+        {
+            DateTime now = DateTime.UtcNow;
+            TimeSpan delta = now - lastTime;
+            lastTime = now;
 
-    private static void UpdateAndPoll(World world, TimeSpan delta)
-    {
-        world.Submit(new WindowUpdate());
-        world.Submit(new InputUpdate());
-        world.Submit(new StateUpdate());
-        world.Submit(new AutomationUpdate(delta));
-        world.Submit(new MixingUpdate());
-        world.Submit(new TransformUpdate());
-        world.Submit(new PhysicsUpdate(delta));
-        world.Submit(new TransformUpdate());
-        world.Submit(new DataUpdate());
-        world.Submit(new ModelUpdate());
-        world.Submit(new ShaderUpdate());
-        world.Submit(new TextureUpdate());
-        world.Submit(new FontUpdate());
-        world.Submit(new InteractionUpdate());
-        world.Submit(new CameraUpdate());
-        world.Submit(new RenderUpdate());
-        world.Poll();
-    }
+            world.Submit(new WindowUpdate());
+            world.Submit(new InputUpdate());
+            world.Submit(new StateUpdate());
+            world.Submit(new AutomationUpdate(delta));
+            world.Submit(new MixingUpdate());
+            world.Submit(new TransformUpdate());
+            world.Submit(new PhysicsUpdate(delta));
+            world.Submit(new TransformUpdate());
+            world.Submit(new DataUpdate());
+            world.Submit(new ModelUpdate());
+            world.Submit(new ShaderUpdate());
+            world.Submit(new TextureUpdate());
+            world.Submit(new FontUpdate());
+            world.Submit(new InteractionUpdate());
+            world.Submit(new CameraUpdate());
+            world.Submit(new RenderUpdate());
+            world.Poll();
 
-    private static void FinalizeSystems(World world)
-    {
-        SystemBase.Get<RenderingSystems>(world).Dispose();
-        SystemBase.Get<InteractionSystems>(world).Dispose();
-        SystemBase.Get<CameraSystem>(world).Dispose();
-        SystemBase.Get<PhysicsSystem>(world).Dispose();
-        SystemBase.Get<TextRasterizationSystem>(world).Dispose();
-        SystemBase.Get<FontImportSystem>(world).Dispose();
-        SystemBase.Get<ShaderImportSystem>(world).Dispose();
-        SystemBase.Get<TextureImportSystem>(world).Dispose();
-        SystemBase.Get<WindowDevicesSystems>(world).Dispose();
-        SystemBase.Get<GlobalKeyboardAndMouseSystem>(world).Dispose();
-        SystemBase.Get<WindowSystem>(world).Dispose();
-        SystemBase.Get<TransformSystem>(world).Dispose();
-        SystemBase.Get<ModelImportSystem>(world).Dispose();
-        SystemBase.Get<StateAutomationSystem>(world).Dispose();
-        SystemBase.Get<StateMachineSystem>(world).Dispose();
-        SystemBase.Get<AutomationPlayingSystem>(world).Dispose();
-        SystemBase.Get<DataImportSystem>(world).Dispose();
+            return delta;
+        }
     }
 }

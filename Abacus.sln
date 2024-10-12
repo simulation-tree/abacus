@@ -129,10 +129,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AssimpNet", "..\model-syste
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AssimpNet.Test", "..\model-systems\AssimpNet-master\AssimpNet.Test\AssimpNet.Test.csproj", "{17489B74-4943-4316-9823-D3C0D2387B2A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Simulator", "..\simulator\source\Simulator.csproj", "{DCFC43A5-546E-4319-BC70-0E2861032273}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Simulator Tests", "..\simulator\tests\Simulator Tests.csproj", "{8F85B4A0-E2D5-4A2D-84A7-733CEC607990}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -391,14 +387,6 @@ Global
 		{17489B74-4943-4316-9823-D3C0D2387B2A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{17489B74-4943-4316-9823-D3C0D2387B2A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{17489B74-4943-4316-9823-D3C0D2387B2A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{DCFC43A5-546E-4319-BC70-0E2861032273}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{DCFC43A5-546E-4319-BC70-0E2861032273}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{DCFC43A5-546E-4319-BC70-0E2861032273}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{DCFC43A5-546E-4319-BC70-0E2861032273}.Release|Any CPU.Build.0 = Release|Any CPU
-		{8F85B4A0-E2D5-4A2D-84A7-733CEC607990}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{8F85B4A0-E2D5-4A2D-84A7-733CEC607990}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{8F85B4A0-E2D5-4A2D-84A7-733CEC607990}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{8F85B4A0-E2D5-4A2D-84A7-733CEC607990}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
