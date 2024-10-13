@@ -9,16 +9,12 @@ namespace AbacusSimulator
     {
         private static int Main(string[] args)
         {
-            AbacusSimulator simulator = new();
             World gameWorld = new();
-            World editorWorld = new();
+            AbacusSimulator simulator = new();
             simulator.Start(gameWorld);
-            simulator.Start(editorWorld);
             Program game = Program.Create<ControlsTest>(gameWorld);
-            Program editor = Program.Create<VoxelGame>(editorWorld);
-            
+
             uint gameReturnCode;
-            uint editorReturnCode;
             DateTime lastTime = DateTime.UtcNow;
             do
             {
@@ -28,16 +24,12 @@ namespace AbacusSimulator
 
                 simulator.Update(gameWorld, delta);
                 gameReturnCode = game.Update(delta);
-
-                simulator.Update(editorWorld, delta);
-                editorReturnCode = editor.Update(delta);
             }
-            while (gameReturnCode != default && editorReturnCode != default);
+            while (gameReturnCode != default);
 
-            editor.Dispose();
             game.Dispose();
-            simulator.Dispose(editorWorld);
             simulator.Dispose(gameWorld);
+            gameWorld.Dispose();
 
             return (int)gameReturnCode;
         }
