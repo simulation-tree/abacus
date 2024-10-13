@@ -218,7 +218,19 @@ namespace Abacus
             MakeWindowFollowCamera();
             UpdateRegionToMatchAnimatedSprite();
             TeleportPlayerToMousePosition();
+            CloseWindow();
             return 1;
+        }
+
+        private readonly void CloseWindow()
+        {
+            if (world.TryGetFirst(out Keyboard keyboard))
+            {
+                if (keyboard.WasPressed(Keyboard.Button.Escape))
+                {
+                    window.Destroy();
+                }
+            }
         }
 
         private readonly void TeleportPlayerToMousePosition()
@@ -227,15 +239,15 @@ namespace Abacus
             {
                 if (mouse.WasPressed(Mouse.Button.LeftButton))
                 {
-                    (uint width, uint height, uint refreshRate) display = window.Display;
+                    (uint width, uint height, uint refreshRate) = window.Display;
                     Vector2 mousePosition = mouse.Position;
-                    mousePosition.X -= display.width * 0.5f;
-                    mousePosition.Y += display.height * 0.5f;
+                    mousePosition.X -= width * 0.5f;
+                    mousePosition.Y += height * 0.5f;
                     Entity player = GetMainPlayer();
                     if (player != default)
                     {
                         Transform playerTransform = player.As<Transform>();
-                        playerTransform.WorldPosition = new Vector3(mousePosition.X, display.height - mousePosition.Y, 0) * DisplayScale;
+                        playerTransform.WorldPosition = new Vector3(mousePosition.X, height - mousePosition.Y, 0) * DisplayScale;
 
                         Body playerBody = player.As<Body>();
                         playerBody.LinearVelocity = Vector3.Zero;
