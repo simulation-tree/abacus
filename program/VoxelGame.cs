@@ -62,7 +62,7 @@ namespace Abacus
             Transform ballTransform = quadRenderer.AsEntity().Become<Transform>();
             ballTransform.LocalPosition = new(0f, 4f, 0f);
 
-            int chunkRadius = 8;
+            int chunkRadius = 1;
             for (int cx = -chunkRadius; cx < chunkRadius; cx++)
             {
                 for (int cz = -chunkRadius; cz < chunkRadius; cz++)
@@ -159,7 +159,7 @@ namespace Abacus
             chunk.UpdateMeshToMatchBlocks(chunkAtlas);
         }
 
-        public void Dispose()
+        public readonly void Dispose()
         {
         }
 
@@ -220,7 +220,7 @@ namespace Abacus
                 get
                 {
                     USpan<BlockID> blocks = mesh.AsEntity().GetArray<BlockID>();
-                    return new(blocks.pointer, blocks.Length);
+                    return blocks.As<uint>();
                 }
             }
 
