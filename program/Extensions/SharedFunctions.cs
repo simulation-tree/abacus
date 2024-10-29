@@ -4,22 +4,12 @@ using System;
 using System.Numerics;
 using Transforms;
 
-public struct DestroyAfterTime
-{
-    public float time;
-
-    public DestroyAfterTime(float time)
-    {
-        this.time = time;
-    }
-}
-
 public static class SharedFunctions
 {
     private static Vector2 lastPointerPosition;
     private static bool hasLastPointerPosition;
 
-    public static void DestroyTemporaryEntities(World world, TimeSpan delta)
+    public static void DestroyTemporaryEntities(this World world, TimeSpan delta)
     {
         using ComponentQuery<DestroyAfterTime> query = new();
         query.Update(world);
@@ -34,7 +24,7 @@ public static class SharedFunctions
         }
     }
 
-    public static void MoveCameraAround(World world, Transform cameraTransform, TimeSpan delta, ref Vector3 position, ref Vector2 pitchYaw, Vector2 lookSensitivity)
+    public static void MoveCameraAround(this World world, Transform cameraTransform, TimeSpan delta, ref Vector3 position, ref Vector2 pitchYaw, Vector2 lookSensitivity)
     {
         Vector3 currentPosition = cameraTransform.LocalPosition;
         Quaternion rotation = cameraTransform.LocalRotation;

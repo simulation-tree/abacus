@@ -37,7 +37,6 @@
 		<ProjectReference Include="..\..\interaction-kit\source\Interaction Kit.csproj" />
 		<ProjectReference Include="..\..\model-systems\source\Model Systems.csproj" />
 		<ProjectReference Include="..\..\physics-systems\source\Phyics Systems.csproj" />
-		<ProjectReference Include="..\..\programs\source\Programs.csproj" />
 		<ProjectReference Include="..\..\shader-systems\source\Shader Systems.csproj" />
 		<ProjectReference Include="..\..\text-rendering-systems\source\Text Rendering Systems.csproj" />
 		<ProjectReference Include="..\..\texture-systems\source\Texture Systems.csproj" />

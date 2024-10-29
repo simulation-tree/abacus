@@ -22,27 +22,47 @@ using Windows;
 
 namespace Abacus
 {
-    public struct AbacusProgram : IDisposable, IProgramType
+    public struct AbacusProgram : IProgram
     {
-        private readonly World world;
-
         private TimeSpan time;
         private Vector3 cameraPosition;
         private Vector2 cameraPitchYaw;
 
         private readonly Window window;
         private readonly Camera camera;
-        private readonly Renderer dummyRenderer;
-        private readonly Renderer testRenderer;
+        private readonly MeshRenderer dummyRenderer;
+        private readonly MeshRenderer testRenderer;
         private readonly Texture waveImage;
         private readonly Texture testImage;
         private readonly TextMesh exampleTextMesh;
-        private readonly Renderer squareBox;
+        private readonly MeshRenderer squareBox;
 
-        public unsafe AbacusProgram(World world)
+        unsafe readonly StartFunction IProgram.Start => new(&Start);
+        unsafe readonly UpdateFunction IProgram.Update => new(&Update);
+        unsafe readonly FinishFunction IProgram.Finish => new(&Finish);
+
+        [UnmanagedCallersOnly]
+        private static void Start(Simulator simulator, Allocation allocation, World world)
         {
-            this.world = world;
+            allocation.Write(new AbacusProgram(world));
+        }
 
+        [UnmanagedCallersOnly]
+        private static uint Update(Simulator simulator, Allocation allocation, World world, TimeSpan delta)
+        {
+            ref AbacusProgram program = ref allocation.Read<AbacusProgram>();
+            return program.Update(world, delta);
+        }
+
+        [UnmanagedCallersOnly]
+        private static void Finish(Simulator simulator, Allocation allocation, World world, uint returnCode)
+        {
+            ref AbacusProgram program = ref allocation.Read<AbacusProgram>();
+            program.CleanUp();
+        }
+
+        private unsafe AbacusProgram(World world)
+        {
             //load scene built in unity
             try
             {
@@ -114,7 +134,7 @@ namespace Abacus
             Material material = new(world, Address.Get<UnlitTexturedMaterial>());
             material.AddPushBinding<Color>();
             material.AddPushBinding<LocalToWorld>();
-            material.AddComponentBinding<CameraProjection>(0, 0, camera.entity);
+            material.AddComponentBinding<CameraMatrices>(0, 0, camera.entity);
             material.AddTextureBinding(1, 0, testImage);
 
             dummyRenderer = new(world, quadMesh, material, camera);
@@ -125,14 +145,14 @@ namespace Abacus
             Material testMaterial = new(world, Address.Get<UnlitTexturedMaterial>());
             testMaterial.AddPushBinding<Color>();
             testMaterial.AddPushBinding<LocalToWorld>();
-            testMaterial.AddComponentBinding<CameraProjection>(0, 0, camera.entity);
+            testMaterial.AddComponentBinding<CameraMatrices>(0, 0, camera.entity);
             testMaterial.AddTextureBinding(1, 0, waveImage);
 
             Texture squareTexture = new(world, Address.Get<SquareTexture>());
             Material defaultSquareMaterial = new(world, Address.Get<UnlitTexturedMaterial>());
             defaultSquareMaterial.AddPushBinding<Color>();
             defaultSquareMaterial.AddPushBinding<LocalToWorld>();
-            defaultSquareMaterial.AddComponentBinding<CameraProjection>(0, 0, camera.entity);
+            defaultSquareMaterial.AddComponentBinding<CameraMatrices>(0, 0, camera.entity);
             defaultSquareMaterial.AddTextureBinding(1, 0, squareTexture);
 
             squareBox = new(world, quadMesh, defaultSquareMaterial, camera);
@@ -146,7 +166,7 @@ namespace Abacus
 
             //material entity (reusable)
             Material textMaterial = new(world, Address.Get<TextMaterial>());
-            textMaterial.AddComponentBinding<CameraProjection>(1, 0, camera.entity);
+            textMaterial.AddComponentBinding<CameraMatrices>(1, 0, camera.entity);
             textMaterial.AddPushBinding<Color>();
             textMaterial.AddPushBinding<LocalToWorld>();
 
@@ -196,45 +216,45 @@ namespace Abacus
             testRenderer.AsEntity().AddComponent(new RendererScissor(100, 100, 200, 200));
 
             [UnmanagedCallersOnly]
-            static void WindowClosed(World world, uint windowEntity)
+            static void WindowClosed(Window window)
             {
-                world.DestroyEntity(windowEntity);
+                window.Dispose();
             }
         }
 
-        public void Dispose()
+        private readonly void CleanUp()
         {
             if (!window.IsDestroyed())
             {
-                window.Destroy();
+                window.Dispose();
             }
         }
 
-        public uint Update(TimeSpan delta)
+        private uint Update(World world, TimeSpan delta)
         {
             time += delta;
             if (time.TotalSeconds > 120f || window.IsDestroyed())
             {
                 Console.WriteLine("Conditions reached for finishing the demo");
-                return default; //source of "shutdown" event
+                return 1; //source of "shutdown" event
             }
 
             float deltaSeconds = (float)delta.TotalSeconds;
-            TestMouseInputs();
-            AnimateTestRenderer(deltaSeconds);
+            TestMouseInputs(world);
+            AnimateTestRenderer(world, deltaSeconds);
             Transform cameraTransform = camera.entity.Become<Transform>();
             SharedFunctions.MoveCameraAround(world, cameraTransform, delta, ref cameraPosition, ref cameraPitchYaw, new(1f, 1f));
-            ModifyText();
-            if (!TestWindowEntity(deltaSeconds))
+            ModifyText(world);
+            if (TestWindowEntity(world, deltaSeconds))
             {
                 //propagating upwards
-                return default;
+                return 2;
             }
 
-            return 1;
+            return 0;
         }
 
-        private readonly void ModifyText()
+        private readonly void ModifyText(World world)
         {
             if (world.TryGetFirst(out Keyboard keyboard))
             {
@@ -266,7 +286,7 @@ namespace Abacus
             }
         }
 
-        private readonly void AnimateTestRenderer(float delta)
+        private readonly void AnimateTestRenderer(World world, float delta)
         {
             foreach (uint keyboardEntity in world.GetAll<IsKeyboard>())
             {
@@ -319,7 +339,7 @@ namespace Abacus
             color.H = hue;
         }
 
-        private readonly bool TestWindowEntity(float delta)
+        private readonly bool TestWindowEntity(World world, float delta)
         {
             Vector2 windowPosition = window.Position;
             Vector2 windowSize = window.Size;
@@ -328,14 +348,14 @@ namespace Abacus
                 Keyboard keyboard = new(world, keyboardEntity);
                 if (keyboard.WasPressed(Keyboard.Button.Escape))
                 {
-                    return false; //source of "shutdown" event
+                    return true; //source of "shutdown" event
                 }
 
                 if (keyboard.WasPressed(Keyboard.Button.X))
                 {
                     Console.WriteLine("Closed early");
-                    window.Destroy();
-                    return true; //finished this function early, theres already a conditional check for window destruction
+                    window.Dispose();
+                    return false; //finished this function early, theres already a conditional check for window destruction
                 }
 
                 if (keyboard.WasPressed(Keyboard.Button.R))
@@ -463,10 +483,10 @@ namespace Abacus
 
             window.Position = windowPosition;
             window.Size = windowSize;
-            return true;
+            return false;
         }
 
-        private readonly void TestMouseInputs()
+        private readonly void TestMouseInputs(World world)
         {
             foreach (uint mouseEntity in world.GetAll<IsMouse>())
             {
@@ -491,33 +511,6 @@ namespace Abacus
                 {
                     Console.WriteLine($"Right button released at {position}");
                 }
-            }
-        }
-
-        readonly unsafe (StartFunction, FinishFunction, UpdateFunction) IProgramType.GetFunctions()
-        {
-            return (new(&Start), new(&Finish), new(&Update));
-
-            [UnmanagedCallersOnly]
-            static Allocation Start(World world)
-            {
-                AbacusProgram program = new(world);
-                return Allocation.Create(program);
-            }
-
-            [UnmanagedCallersOnly]
-            static void Finish(Allocation allocation)
-            {
-                ref AbacusProgram program = ref allocation.Read<AbacusProgram>();
-                program.Dispose();
-                allocation.Dispose();
-            }
-
-            [UnmanagedCallersOnly]
-            static uint Update(Allocation allocation, TimeSpan delta)
-            {
-                ref AbacusProgram program = ref allocation.Read<AbacusProgram>();
-                return program.Update(delta);
             }
         }
     }

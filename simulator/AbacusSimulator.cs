@@ -1,116 +1,75 @@
-﻿using Automations.Events;
-using Automations.Systems;
+﻿using Automations.Systems;
 using Cameras.Systems;
-using Data.Events;
 using Data.Systems;
-using Fonts.Events;
 using Fonts.Systems;
-using InputDevices.Events;
 using InputDevices.Systems;
-using InteractionKit.Events;
 using InteractionKit.Systems;
-using Models.Events;
 using Models.Systems;
-using Physics.Events;
 using Physics.Systems;
-using Rendering.Events;
 using Rendering.Systems;
 using Rendering.Vulkan;
-using Shaders.Events;
 using Shaders.Systems;
 using Simulation;
 using System;
-using Textures.Events;
 using Textures.Systems;
-using Transforms.Events;
 using Transforms.Systems;
-using Windows.Events;
 using Windows.Systems;
 
 namespace AbacusSimulator
 {
-    public struct AbacusSimulator
+    public struct AbacusSimulator : IDisposable
     {
-        public DataImportSystem data;
-        public AutomationPlayingSystem automations;
-        public StateMachineSystem stateMachines;
-        public StateAutomationSystem stateAutomation;
-        public ModelImportSystem models;
-        public TransformSystem transforms;
-        public WindowSystem windows;
-        public GlobalKeyboardAndMouseSystem globalDevices;
-        public WindowDevicesSystems windowDevices;
-        public TextureImportSystem textures;
-        public ShaderImportSystem shaders;
-        public FontImportSystem fonts;
-        public TextRasterizationSystem textMeshes;
-        public PhysicsSystem physics;
-        public CameraSystem cameras;
-        public InteractionSystems interactions;
-        public RenderingSystems rendering;
+        private readonly Simulator simulator;
 
-        public void Start(World world)
+        public AbacusSimulator(World world)
         {
-            data = new(world);
-            automations = new(world);
-            stateMachines = new(world);
-            stateAutomation = new(world);
-            models = new(world);
-            transforms = new(world);
-            windows = new(world);
-            globalDevices = new(world);
-            windowDevices = new(world);
-            textures = new(world);
-            shaders = new(world);
-            fonts = new(world);
-            textMeshes = new(world);
-            physics = new(world);
-            cameras = new(world);
-            interactions = new(world);
-            rendering = new(world);
-            rendering.renderEngine.RegisterSystem<VulkanRendererType>();
+            simulator = new(world);
+            simulator.AddSystem<DataImportSystem>();
+            simulator.AddSystem<AutomationPlayingSystem>();
+            simulator.AddSystem<StateMachineSystem>();
+            simulator.AddSystem<StateAutomationSystem>();
+            simulator.AddSystem<ModelImportSystem>();
+            simulator.AddSystem<TransformSystem>();
+            simulator.AddSystem<WindowSystem>();
+            simulator.AddSystem<GlobalKeyboardAndMouseSystem>();
+            simulator.AddSystem<WindowDevicesSystems>();
+            simulator.AddSystem<TextureImportSystem>();
+            simulator.AddSystem<ShaderImportSystem>();
+            simulator.AddSystem<FontImportSystem>();
+            simulator.AddSystem<TextRasterizationSystem>();
+            simulator.AddSystem<PhysicsSystem>();
+            simulator.AddSystem<CameraSystem>();
+            simulator.AddSystem<InteractionSystems>();
+
+            ref RenderingSystems renderingSystems = ref simulator.AddSystem<RenderingSystems>().Value;
+            renderingSystems.RegisterRenderSystem<VulkanRenderer>();
         }
 
-        public readonly void Dispose(World world)
+        public readonly void Dispose()
         {
-            rendering.Dispose();
-            interactions.Dispose();
-            cameras.Dispose();
-            physics.Dispose();
-            textMeshes.Dispose();
-            fonts.Dispose();
-            shaders.Dispose();
-            textures.Dispose();
-            windowDevices.Dispose();
-            globalDevices.Dispose();
-            windows.Dispose();
-            transforms.Dispose();
-            models.Dispose();
-            stateAutomation.Dispose();
-            stateMachines.Dispose();
-            automations.Dispose();
-            data.Dispose();
+            simulator.RemoveSystem<RenderingSystems>();
+            simulator.RemoveSystem<InteractionSystems>();
+            simulator.RemoveSystem<CameraSystem>();
+            simulator.RemoveSystem<PhysicsSystem>();
+            simulator.RemoveSystem<TextRasterizationSystem>();
+            simulator.RemoveSystem<FontImportSystem>();
+            simulator.RemoveSystem<ShaderImportSystem>();
+            simulator.RemoveSystem<TextureImportSystem>();
+            simulator.RemoveSystem<WindowDevicesSystems>();
+            simulator.RemoveSystem<GlobalKeyboardAndMouseSystem>();
+            simulator.RemoveSystem<WindowSystem>();
+            simulator.RemoveSystem<TransformSystem>();
+            simulator.RemoveSystem<ModelImportSystem>();
+            simulator.RemoveSystem<StateAutomationSystem>();
+            simulator.RemoveSystem<StateMachineSystem>();
+            simulator.RemoveSystem<AutomationPlayingSystem>();
+            simulator.RemoveSystem<DataImportSystem>();
+            simulator.Dispose();
         }
 
-        public readonly void Update(World world, TimeSpan delta)
+        public readonly void Update(TimeSpan delta)
         {
-            world.Submit(new WindowUpdate());
-            world.Submit(new InputUpdate());
-            world.Submit(new StateUpdate());
-            world.Submit(new AutomationUpdate(delta));
-            world.Submit(new MixingUpdate());
-            world.Submit(new TransformUpdate());
-            world.Submit(new PhysicsUpdate(delta));
-            world.Submit(new TransformUpdate());
-            world.Submit(new DataUpdate());
-            world.Submit(new ModelUpdate());
-            world.Submit(new ShaderUpdate());
-            world.Submit(new TextureUpdate());
-            world.Submit(new FontUpdate());
-            world.Submit(new InteractionUpdate());
-            world.Submit(new CameraUpdate());
-            world.Submit(new RenderUpdate());
-            world.Poll();
+            simulator.Update(delta);
         }
     }
 }

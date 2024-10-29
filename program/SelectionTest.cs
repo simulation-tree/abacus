@@ -15,14 +15,37 @@ using Windows;
 
 namespace Abacus
 {
-    public struct SelectionTest : IDisposable, IProgramType
+    public readonly struct SelectionTest : IProgram
     {
-        private readonly World world;
+        private readonly Window window;
 
-        public unsafe SelectionTest(World world)
+        unsafe readonly StartFunction IProgram.Start => new(&Start);
+        unsafe readonly UpdateFunction IProgram.Update => new(&Update);
+        unsafe readonly FinishFunction IProgram.Finish => new(&Finish);
+
+        [UnmanagedCallersOnly]
+        private static void Start(Simulator simulator, Allocation allocation, World world)
         {
-            this.world = world;
-            Window window = new(world, "Selection Test", new(200, 200), new(900, 720), "vulkan", new(&OnWindowClosed));
+            allocation.Write(new SelectionTest(world));
+        }
+
+        [UnmanagedCallersOnly]
+        private static uint Update(Simulator simulator, Allocation allocation, World world, TimeSpan delta)
+        {
+            ref SelectionTest program = ref allocation.Read<SelectionTest>();
+            return Update(world);
+        }
+
+        [UnmanagedCallersOnly]
+        private static void Finish(Simulator simulator, Allocation allocation, World world, uint returnCode)
+        {
+            ref SelectionTest program = ref allocation.Read<SelectionTest>();
+            program.CleanUp();
+        }
+
+        private unsafe SelectionTest(World world)
+        {
+            window = new(world, "Selection Test", new(200, 200), new(900, 720), "vulkan", new(&OnWindowClosed));
             window.IsResizable = true;
 
             Settings settings = new(world);
@@ -45,34 +68,37 @@ namespace Abacus
             buttonC.Color = Color.Blue * new Color(1f, 1f, 1f, 0.5f);
 
             [UnmanagedCallersOnly]
-            static void Pressed(World world, uint buttonEntity)
+            static void Pressed(Entity buttonEntity)
             {
                 Debug.WriteLine($"Button {buttonEntity} pressed");
             }
         }
 
-        public readonly void Dispose()
+        private readonly void CleanUp()
         {
+            if (!window.IsDestroyed())
+            {
+                window.Dispose();
+            }
         }
 
-        public readonly uint Update(TimeSpan delta)
+        private static uint Update(World world)
         {
-            if (!IsAnyWindowOpen())
+            if (!IsAnyWindowOpen(world))
             {
-                return 0;
+                return 1;
             }
 
-            MakeFirstMouseAPointer();
-            UpdateInteractiveContext();
-            return 1;
+            MakeFirstMouseAPointer(world);
+            return 0;
         }
 
-        private readonly bool IsAnyWindowOpen()
+        private static bool IsAnyWindowOpen(World world)
         {
-            return world.TryGetFirst(out Window _);
+            return world.CountEntities<Window>() > 0;
         }
 
-        private readonly void MakeFirstMouseAPointer()
+        private static void MakeFirstMouseAPointer(World world)
         {
             if (world.TryGetFirst(out Mouse mouse))
             {
@@ -108,45 +134,10 @@ namespace Abacus
             }
         }
 
-        private readonly void UpdateInteractiveContext()
-        {
-            if (world.TryGetFirst(out Keyboard keyboard))
-            {
-                //context.SelectMultiple = keyboard.IsPressed(Keyboard.Button.LeftShift);
-            }
-        }
-
         [UnmanagedCallersOnly]
-        private static void OnWindowClosed(World world, uint windowEntity)
+        private static void OnWindowClosed(Window window)
         {
-            world.DestroyEntity(windowEntity);
-        }
-
-        unsafe readonly (StartFunction, FinishFunction, UpdateFunction) IProgramType.GetFunctions()
-        {
-            return (new(&Start), new(&Finish), new(&Update));
-
-            [UnmanagedCallersOnly]
-            static Allocation Start(World world)
-            {
-                SelectionTest program = new(world);
-                return Allocation.Create(program);
-            }
-
-            [UnmanagedCallersOnly]
-            static void Finish(Allocation allocation)
-            {
-                ref SelectionTest program = ref allocation.Read<SelectionTest>();
-                program.Dispose();
-                allocation.Dispose();
-            }
-
-            [UnmanagedCallersOnly]
-            static uint Update(Allocation allocation, TimeSpan delta)
-            {
-                ref SelectionTest program = ref allocation.Read<SelectionTest>();
-                return program.Update(delta);
-            }
+            window.Dispose();
         }
     }
 }

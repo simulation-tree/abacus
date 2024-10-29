@@ -7,19 +7,30 @@ using Unmanaged;
 
 namespace Abacus
 {
-    public struct SimpleProgram : IProgramType, IDisposable
+    public struct SimpleProgram : IProgram
     {
-        private readonly World world;
         private TimeSpan time;
 
-        public SimpleProgram(World world)
+        unsafe readonly StartFunction IProgram.Start => new(&Start);
+        unsafe readonly UpdateFunction IProgram.Update => new(&Update);
+        unsafe readonly FinishFunction IProgram.Finish => new(&Finish);
+
+        [UnmanagedCallersOnly]
+        private static void Start(Simulator simulator, Allocation allocation, World world)
         {
-            this.world = world;
+            allocation.Write(new SimpleProgram());
         }
 
-        public readonly void Dispose()
+        [UnmanagedCallersOnly]
+        private static uint Update(Simulator simulator, Allocation allocation, World world, TimeSpan delta)
         {
+            ref SimpleProgram program = ref allocation.Read<SimpleProgram>();
+            return program.Update(delta);
+        }
 
+        [UnmanagedCallersOnly]
+        private static void Finish(Simulator simulator, Allocation allocation, World world, uint returnCode)
+        {
         }
 
         private uint Update(TimeSpan delta)
@@ -27,37 +38,10 @@ namespace Abacus
             time += delta;
             if (time >= TimeSpan.FromSeconds(5f))
             {
-                return default;
+                return 1;
             }
 
-            return 1;
-        }
-
-        readonly unsafe (StartFunction, FinishFunction, UpdateFunction) IProgramType.GetFunctions()
-        {
-            return (new(&Start), new(&Finish), new(&Update));
-
-            [UnmanagedCallersOnly]
-            static Allocation Start(World world)
-            {
-                SimpleProgram program = new(world);
-                return Allocation.Create(program);
-            }
-
-            [UnmanagedCallersOnly]
-            static void Finish(Allocation allocation)
-            {
-                ref SimpleProgram program = ref allocation.Read<SimpleProgram>();
-                program.Dispose();
-                allocation.Dispose();
-            }
-
-            [UnmanagedCallersOnly]
-            static uint Update(Allocation allocation, TimeSpan delta)
-            {
-                ref SimpleProgram program = ref allocation.Read<SimpleProgram>();
-                return program.Update(delta);
-            }
+            return 0;
         }
     }
 }

@@ -1,7 +1,6 @@
 ﻿using Automations;
 using Cameras.Components;
 using Data;
-using Data.Events;
 using DefaultPresentationAssets;
 using InputDevices;
 using InteractionKit;
@@ -19,7 +18,6 @@ using System;
 using System.Numerics;
 using System.Runtime.InteropServices;
 using Textures;
-using Textures.Events;
 using Transforms;
 using Transforms.Components;
 using Unmanaged;
@@ -27,22 +25,43 @@ using Windows;
 
 namespace Abacus
 {
-    public unsafe struct DesktopPlatformer : IDisposable, IProgramType
+    public readonly unsafe struct DesktopPlatformer : IProgram
     {
         private const float Gravity = 14f;
         private const float DisplayScale = 0.01f;
 
-        private readonly World world;
         private readonly Window window;
         private readonly Camera camera;
         private readonly Body floorBody;
         private readonly Body leftWallBody;
         private readonly Body rightWallBody;
 
-        public DesktopPlatformer(World world)
-        {
-            this.world = world;
+        readonly StartFunction IProgram.Start => new(&Start);
+        readonly UpdateFunction IProgram.Update => new(&Update);
+        readonly FinishFunction IProgram.Finish => new(&Finish);
 
+        [UnmanagedCallersOnly]
+        private static void Start(Simulator simulator, Allocation allocation, World world)
+        {
+            allocation.Write(new DesktopPlatformer(simulator, world));
+        }
+
+        [UnmanagedCallersOnly]
+        private static uint Update(Simulator simulator, Allocation allocation, World world, TimeSpan delta)
+        {
+            ref DesktopPlatformer program = ref allocation.Read<DesktopPlatformer>();
+            return program.Update(simulator, world, delta);
+        }
+
+        [UnmanagedCallersOnly]
+        private static void Finish(Simulator simulator, Allocation allocation, World world, uint returnCode)
+        {
+            ref DesktopPlatformer program = ref allocation.Read<DesktopPlatformer>();
+            program.CleanUp();
+        }
+
+        private DesktopPlatformer(Simulator simulator, World world)
+        {
             window = new(world, "Fly", default, new(200, 200), "vulkan", new(&WindowClosed));
             window.Position = new(200, 200);
             window.IsTransparent = true;
@@ -83,20 +102,20 @@ namespace Abacus
             Material unlitMaterial = new(world, Address.Get<UnlitTexturedMaterial>());
             unlitMaterial.AddPushBinding<Color>();
             unlitMaterial.AddPushBinding<LocalToWorld>();
-            unlitMaterial.AddComponentBinding<CameraProjection>(0, 0, camera);
+            unlitMaterial.AddComponentBinding<CameraMatrices>(0, 0, camera);
             unlitMaterial.AddTextureBinding(1, 0, squareTexture);
 
-            AtlasTexture playerAtlas = GetPlayerAtlas();
+            AtlasTexture playerAtlas = GetPlayerAtlas(simulator, world);
 
             Material playerMaterial = new(world, Address.Get<UnlitTexturedMaterial>());
             playerMaterial.AddPushBinding<Color>();
             playerMaterial.AddPushBinding<LocalToWorld>();
-            playerMaterial.AddComponentBinding<CameraProjection>(0, 0, camera);
+            playerMaterial.AddComponentBinding<CameraMatrices>(0, 0, camera);
             playerMaterial.AddTextureBinding(1, 0, playerAtlas, TextureFiltering.Nearest);
 
             //create player
             Body playerBody = new(world, new CubeShape(0.5f), IsBody.Type.Dynamic);
-            Renderer playerRenderer = playerBody.AsEntity().Become<Renderer>();
+            MeshRenderer playerRenderer = playerBody.AsEntity().Become<MeshRenderer>();
             playerRenderer.Mesh = quadMesh;
             playerRenderer.Material = playerMaterial;
             playerRenderer.Camera = camera;
@@ -163,13 +182,21 @@ namespace Abacus
             new GlobalMouse(world);
 
             [UnmanagedCallersOnly]
-            static void WindowClosed(World world, uint windowEntity)
+            static void WindowClosed(Window window)
             {
-                world.DestroyEntity(windowEntity);
+                window.Dispose();
             }
         }
 
-        private readonly AtlasTexture GetPlayerAtlas()
+        private readonly void CleanUp()
+        {
+            if (!window.IsDestroyed())
+            {
+                window.Dispose();
+            }
+        }
+
+        private readonly AtlasTexture GetPlayerAtlas(Simulator simulator, World world)
         {
             Texture idle = new(world, "*/Assets/Textures/Spaceman/Idle.png");
             Texture idle2 = new(world, "*/Assets/Textures/Spaceman/Idle2.png");
@@ -179,9 +206,7 @@ namespace Abacus
             Texture walk = new(world, "*/Assets/Textures/Spaceman/Walk.png");
             Texture walk2 = new(world, "*/Assets/Textures/Spaceman/Walk2.png");
 
-            world.Submit(new DataUpdate());
-            world.Submit(new TextureUpdate());
-            world.Poll();
+            simulator.UpdateSystems(TimeSpan.MinValue);
 
             USpan<AtlasTexture.InputSprite> sprites = stackalloc AtlasTexture.InputSprite[]
             {
@@ -198,42 +223,38 @@ namespace Abacus
             return atlasTexture;
         }
 
-        public readonly void Dispose()
-        {
-        }
-
-        public uint Update(TimeSpan delta)
+        private readonly uint Update(Simulator simulator, World world, TimeSpan delta)
         {
             if (window.IsDestroyed())
             {
-                return 0;
+                return 1;
             }
 
-            UpdateCollidersToMatchDisplay();
-            (Vector2 direction, bool jump) = ReadInput();
-            MovePlayer(direction, jump, delta);
-            AnimatePlayerParameters();
-            CheckIfPlayersAreGrounded();
-            MakeCameraFollowPlayer();
-            MakeWindowFollowCamera();
-            UpdateRegionToMatchAnimatedSprite();
-            TeleportPlayerToMousePosition();
-            CloseWindow();
-            return 1;
+            UpdateCollidersToMatchDisplay(world);
+            (Vector2 direction, bool jump) = ReadInput(world);
+            MovePlayer(world, direction, jump, delta);
+            AnimatePlayerParameters(world);
+            CheckIfPlayersAreGrounded(simulator, world);
+            MakeCameraFollowPlayer(world);
+            MakeWindowFollowCamera(world);
+            UpdateRegionToMatchAnimatedSprite(world);
+            TeleportPlayerToMousePosition(world);
+            CloseWindow(world);
+            return 0;
         }
 
-        private readonly void CloseWindow()
+        private readonly void CloseWindow(World world)
         {
             if (world.TryGetFirst(out Keyboard keyboard))
             {
                 if (keyboard.WasPressed(Keyboard.Button.Escape))
                 {
-                    window.Destroy();
+                    window.Dispose();
                 }
             }
         }
 
-        private readonly void TeleportPlayerToMousePosition()
+        private readonly void TeleportPlayerToMousePosition(World world)
         {
             if (world.TryGetFirst(out GlobalMouse mouse))
             {
@@ -243,7 +264,7 @@ namespace Abacus
                     Vector2 mousePosition = mouse.Position;
                     mousePosition.X -= width * 0.5f;
                     mousePosition.Y += height * 0.5f;
-                    Entity player = GetMainPlayer();
+                    Entity player = GetMainPlayer(world);
                     if (player != default)
                     {
                         Transform playerTransform = player.As<Transform>();
@@ -256,7 +277,7 @@ namespace Abacus
             }
         }
 
-        private readonly (Vector2 direction, bool jump) ReadInput()
+        private static (Vector2 direction, bool jump) ReadInput(World world)
         {
             if (world.TryGetFirst(out GlobalKeyboard keyboard))
             {
@@ -294,7 +315,7 @@ namespace Abacus
             }
         }
 
-        private readonly Entity GetMainPlayer()
+        private static Entity GetMainPlayer(World world)
         {
             foreach (uint playerEntity in world.GetAll<IsPlayer>())
             {
@@ -308,9 +329,9 @@ namespace Abacus
             return default;
         }
 
-        private readonly void MovePlayer(Vector2 direction, bool jump, TimeSpan delta)
+        private readonly void MovePlayer(World world, Vector2 direction, bool jump, TimeSpan delta)
         {
-            Entity player = GetMainPlayer();
+            Entity player = GetMainPlayer(world);
             if (player == default)
             {
                 return;
@@ -343,13 +364,13 @@ namespace Abacus
             playerTransform.WorldPosition = playerPosition;
         }
 
-        private readonly void CheckIfPlayersAreGrounded()
+        private readonly void CheckIfPlayersAreGrounded(Simulator simulator, World world)
         {
             foreach (uint playerEntity in world.GetAll<IsPlayer>())
             {
                 Entity player = new(world, playerEntity);
                 Transform playerTransform = player.As<Transform>();
-                world.Submit(new Raycast(playerTransform.WorldPosition, -Vector3.UnitY, new(&GroundHitCallback), 0.5f, player.GetEntityValue()));
+                simulator.TryHandleMessage(new Raycast(playerTransform.WorldPosition, -Vector3.UnitY, new(&GroundHitCallback), 0.5f, player.GetEntityValue()));
                 player.SetComponent(new GroundedState(false));
             }
 
@@ -369,9 +390,9 @@ namespace Abacus
             }
         }
 
-        private readonly void MakeCameraFollowPlayer()
+        private readonly void MakeCameraFollowPlayer(World world)
         {
-            Entity player = GetMainPlayer();
+            Entity player = GetMainPlayer(world);
             if (player == default)
             {
                 return;
@@ -384,7 +405,7 @@ namespace Abacus
             cameraTransform.WorldPosition = new(playerPosition.X, playerPosition.Y, cameraPosition.Z);
         }
 
-        private readonly void MakeWindowFollowCamera()
+        private readonly void MakeWindowFollowCamera(World world)
         {
             Transform cameraTransform = camera.AsEntity().Become<Transform>();
             Vector3 cameraPosition = cameraTransform.WorldPosition;
@@ -399,7 +420,7 @@ namespace Abacus
             window.Position = new(windowPosition.X, display.height - windowPosition.Y);
         }
 
-        private readonly void UpdateCollidersToMatchDisplay()
+        private readonly void UpdateCollidersToMatchDisplay(World world)
         {
             (uint width, uint height, uint refreshRate) display = window.Display;
             Transform floorTransform = floorBody;
@@ -418,7 +439,7 @@ namespace Abacus
             rightWallTransform.LocalScale = new(2f, height + 1f, 2f);
         }
 
-        private readonly void AnimatePlayerParameters()
+        private readonly void AnimatePlayerParameters(World world)
         {
             foreach (uint playerEntity in world.GetAll<IsPlayer>())
             {
@@ -451,12 +472,11 @@ namespace Abacus
             }
         }
 
-        private readonly void UpdateRegionToMatchAnimatedSprite()
+        private static void UpdateRegionToMatchAnimatedSprite(World world)
         {
-            World world = this.world;
             world.ForEach((in uint entity, ref AnimatedSprite animatedSprite, ref IsRenderer _) =>
             {
-                Renderer renderer = new(world, entity);
+                MeshRenderer renderer = new(world, entity);
                 Material material = renderer.Material;
                 ref MaterialTextureBinding binding = ref material.GetTextureBindingRef(1, 0);
                 AtlasTexture atlasTexture = new(world, binding.TextureEntity);
@@ -465,33 +485,6 @@ namespace Abacus
                     binding.SetRegion(sprite.region);
                 }
             });
-        }
-
-        readonly unsafe (StartFunction, FinishFunction, UpdateFunction) IProgramType.GetFunctions()
-        {
-            return (new(&Start), new(&Finish), new(&Update));
-
-            [UnmanagedCallersOnly]
-            static Allocation Start(World world)
-            {
-                DesktopPlatformer program = new(world);
-                return Allocation.Create(program);
-            }
-
-            [UnmanagedCallersOnly]
-            static void Finish(Allocation allocation)
-            {
-                ref DesktopPlatformer program = ref allocation.Read<DesktopPlatformer>();
-                program.Dispose();
-                allocation.Dispose();
-            }
-
-            [UnmanagedCallersOnly]
-            static uint Update(Allocation allocation, TimeSpan delta)
-            {
-                ref DesktopPlatformer program = ref allocation.Read<DesktopPlatformer>();
-                return program.Update(delta);
-            }
         }
 
         private static float Lerp(float a, float b, float t)

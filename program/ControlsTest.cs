@@ -18,14 +18,37 @@ using Windows;
 
 namespace Abacus
 {
-    public struct ControlsTest : IDisposable, IProgramType
+    public readonly struct ControlsTest : IProgram
     {
-        private readonly World world;
+        private readonly Window window;
 
-        public unsafe ControlsTest(World world)
+        unsafe readonly StartFunction IProgram.Start => new(&Start);
+        unsafe readonly UpdateFunction IProgram.Update => new(&Update);
+        unsafe readonly FinishFunction IProgram.Finish => new(&Finish);
+
+        [UnmanagedCallersOnly]
+        private static void Start(Simulator simulator, Allocation allocation, World world)
         {
-            this.world = world;
-            Window window = new(world, "Editor", new(200, 200), new(900, 720), "vulkan", new(&OnWindowClosed));
+            allocation.Write(new ControlsTest(world));
+        }
+
+        [UnmanagedCallersOnly]
+        private static uint Update(Simulator simulator, Allocation allocation, World world, TimeSpan delta)
+        {
+            ref ControlsTest program = ref allocation.Read<ControlsTest>();
+            return program.Update(world, delta);
+        }
+
+        [UnmanagedCallersOnly]
+        private static void Finish(Simulator simulator, Allocation allocation, World world, uint returnCode)
+        {
+            ref ControlsTest program = ref allocation.Read<ControlsTest>();
+            program.CleanUp();
+        }
+
+        private unsafe ControlsTest(World world)
+        {
+            window = new(world, "Editor", new(200, 200), new(900, 720), "vulkan", new(&OnWindowClosed));
             window.IsResizable = true;
 
             Settings settings = new(world);
@@ -38,38 +61,42 @@ namespace Abacus
             //box.Anchor = new(new(2f, true), new(2f, true), new(0f, false), new(2f, true), new(2f, true), new(0f, false));
         }
 
-        public readonly void Dispose()
+        private readonly void CleanUp()
         {
+            if (!window.IsDestroyed())
+            {
+                window.Dispose();
+            }
         }
 
-        public uint Update(TimeSpan delta)
+        private readonly uint Update(World world, TimeSpan delta)
         {
-            if (!IsAnyVirtualWindowOpen())
+            if (!IsAnyVirtualWindowOpen(world))
             {
-                return 0;
+                return 1;
             }
 
-            if (!IsAnyWindowOpen())
+            if (!IsAnyWindowOpen(world))
             {
-                return 0;
+                return 2;
             }
 
-            MakeFirstMouseAPointer();
-            UpdateInteractiveContext();
-            return 1;
+            MakeFirstMouseAPointer(world);
+            UpdateInteractiveContext(world);
+            return 0;
         }
 
-        private readonly bool IsAnyVirtualWindowOpen()
+        private static bool IsAnyVirtualWindowOpen(World world)
         {
             return world.TryGetFirst(out VirtualWindow _);
         }
 
-        private readonly bool IsAnyWindowOpen()
+        private static bool IsAnyWindowOpen(World world)
         {
             return world.TryGetFirst(out Window _);
         }
 
-        private readonly void MakeFirstMouseAPointer()
+        private static void MakeFirstMouseAPointer(World world)
         {
             if (world.TryGetFirst(out Mouse mouse))
             {
@@ -105,7 +132,7 @@ namespace Abacus
             }
         }
 
-        private readonly void UpdateInteractiveContext()
+        private readonly void UpdateInteractiveContext(World world)
         {
             if (world.TryGetFirst(out Keyboard keyboard))
             {
@@ -123,37 +150,11 @@ namespace Abacus
             }
         }
 
+
         [UnmanagedCallersOnly]
-        private static void OnWindowClosed(World world, uint windowEntity)
+        private static void OnWindowClosed(Window window)
         {
-            world.DestroyEntity(windowEntity);
-        }
-
-        unsafe readonly (StartFunction, FinishFunction, UpdateFunction) IProgramType.GetFunctions()
-        {
-            return (new(&Start), new(&Finish), new(&Update));
-
-            [UnmanagedCallersOnly]
-            static Allocation Start(World world)
-            {
-                ControlsTest program = new(world);
-                return Allocation.Create(program);
-            }
-
-            [UnmanagedCallersOnly]
-            static void Finish(Allocation allocation)
-            {
-                ref ControlsTest program = ref allocation.Read<ControlsTest>();
-                program.Dispose();
-                allocation.Dispose();
-            }
-
-            [UnmanagedCallersOnly]
-            static uint Update(Allocation allocation, TimeSpan delta)
-            {
-                ref ControlsTest program = ref allocation.Read<ControlsTest>();
-                return program.Update(delta);
-            }
+            window.Dispose();
         }
 
         public readonly struct ControlsDemoWindow : IVirtualWindow
@@ -307,10 +308,11 @@ namespace Abacus
             }
 
             [UnmanagedCallersOnly]
-            private static void PressedTestButton(World world, uint buttonEntity)
+            private static void PressedTestButton(Entity buttonEntity)
             {
-                uint containerEntity = world.GetParent(buttonEntity);
-                USpan<uint> children = world.GetChildren(containerEntity);
+                World world = buttonEntity.GetWorld();
+                Entity containerEntity = buttonEntity.Parent;
+                USpan<uint> children = containerEntity.Children;
                 bool toggleValue = default;
                 for (uint i = 0; i < children.Length; i++)
                 {
@@ -324,7 +326,7 @@ namespace Abacus
                     }
                 }
 
-                children = world.GetChildren(buttonEntity);
+                children = buttonEntity.Children;
                 for (uint i = 0; i < children.Length; i++)
                 {
                     uint child = children[i];
@@ -358,7 +360,7 @@ namespace Abacus
             [UnmanagedCallersOnly]
             private static void Closed(VirtualWindow virtualWindow)
             {
-                virtualWindow.Destroy();
+                virtualWindow.Dispose();
             }
         }
     }

@@ -1,6 +1,5 @@
 ﻿using Cameras.Components;
 using Data;
-using Data.Events;
 using DefaultPresentationAssets;
 using Meshes;
 using Meshes.Components;
@@ -14,7 +13,6 @@ using System;
 using System.Numerics;
 using System.Runtime.InteropServices;
 using Textures;
-using Textures.Events;
 using Transforms;
 using Transforms.Components;
 using Unmanaged;
@@ -23,9 +21,9 @@ using Windows;
 
 namespace Abacus
 {
-    public struct VoxelGame : IDisposable, IProgramType
+    public struct VoxelGame : IProgram
     {
-        private readonly World world;
+        private readonly Window window;
         private readonly Camera camera;
         private readonly Material chunkMaterial;
         private readonly Mesh quadMesh;
@@ -33,28 +31,51 @@ namespace Abacus
         private Vector3 cameraPosition;
         private Vector2 cameraPitchYaw;
 
-        public VoxelGame(World world)
+        unsafe readonly StartFunction IProgram.Start => new(&Start);
+        unsafe readonly UpdateFunction IProgram.Update => new(&Update);
+        unsafe readonly FinishFunction IProgram.Finish => new(&Finish);
+
+        [UnmanagedCallersOnly]
+        private static void Start(Simulator simulator, Allocation allocation, World world)
         {
-            this.world = world;
-            Window window = CreateWindow();
+            allocation.Write(new VoxelGame(simulator, world));
+        }
+
+        [UnmanagedCallersOnly]
+        private static uint Update(Simulator simulator, Allocation allocation, World world, TimeSpan delta)
+        {
+            ref VoxelGame program = ref allocation.Read<VoxelGame>();
+            return program.Update(world, delta);
+        }
+
+        [UnmanagedCallersOnly]
+        private static void Finish(Simulator simulator, Allocation allocation, World world, uint returnCode)
+        {
+            ref VoxelGame program = ref allocation.Read<VoxelGame>();
+            program.CleanUp();
+        }
+
+        private VoxelGame(Simulator simulator, World world)
+        {
+            window = CreateWindow(world);
 
             camera = new(world, window, CameraFieldOfView.FromDegrees(90f));
             Transform cameraTransform = camera.AsEntity().Become<Transform>();
             cameraTransform.LocalPosition = new(0f, 1f, -10f);
             cameraPosition = cameraTransform.LocalPosition;
 
-            chunkAtlas = GetChunkAtlas();
+            chunkAtlas = GetChunkAtlas(simulator, world);
 
             chunkMaterial = new(world, Address.Get<UnlitTexturedMaterial>());
             chunkMaterial.AddPushBinding<Color>();
             chunkMaterial.AddPushBinding<LocalToWorld>();
-            chunkMaterial.AddComponentBinding<CameraProjection>(0, 0, camera.entity);
+            chunkMaterial.AddComponentBinding<CameraMatrices>(0, 0, camera.entity);
             chunkMaterial.AddTextureBinding(1, 0, chunkAtlas, TextureFiltering.Nearest);
 
             Model quadModel = new(world, Address.Get<QuadModel>());
             quadMesh = new(world, quadModel.entity);
 
-            Renderer quadRenderer = new(world, quadMesh, chunkMaterial, camera);
+            MeshRenderer quadRenderer = new(world, quadMesh, chunkMaterial, camera);
             quadRenderer.Mesh = quadMesh;
             quadRenderer.Material = chunkMaterial;
             quadRenderer.Camera = camera;
@@ -67,23 +88,31 @@ namespace Abacus
             {
                 for (int cz = -chunkRadius; cz < chunkRadius; cz++)
                 {
-                    GenerateChunk(cx, 0, cz);
+                    GenerateChunk(world, cx, 0, cz);
                 }
             }
         }
 
-        private readonly unsafe Window CreateWindow()
+        private readonly void CleanUp()
+        {
+            if (!window.IsDestroyed())
+            {
+                window.Dispose();
+            }
+        }
+
+        private static unsafe Window CreateWindow(World world)
         {
             return new(world, "Voxel Game", new Vector2(400, 200), new(900, 720), "vulkan", new(&WindowClosed));
 
             [UnmanagedCallersOnly]
-            static void WindowClosed(World world, uint windowEntity)
+            static void WindowClosed(Window window)
             {
-                world.DestroyEntity(windowEntity);
+                window.Dispose();
             }
         }
 
-        private readonly AtlasTexture GetChunkAtlas()
+        private readonly AtlasTexture GetChunkAtlas(Simulator simulator, World world)
         {
             Texture dirt = new(world, "*/Assets/Textures/Blocks/Dirt.png");
             Texture grass = new(world, "*/Assets/Textures/Blocks/Grass.png");
@@ -91,9 +120,7 @@ namespace Abacus
             Texture grassSide = new(world, "*/Assets/Textures/Blocks/GrassSide.png");
             Texture cobblestone = new(world, "*/Assets/Textures/Blocks/Cobblestone.png");
 
-            world.Submit(new DataUpdate());
-            world.Submit(new TextureUpdate());
-            world.Poll();
+            simulator.UpdateSystems(TimeSpan.MinValue);
 
             USpan<AtlasTexture.InputSprite> sprites = stackalloc AtlasTexture.InputSprite[]
             {
@@ -108,10 +135,10 @@ namespace Abacus
             return atlasTexture;
         }
 
-        private readonly void GenerateChunk(int cx, int cy, int cz)
+        private readonly void GenerateChunk(World world, int cx, int cy, int cz)
         {
             using RandomGenerator rng = new();
-            FastNoiseLite noise = new FastNoiseLite();
+            FastNoiseLite noise = new();
             noise.SetNoiseType(FastNoiseLite.NoiseType.OpenSimplex2);
             float frequency = 4f;
             float amplitude = 6f;
@@ -159,52 +186,21 @@ namespace Abacus
             chunk.UpdateMeshToMatchBlocks(chunkAtlas);
         }
 
-        public readonly void Dispose()
+        private uint Update(World world, TimeSpan delta)
         {
-        }
-
-        public uint Update(TimeSpan delta)
-        {
-            if (!AnyWindowOpen())
+            if (!AnyWindowOpen(world))
             {
-                return 0;
+                return 1;
             }
 
             Transform cameraTransform = camera.AsEntity().As<Transform>();
             SharedFunctions.MoveCameraAround(world, cameraTransform, delta, ref cameraPosition, ref cameraPitchYaw, new(1f, 1f));
-            return 1;
+            return 0;
         }
 
-        private readonly bool AnyWindowOpen()
+        private static bool AnyWindowOpen(World world)
         {
-            return world.TryGetFirst(out Window window);
-        }
-
-        readonly unsafe (StartFunction, FinishFunction, UpdateFunction) IProgramType.GetFunctions()
-        {
-            return (new(&Start), new(&Finish), new(&Update));
-
-            [UnmanagedCallersOnly]
-            static Allocation Start(World world)
-            {
-                VoxelGame program = new(world);
-                return Allocation.Create(program);
-            }
-
-            [UnmanagedCallersOnly]
-            static void Finish(Allocation allocation)
-            {
-                ref VoxelGame program = ref allocation.Read<VoxelGame>();
-                program.Dispose();
-                allocation.Dispose();
-            }
-
-            [UnmanagedCallersOnly]
-            static uint Update(Allocation allocation, TimeSpan delta)
-            {
-                ref VoxelGame program = ref allocation.Read<VoxelGame>();
-                return program.Update(delta);
-            }
+            return world.CountEntities<Window>() > 0;
         }
 
         public readonly struct Chunk : IEntity
@@ -237,20 +233,25 @@ namespace Abacus
             {
                 uint capacity = chunkSize * chunkSize * chunkSize;
                 mesh = new(world);
-                mesh.AsEntity().AddComponent(new IsChunk(chunkSize));
+                mesh.AddComponent(new IsChunk(chunkSize));
                 mesh.CreatePositions(0);
                 mesh.CreateColors(0);
                 mesh.CreateUVs(0);
                 USpan<BlockID> blocks = mesh.AsEntity().CreateArray<BlockID>(capacity);
                 blocks.Clear();
 
-                Renderer chunkRenderer = mesh.AsEntity().Become<Renderer>();
+                MeshRenderer chunkRenderer = mesh.AsEntity().Become<MeshRenderer>();
                 chunkRenderer.Mesh = mesh;
                 chunkRenderer.Material = unlitMaterial;
                 chunkRenderer.Camera = camera;
-                chunkRenderer.AsEntity().AddComponent(Color.White);
+                chunkRenderer.AddComponent(Color.White);
                 Transform chunkTransform = chunkRenderer.AsEntity().Become<Transform>();
                 chunkTransform.LocalPosition = new Vector3(cx, cy, cz) * chunkSize;
+            }
+
+            public readonly void Dispose()
+            {
+                mesh.Dispose();
             }
 
             public readonly void UpdateMeshToMatchBlocks(AtlasTexture chunkAtlas)

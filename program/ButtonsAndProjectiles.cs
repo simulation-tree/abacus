@@ -27,18 +27,39 @@ using Windows;
 
 namespace Abacus
 {
-    public struct ButtonsAndProjectiles : IDisposable, IProgramType
+    public struct ButtonsAndProjectiles : IProgram
     {
-        private readonly World world;
         private readonly Window window;
-        public readonly Camera worldCamera;
+        private readonly Camera worldCamera;
         private Vector3 cameraPosition;
         private Vector2 cameraPitchYaw;
 
-        public unsafe ButtonsAndProjectiles(World world)
-        {
-            this.world = world;
+        unsafe readonly StartFunction IProgram.Start => new(&Start);
+        unsafe readonly UpdateFunction IProgram.Update => new(&Update);
+        unsafe readonly FinishFunction IProgram.Finish => new(&Finish);
 
+        [UnmanagedCallersOnly]
+        private static void Start(Simulator simulator, Allocation allocation, World world)
+        {
+            allocation.Write(new ButtonsAndProjectiles(world));
+        }
+
+        [UnmanagedCallersOnly]
+        private static uint Update(Simulator simulator, Allocation allocation, World world, TimeSpan delta)
+        {
+            ref ButtonsAndProjectiles program = ref allocation.Read<ButtonsAndProjectiles>();
+            return program.Update(simulator, world, delta);
+        }
+
+        [UnmanagedCallersOnly]
+        private static void Finish(Simulator simulator, Allocation allocation, World world, uint returnCode)
+        {
+            ref ButtonsAndProjectiles program = ref allocation.Read<ButtonsAndProjectiles>();
+            program.CleanUp();
+        }
+
+        private unsafe ButtonsAndProjectiles(World world)
+        {
             //window to render everything
             window = new(world, "Fly", default, new(900, 600), "vulkan", new(&WindowClosed));
             window.IsResizable = true;
@@ -60,19 +81,19 @@ namespace Abacus
             Material unlitWorldMaterial = new(world, Address.Get<UnlitTexturedMaterial>());
             unlitWorldMaterial.AddPushBinding<Color>();
             unlitWorldMaterial.AddPushBinding<LocalToWorld>();
-            unlitWorldMaterial.AddComponentBinding<CameraProjection>(0, 0, worldCamera);
+            unlitWorldMaterial.AddComponentBinding<CameraMatrices>(0, 0, worldCamera);
             unlitWorldMaterial.AddTextureBinding(1, 0, squareTexture);
 
             Canvas canvas = new(world, uiCamera);
             Settings settings = new(world);
 
             Material textMaterial = new(world, Address.Get<TextMaterial>());
-            textMaterial.AddComponentBinding<CameraProjection>(1, 0, uiCamera);
+            textMaterial.AddComponentBinding<CameraMatrices>(1, 0, uiCamera);
             textMaterial.AddPushBinding<Color>();
             textMaterial.AddPushBinding<LocalToWorld>();
 
             //crate test cube
-            Renderer waveRenderer = new(world, cubeMesh, unlitWorldMaterial, worldCamera);
+            MeshRenderer waveRenderer = new(world, cubeMesh, unlitWorldMaterial, worldCamera);
             Transform waveTransform = waveRenderer.entity.Become<Transform>();
             waveRenderer.entity.AddComponent(Color.Red);
             waveRenderer.entity.AddComponent(new IsBody(new CubeShape(0.5f), IsBody.Type.Static));
@@ -100,37 +121,37 @@ namespace Abacus
             textRenderer.AddComponent(Pivot.TopLeft);
 
             [UnmanagedCallersOnly]
-            static void TestBoxPressed(World world, uint entity)
+            static void TestBoxPressed(Entity entity)
             {
                 Debug.WriteLine("Test box pressed");
             }
 
             [UnmanagedCallersOnly]
-            static void AnotherBoxPressed(World world, uint entity)
+            static void AnotherBoxPressed(Entity entity)
             {
                 Debug.WriteLine("Another box pressed");
             }
 
             [UnmanagedCallersOnly]
-            static void WindowClosed(World world, uint windowEntity)
+            static void WindowClosed(Window window)
             {
-                world.DestroyEntity(windowEntity);
+                window.Dispose();
             }
         }
 
-        public void Dispose()
+        private readonly void CleanUp()
         {
             if (!window.IsDestroyed())
             {
-                window.Destroy();
+                window.Dispose();
             }
         }
 
-        public unsafe uint Update(TimeSpan delta)
+        private unsafe uint Update(Simulator simulator, World world, TimeSpan delta)
         {
             if (window.IsDestroyed())
             {
-                return default;
+                return 1;
             }
 
             Transform cameraTransform = worldCamera.entity.Become<Transform>();
@@ -160,8 +181,8 @@ namespace Abacus
                 if (mouse.WasPressed(Mouse.Button.LeftButton))
                 {
                     Vector2 screenPoint = worldCamera.Destination.GetScreenPointFromPosition(mouse.Position);
-                    (Vector3 origin, Vector3 direction) ray = worldCamera.GetProjection().GetRayFromScreenPoint(screenPoint);
-                    world.Submit(new Raycast(ray.origin, ray.direction, new(&OnRaycastHit)));
+                    (Vector3 origin, Vector3 direction) ray = worldCamera.GetMatrices().GetRayFromScreenPoint(screenPoint);
+                    simulator.TryHandleMessage(new Raycast(ray.origin, ray.direction, new(&OnRaycastHit)));
 
                     [UnmanagedCallersOnly]
                     static void OnRaycastHit(World world, Raycast raycast, RaycastHit* hits, uint hitsCount)
@@ -179,34 +200,7 @@ namespace Abacus
                 }
             }
 
-            return 1;
-        }
-
-        readonly unsafe (StartFunction, FinishFunction, UpdateFunction) IProgramType.GetFunctions()
-        {
-            return (new(&Start), new(&Finish), new(&Update));
-
-            [UnmanagedCallersOnly]
-            static Allocation Start(World world)
-            {
-                ButtonsAndProjectiles program = new(world);
-                return Allocation.Create(program);
-            }
-
-            [UnmanagedCallersOnly]
-            static void Finish(Allocation allocation)
-            {
-                ref ButtonsAndProjectiles program = ref allocation.Read<ButtonsAndProjectiles>();
-                program.Dispose();
-                allocation.Dispose();
-            }
-
-            [UnmanagedCallersOnly]
-            static uint Update(Allocation allocation, TimeSpan delta)
-            {
-                ref ButtonsAndProjectiles program = ref allocation.Read<ButtonsAndProjectiles>();
-                return program.Update(delta);
-            }
+            return default;
         }
     }
 }

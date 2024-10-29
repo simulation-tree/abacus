@@ -10,12 +10,36 @@ using Windows;
 
 namespace Abacus
 {
-    public struct WindowThatFollowsTheMouse : IDisposable, IProgramType
+    public struct WindowThatFollowsTheMouse : IProgram
     {
         private readonly World world;
         private readonly Window followerWindow;
 
-        public unsafe WindowThatFollowsTheMouse(World world)
+        unsafe readonly StartFunction IProgram.Start => new(&Start);
+        unsafe readonly UpdateFunction IProgram.Update => new(&Update);
+        unsafe readonly FinishFunction IProgram.Finish => new(&Finish);
+
+        [UnmanagedCallersOnly]
+        private static void Start(Simulator simulator, Allocation allocation, World world)
+        {
+            allocation.Write(new WindowThatFollowsTheMouse(world));
+        }
+
+        [UnmanagedCallersOnly]
+        private static uint Update(Simulator simulator, Allocation allocation, World world, TimeSpan delta)
+        {
+            ref WindowThatFollowsTheMouse program = ref allocation.Read<WindowThatFollowsTheMouse>();
+            return program.Update(delta);
+        }
+
+        [UnmanagedCallersOnly]
+        private static void Finish(Simulator simulator, Allocation allocation, World world, uint returnCode)
+        {
+            ref WindowThatFollowsTheMouse program = ref allocation.Read<WindowThatFollowsTheMouse>();
+            program.CleanUp();
+        }
+
+        private unsafe WindowThatFollowsTheMouse(World world)
         {
             this.world = world;
             followerWindow = new(world, "Fly", default, new(100, 100), "vulkan", new(&WindowClosed));
@@ -25,17 +49,17 @@ namespace Abacus
             new GlobalMouse(world);
 
             [UnmanagedCallersOnly]
-            static void WindowClosed(World world, uint windowEntity)
+            static void WindowClosed(Window window)
             {
-                world.DestroyEntity(windowEntity);
+                window.Dispose();
             }
         }
 
-        public uint Update(TimeSpan delta)
+        private readonly uint Update(TimeSpan delta)
         {
             if (followerWindow.IsDestroyed())
             {
-                return 0;
+                return 1;
             }
 
             bool holdingShift = false;
@@ -64,41 +88,14 @@ namespace Abacus
                 }
             }
 
-            return 1;
+            return 0;
         }
 
-        public void Dispose()
+        private readonly void CleanUp()
         {
             if (!followerWindow.IsDestroyed())
             {
-                followerWindow.Destroy();
-            }
-        }
-
-        readonly unsafe (StartFunction, FinishFunction, UpdateFunction) IProgramType.GetFunctions()
-        {
-            return (new(&Start), new(&Finish), new(&Update));
-
-            [UnmanagedCallersOnly]
-            static Allocation Start(World world)
-            {
-                WindowThatFollowsTheMouse program = new(world);
-                return Allocation.Create(program);
-            }
-
-            [UnmanagedCallersOnly]
-            static void Finish(Allocation allocation)
-            {
-                ref WindowThatFollowsTheMouse program = ref allocation.Read<WindowThatFollowsTheMouse>();
-                program.Dispose();
-                allocation.Dispose();
-            }
-
-            [UnmanagedCallersOnly]
-            static uint Update(Allocation allocation, TimeSpan delta)
-            {
-                ref WindowThatFollowsTheMouse program = ref allocation.Read<WindowThatFollowsTheMouse>();
-                return program.Update(delta);
+                followerWindow.Dispose();
             }
         }
     }

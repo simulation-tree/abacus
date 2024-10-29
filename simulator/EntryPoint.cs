@@ -9,29 +9,27 @@ namespace AbacusSimulator
     {
         private static int Main(string[] args)
         {
-            World gameWorld = new();
-            AbacusSimulator simulator = new();
-            simulator.Start(gameWorld);
-            Program game = Program.Create<ControlsTest>(gameWorld);
-
-            uint gameReturnCode;
-            DateTime lastTime = DateTime.UtcNow;
-            do
+            using (World world = new())
             {
-                DateTime now = DateTime.UtcNow;
-                TimeSpan delta = now - lastTime;
-                lastTime = now;
+                using (AbacusSimulator simulator = new(world))
+                {
+                    using (Program program = Program.Create<VoxelGame>(world))
+                    {
+                        DateTime lastTime = DateTime.UtcNow;
+                        uint returnCode;
+                        do
+                        {
+                            DateTime now = DateTime.UtcNow;
+                            TimeSpan delta = now - lastTime;
+                            lastTime = now;
 
-                simulator.Update(gameWorld, delta);
-                gameReturnCode = game.Update(delta);
+                            simulator.Update(delta);
+                        }
+                        while (!program.IsFinished(out returnCode));
+                        return (int)returnCode;
+                    }
+                }
             }
-            while (gameReturnCode != default);
-
-            game.Dispose();
-            simulator.Dispose(gameWorld);
-            gameWorld.Dispose();
-
-            return (int)gameReturnCode;
         }
     }
 }

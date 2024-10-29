@@ -23,9 +23,8 @@ using Windows;
 
 namespace Abacus
 {
-    public struct PhysicsDemo : IDisposable, IProgramType
+    public struct PhysicsDemo : IProgram
     {
-        private readonly World world;
         private readonly Window window;
         private readonly Camera camera;
         private readonly Transform cameraTransform;
@@ -38,9 +37,32 @@ namespace Abacus
         private Vector3 cameraPosition;
         private Vector2 cameraPitchYaw;
 
-        public unsafe PhysicsDemo(World world)
+        unsafe readonly StartFunction IProgram.Start => new(&Start);
+        unsafe readonly UpdateFunction IProgram.Update => new(&Update);
+        unsafe readonly FinishFunction IProgram.Finish => new(&Finish);
+
+        [UnmanagedCallersOnly]
+        private static void Start(Simulator simulator, Allocation allocation, World world)
         {
-            this.world = world;
+            allocation.Write(new PhysicsDemo(world));
+        }
+
+        [UnmanagedCallersOnly]
+        private static uint Update(Simulator simulator, Allocation allocation, World world, TimeSpan delta)
+        {
+            ref PhysicsDemo program = ref allocation.Read<PhysicsDemo>();
+            return program.Update(simulator, world, delta);
+        }
+
+        [UnmanagedCallersOnly]
+        private static void Finish(Simulator simulator, Allocation allocation, World world, uint returnCode)
+        {
+            ref PhysicsDemo program = ref allocation.Read<PhysicsDemo>();
+            program.CleanUp();
+        }
+
+        private unsafe PhysicsDemo(World world)
+        {
             window = new(world, "Physics Demo", new Vector2(400, 200), new(900, 720), "vulkan", new(&WindowClosed));
             window.IsResizable = true;
 
@@ -54,7 +76,7 @@ namespace Abacus
             unlitMaterial = new(world, Address.Get<UnlitTexturedMaterial>());
             unlitMaterial.AddPushBinding<Color>();
             unlitMaterial.AddPushBinding<LocalToWorld>();
-            unlitMaterial.AddComponentBinding<CameraProjection>(0, 0, camera.entity);
+            unlitMaterial.AddComponentBinding<CameraMatrices>(0, 0, camera.entity);
             unlitMaterial.AddTextureBinding(1, 0, squareTexture);
 
             Model cubeModel = new(world, Address.Get<CubeModel>());
@@ -65,7 +87,7 @@ namespace Abacus
             //create ball
             ballBody = new(world, new SphereShape(0.5f), IsBody.Type.Dynamic, new Vector3(0f, 3f, 0f));
             Entity ballEntity = ballBody.transform.entity;
-            Renderer ballRenderer = ballEntity.Become<Renderer>();
+            MeshRenderer ballRenderer = ballEntity.Become<MeshRenderer>();
             ballRenderer.Mesh = sphereMesh;
             ballRenderer.Material = unlitMaterial;
             ballRenderer.Camera = camera;
@@ -76,7 +98,7 @@ namespace Abacus
             //create floor
             floorBody = new(world, new CubeShape(0.5f, 0.5f, 0.5f), IsBody.Type.Static);
             Entity floorEntity = floorBody.transform.entity;
-            Renderer floorRenderer = floorEntity.Become<Renderer>();
+            MeshRenderer floorRenderer = floorEntity.Become<MeshRenderer>();
             floorRenderer.Mesh = cubeMesh;
             floorRenderer.Material = unlitMaterial;
             floorRenderer.Camera = camera;
@@ -89,7 +111,7 @@ namespace Abacus
             Model quadModel = new(world, Address.Get<QuadModel>());
             Mesh quadMesh = new(world, quadModel.entity);
             quadEntity = new(world);
-            Renderer quadRenderer = quadEntity.Become<Renderer>();
+            MeshRenderer quadRenderer = quadEntity.Become<MeshRenderer>();
             quadRenderer.Mesh = quadMesh;
             quadRenderer.Material = unlitMaterial;
             quadRenderer.Camera = camera;
@@ -98,25 +120,25 @@ namespace Abacus
             quadTransform.LocalPosition = new(-2f, 2f, 0f);
 
             [UnmanagedCallersOnly]
-            static void WindowClosed(World world, uint windowEntity)
+            static void WindowClosed(Window window)
             {
-                world.DestroyEntity(windowEntity);
+                window.Dispose();
             }
         }
 
-        public void Dispose()
+        private readonly void CleanUp()
         {
             if (!window.IsDestroyed())
             {
-                window.Destroy();
+                window.Dispose();
             }
         }
 
-        public uint Update(TimeSpan delta)
+        private uint Update(Simulator simulator, World world, TimeSpan delta)
         {
             if (window.IsDestroyed())
             {
-                return default;
+                return 1;
             }
 
             if (world.TryGetFirst(out Keyboard keyboard))
@@ -191,12 +213,12 @@ namespace Abacus
             if (world.TryGetFirst(out Mouse mouse))
             {
                 Vector2 screenPoint = camera.Destination.GetScreenPointFromPosition(mouse.Position);
-                CameraProjection cameraProjection = camera.GetProjection();
+                CameraMatrices cameraProjection = camera.GetMatrices();
                 (Vector3 origin, Vector3 direction) = cameraProjection.GetRayFromScreenPoint(screenPoint);
                 unsafe
                 {
                     Raycast raycast = new(origin, direction, new(&RaycastHitCallback), 5f, (ulong)delta.Ticks);
-                    world.Submit(raycast);
+                    simulator.TryHandleMessage(raycast);
                 }
 
                 if (mouse.WasPressed(Mouse.Button.RightButton))
@@ -219,7 +241,7 @@ namespace Abacus
                     Vector3 launchForce = Vector3.Normalize(cameraTransform.WorldForward + Vector3.UnitY * 0.2f) * 8f;
                     Body projectile = new(world, new SphereShape(0.5f), IsBody.Type.Dynamic, launchForce);
                     Entity projectileEntity = projectile.transform.entity;
-                    Renderer projectileRenderer = projectileEntity.Become<Renderer>();
+                    MeshRenderer projectileRenderer = projectileEntity.Become<MeshRenderer>();
                     projectileRenderer.Mesh = sphereMesh;
                     projectileRenderer.Material = unlitMaterial;
                     projectileRenderer.Camera = camera;
@@ -233,7 +255,7 @@ namespace Abacus
 
             SharedFunctions.MoveCameraAround(world, cameraTransform, delta, ref cameraPosition, ref cameraPitchYaw, new(1f, 1f));
             SharedFunctions.DestroyTemporaryEntities(world, delta);
-            return 1;
+            return 0;
         }
 
         [UnmanagedCallersOnly]
@@ -265,33 +287,6 @@ namespace Abacus
                         transform.WorldPosition -= hit.normal * (float)delta.TotalSeconds * 4f;
                     }
                 }
-            }
-        }
-
-        readonly unsafe (StartFunction, FinishFunction, UpdateFunction) IProgramType.GetFunctions()
-        {
-            return (new(&Start), new(&Finish), new(&Update));
-
-            [UnmanagedCallersOnly]
-            static Allocation Start(World world)
-            {
-                PhysicsDemo program = new(world);
-                return Allocation.Create(program);
-            }
-
-            [UnmanagedCallersOnly]
-            static void Finish(Allocation allocation)
-            {
-                ref PhysicsDemo program = ref allocation.Read<PhysicsDemo>();
-                program.Dispose();
-                allocation.Dispose();
-            }
-
-            [UnmanagedCallersOnly]
-            static uint Update(Allocation allocation, TimeSpan delta)
-            {
-                ref PhysicsDemo program = ref allocation.Read<PhysicsDemo>();
-                return program.Update(delta);
             }
         }
     }
