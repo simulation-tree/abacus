@@ -1,4 +1,5 @@
 ﻿using Cameras.Components;
+using Collections;
 using Data;
 using DefaultPresentationAssets;
 using Meshes;
@@ -16,7 +17,6 @@ using Textures;
 using Transforms;
 using Transforms.Components;
 using Unmanaged;
-using Unmanaged.Collections;
 using Windows;
 
 namespace Abacus
@@ -263,10 +263,10 @@ namespace Abacus
                 int cz = (int)MathF.Floor(chunkPosition.Z / chunkSize);
                 USpan<uint> blocks = Blocks;
                 uint capacity = Capacity;
-                using UnmanagedArray<Vector3> vertices = new(capacity * VerticesPerFace * FacesPerBlock);
-                using UnmanagedArray<Vector2> uvs = new(capacity * VerticesPerFace * FacesPerBlock);
-                using UnmanagedArray<Color> colors = new(capacity * VerticesPerFace * FacesPerBlock);
-                using UnmanagedArray<uint> triangles = new(capacity * TrianglesPerFace * FacesPerBlock);
+                using Array<Vector3> vertices = new(capacity * VerticesPerFace * FacesPerBlock);
+                using Array<Vector2> uvs = new(capacity * VerticesPerFace * FacesPerBlock);
+                using Array<Color> colors = new(capacity * VerticesPerFace * FacesPerBlock);
+                using Array<uint> triangles = new(capacity * TrianglesPerFace * FacesPerBlock);
                 using RandomGenerator rng = new();
                 uint verticeIndex = 0;
                 uint triangleIndex = 0;
