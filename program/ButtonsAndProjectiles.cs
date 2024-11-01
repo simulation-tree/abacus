@@ -84,8 +84,8 @@ namespace Abacus
             unlitWorldMaterial.AddComponentBinding<CameraMatrices>(0, 0, worldCamera);
             unlitWorldMaterial.AddTextureBinding(1, 0, squareTexture);
 
-            Canvas canvas = new(world, uiCamera);
             Settings settings = new(world);
+            Canvas canvas = new(world, uiCamera);
 
             Material textMaterial = new(world, Address.Get<TextMaterial>());
             textMaterial.AddComponentBinding<CameraMatrices>(1, 0, uiCamera);

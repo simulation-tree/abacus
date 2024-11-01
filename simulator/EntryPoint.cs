@@ -13,7 +13,7 @@ namespace AbacusSimulator
             {
                 using (AbacusSimulator simulator = new(world))
                 {
-                    using (Program program = Program.Create<VoxelGame>(world))
+                    using (Program program = Program.Create<ControlsTest>(world))
                     {
                         DateTime lastTime = DateTime.UtcNow;
                         uint returnCode;
