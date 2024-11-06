@@ -1,4 +1,5 @@
-﻿using Cameras.Components;
+﻿using Cameras;
+using Cameras.Components;
 using Collections;
 using Data;
 using DefaultPresentationAssets;
@@ -8,7 +9,6 @@ using Models;
 using Programs;
 using Programs.Functions;
 using Rendering;
-using Rendering.Components;
 using Simulation;
 using System;
 using System.Numerics;
@@ -69,16 +69,13 @@ namespace Abacus
             chunkMaterial = new(world, Address.Get<UnlitTexturedMaterial>());
             chunkMaterial.AddPushBinding<Color>();
             chunkMaterial.AddPushBinding<LocalToWorld>();
-            chunkMaterial.AddComponentBinding<CameraMatrices>(0, 0, camera.entity);
+            chunkMaterial.AddComponentBinding<CameraMatrices>(0, 0, camera);
             chunkMaterial.AddTextureBinding(1, 0, chunkAtlas, TextureFiltering.Nearest);
 
             Model quadModel = new(world, Address.Get<QuadModel>());
             quadMesh = new(world, quadModel.entity);
 
-            MeshRenderer quadRenderer = new(world, quadMesh, chunkMaterial, camera);
-            quadRenderer.Mesh = quadMesh;
-            quadRenderer.Material = chunkMaterial;
-            quadRenderer.Camera = camera;
+            MeshRenderer quadRenderer = new(world, quadMesh, chunkMaterial);
             quadRenderer.AsEntity().AddComponent(Color.White);
             Transform ballTransform = quadRenderer.AsEntity().Become<Transform>();
             ballTransform.LocalPosition = new(0f, 4f, 0f);
@@ -143,7 +140,7 @@ namespace Abacus
             float frequency = 4f;
             float amplitude = 6f;
             uint chunkSize = 16;
-            Chunk chunk = new(world, cx, cy, cz, chunkSize, chunkMaterial, camera);
+            Chunk chunk = new(world, cx, cy, cz, chunkSize, chunkMaterial);
             for (uint x = 0; x < chunkSize; x++)
             {
                 for (uint z = 0; z < chunkSize; z++)
@@ -229,7 +226,7 @@ namespace Abacus
             readonly World IEntity.World => mesh.GetWorld();
             readonly Definition IEntity.Definition => new Definition().AddComponentTypes<IsMesh, IsChunk>().AddArrayTypes<uint, BlockID>();
 
-            public Chunk(World world, int cx, int cy, int cz, uint chunkSize, Material unlitMaterial, Camera camera)
+            public Chunk(World world, int cx, int cy, int cz, uint chunkSize, Material unlitMaterial)
             {
                 uint capacity = chunkSize * chunkSize * chunkSize;
                 mesh = new(world);
@@ -243,7 +240,6 @@ namespace Abacus
                 MeshRenderer chunkRenderer = mesh.AsEntity().Become<MeshRenderer>();
                 chunkRenderer.Mesh = mesh;
                 chunkRenderer.Material = unlitMaterial;
-                chunkRenderer.Camera = camera;
                 chunkRenderer.AddComponent(Color.White);
                 Transform chunkTransform = chunkRenderer.AsEntity().Become<Transform>();
                 chunkTransform.LocalPosition = new Vector3(cx, cy, cz) * chunkSize;

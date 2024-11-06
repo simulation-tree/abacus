@@ -1,4 +1,5 @@
-﻿using Cameras.Components;
+﻿using Cameras;
+using Cameras.Components;
 using Data;
 using DefaultPresentationAssets;
 using Fonts;
@@ -66,7 +67,7 @@ namespace Abacus
             window.BecomeMaximized();
 
             worldCamera = new(world, window.destination, CameraFieldOfView.FromDegrees(90));
-            Transform cameraTransform = worldCamera.entity.Become<Transform>();
+            Transform cameraTransform = worldCamera.AsEntity().Become<Transform>();
             cameraTransform.LocalPosition = new(0, 0, -10);
             cameraPosition = cameraTransform.LocalPosition;
 
@@ -93,10 +94,10 @@ namespace Abacus
             textMaterial.AddPushBinding<LocalToWorld>();
 
             //crate test cube
-            MeshRenderer waveRenderer = new(world, cubeMesh, unlitWorldMaterial, worldCamera);
-            Transform waveTransform = waveRenderer.entity.Become<Transform>();
-            waveRenderer.entity.AddComponent(Color.Red);
-            waveRenderer.entity.AddComponent(new IsBody(new CubeShape(0.5f), IsBody.Type.Static));
+            MeshRenderer waveRenderer = new(world, cubeMesh, unlitWorldMaterial, worldCamera.Mask);
+            Transform waveTransform = waveRenderer.AsEntity().Become<Transform>();
+            waveRenderer.AddComponent(Color.Red);
+            waveRenderer.AddComponent(new IsBody(new CubeShape(0.5f), IsBody.Type.Static));
 
             //create ui boxes
             Button testWindow = new(world, new(&TestBoxPressed), canvas);
@@ -111,7 +112,7 @@ namespace Abacus
             anotherBox.Color = Color.SkyBlue;
 
             TextMesh textMesh = new(world, "abacus 123 hiii", robotoFont);
-            TextRenderer textRenderer = new(world, textMesh, textMaterial, uiCamera);
+            TextRenderer textRenderer = new(world, textMesh, textMaterial, uiCamera.Mask);
             textRenderer.Parent = anotherBox.AsEntity();
             Transform textTransform = textRenderer.entity.Become<Transform>();
             textTransform.LocalPosition = new(4f, -4f, 0.1f);
@@ -154,7 +155,7 @@ namespace Abacus
                 return 1;
             }
 
-            Transform cameraTransform = worldCamera.entity.Become<Transform>();
+            Transform cameraTransform = worldCamera.AsEntity().Become<Transform>();
             SharedFunctions.MoveCameraAround(world, cameraTransform, delta, ref cameraPosition, ref cameraPitchYaw, new(1f, 1f));
 
             if (world.TryGetFirst(out Mouse mouse))
@@ -182,10 +183,10 @@ namespace Abacus
                 {
                     Vector2 screenPoint = worldCamera.Destination.GetScreenPointFromPosition(mouse.Position);
                     (Vector3 origin, Vector3 direction) ray = worldCamera.GetMatrices().GetRayFromScreenPoint(screenPoint);
-                    simulator.TryHandleMessage(new Raycast(ray.origin, ray.direction, new(&OnRaycastHit)));
+                    simulator.TryHandleMessage(new RaycastRequest(ray.origin, ray.direction, new(&OnRaycastHit)));
 
                     [UnmanagedCallersOnly]
-                    static void OnRaycastHit(World world, Raycast raycast, RaycastHit* hits, uint hitsCount)
+                    static void OnRaycastHit(World world, RaycastRequest raycast, RaycastHit* hits, uint hitsCount)
                     {
                         for (uint i = 0; i < hitsCount; i++)
                         {

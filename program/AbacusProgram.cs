@@ -1,4 +1,5 @@
-﻿using Cameras.Components;
+﻿using Cameras;
+using Cameras.Components;
 using Data;
 using DefaultPresentationAssets;
 using Fonts;
@@ -92,7 +93,7 @@ namespace Abacus
             }
 
             //build scene
-            Transform cameraTransform = camera.entity.Become<Transform>();
+            Transform cameraTransform = camera.AsEntity().Become<Transform>();
             cameraTransform.LocalPosition = new(0f, 0f, -10f);
             cameraPosition = cameraTransform.LocalPosition;
 
@@ -134,30 +135,30 @@ namespace Abacus
             Material material = new(world, Address.Get<UnlitTexturedMaterial>());
             material.AddPushBinding<Color>();
             material.AddPushBinding<LocalToWorld>();
-            material.AddComponentBinding<CameraMatrices>(0, 0, camera.entity);
+            material.AddComponentBinding<CameraMatrices>(0, 0, camera);
             material.AddTextureBinding(1, 0, testImage);
 
-            dummyRenderer = new(world, quadMesh, material, camera);
-            dummyRenderer.entity.AddComponent(Color.Yellow);
-            dummyRenderer.entity.Become<Transform>();
+            dummyRenderer = new(world, quadMesh, material);
+            dummyRenderer.AddComponent(Color.Yellow);
+            dummyRenderer.AsEntity().Become<Transform>();
 
             waveImage = new(world, "*/Assets/Textures/wave.png");
             Material testMaterial = new(world, Address.Get<UnlitTexturedMaterial>());
             testMaterial.AddPushBinding<Color>();
             testMaterial.AddPushBinding<LocalToWorld>();
-            testMaterial.AddComponentBinding<CameraMatrices>(0, 0, camera.entity);
+            testMaterial.AddComponentBinding<CameraMatrices>(0, 0, camera);
             testMaterial.AddTextureBinding(1, 0, waveImage);
 
             Texture squareTexture = new(world, Address.Get<SquareTexture>());
             Material defaultSquareMaterial = new(world, Address.Get<UnlitTexturedMaterial>());
             defaultSquareMaterial.AddPushBinding<Color>();
             defaultSquareMaterial.AddPushBinding<LocalToWorld>();
-            defaultSquareMaterial.AddComponentBinding<CameraMatrices>(0, 0, camera.entity);
+            defaultSquareMaterial.AddComponentBinding<CameraMatrices>(0, 0, camera);
             defaultSquareMaterial.AddTextureBinding(1, 0, squareTexture);
 
-            squareBox = new(world, quadMesh, defaultSquareMaterial, camera);
-            squareBox.entity.AddComponent(Color.Red);
-            Transform squareTransform = squareBox.entity.Become<Transform>();
+            squareBox = new(world, quadMesh, defaultSquareMaterial);
+            squareBox.AddComponent(Color.Red);
+            Transform squareTransform = squareBox.AsEntity().Become<Transform>();
             squareTransform.LocalPosition = new(8, 4, -2);
             squareTransform.LocalScale = new(4, 4, 1);
 
@@ -166,7 +167,7 @@ namespace Abacus
 
             //material entity (reusable)
             Material textMaterial = new(world, Address.Get<TextMaterial>());
-            textMaterial.AddComponentBinding<CameraMatrices>(1, 0, camera.entity);
+            textMaterial.AddComponentBinding<CameraMatrices>(1, 0, camera);
             textMaterial.AddPushBinding<Color>();
             textMaterial.AddPushBinding<LocalToWorld>();
 
@@ -174,8 +175,8 @@ namespace Abacus
             exampleTextMesh = new TextMesh(world, "hiii <3", cascadiaMono);
 
             //render request itself (not reusable)
-            TextRenderer text = new(world, exampleTextMesh, textMaterial, camera);
-            text.Parent = squareBox.entity;
+            TextRenderer text = new(world, exampleTextMesh, textMaterial);
+            text.Parent = squareBox;
             Entity textEntity = text.entity;
             textEntity.AddComponent(Color.Green);
             textEntity.AddComponent(Anchor.BottomLeft);
@@ -183,8 +184,8 @@ namespace Abacus
             textTransform.LocalPosition = new(0f, 0f, -0.1f);
 
             TextMesh anotherTextMesh = new(world, "top right corner?", cascadiaMono);
-            TextRenderer anotherText = new(world, anotherTextMesh, textMaterial, camera);
-            anotherText.Parent = squareBox.entity;
+            TextRenderer anotherText = new(world, anotherTextMesh, textMaterial);
+            anotherText.Parent = squareBox;
             Entity anotherTextEntity = anotherText.entity;
             anotherTextEntity.AddComponent(Color.Blue);
             anotherTextEntity.AddComponent(Anchor.TopRight);
@@ -208,9 +209,9 @@ namespace Abacus
             //testColors.Add(new(1, 1, 1, 1));
             //testMesh.AddTriangle(0, 1, 2);
 
-            testRenderer = new(world, manuallyBuiltMesh, testMaterial, camera);
-            testRenderer.entity.AddComponent(Color.White);
-            Transform testTransform = testRenderer.entity.Become<Transform>();
+            testRenderer = new(world, manuallyBuiltMesh, testMaterial);
+            testRenderer.AddComponent(Color.White);
+            Transform testTransform = testRenderer.AsEntity().Become<Transform>();
             testTransform.LocalPosition = new(-7, -4, -2);
             testTransform.LocalScale = new(8f, 8f, 1f);
             testRenderer.AsEntity().AddComponent(new RendererScissor(100, 100, 200, 200));
@@ -242,7 +243,7 @@ namespace Abacus
             float deltaSeconds = (float)delta.TotalSeconds;
             TestMouseInputs(world);
             AnimateTestRenderer(world, deltaSeconds);
-            Transform cameraTransform = camera.entity.Become<Transform>();
+            Transform cameraTransform = camera.AsEntity().Become<Transform>();
             SharedFunctions.MoveCameraAround(world, cameraTransform, delta, ref cameraPosition, ref cameraPitchYaw, new(1f, 1f));
             ModifyText(world);
             if (TestWindowEntity(world, deltaSeconds))
@@ -328,7 +329,7 @@ namespace Abacus
                 }
             }
 
-            ref Color color = ref dummyRenderer.entity.GetComponentRef<Color>();
+            ref Color color = ref dummyRenderer.AsEntity().GetComponentRef<Color>();
             float hue = color.H;
             hue += delta * 0.2f;
             while (hue > 1f)
@@ -441,7 +442,7 @@ namespace Abacus
                 if (keyboard.IsPressed(Keyboard.Button.B))
                 {
                     float speed = 20f;
-                    Transform squareBoxTransform = squareBox.entity.As<Transform>();
+                    Transform squareBoxTransform = squareBox.AsEntity().As<Transform>();
                     if (alt.IsPressed)
                     {
                         squareBoxTransform.LocalPosition += new Vector3(direction, 0) * delta * speed;

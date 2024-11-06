@@ -1,4 +1,5 @@
-﻿using Cameras.Components;
+﻿using Cameras;
+using Cameras.Components;
 using Data;
 using DefaultPresentationAssets;
 using InputDevices;
@@ -10,7 +11,6 @@ using Physics.Events;
 using Programs;
 using Programs.Functions;
 using Rendering;
-using Rendering.Components;
 using Simulation;
 using System;
 using System.Numerics;
@@ -67,7 +67,7 @@ namespace Abacus
             window.IsResizable = true;
 
             camera = new(world, window, CameraFieldOfView.FromDegrees(90f));
-            cameraTransform = camera.entity.Become<Transform>();
+            cameraTransform = camera.AsEntity().Become<Transform>();
             cameraTransform.LocalPosition = new(-1f, 2f, -10f);
             cameraPosition = cameraTransform.LocalPosition;
 
@@ -76,7 +76,7 @@ namespace Abacus
             unlitMaterial = new(world, Address.Get<UnlitTexturedMaterial>());
             unlitMaterial.AddPushBinding<Color>();
             unlitMaterial.AddPushBinding<LocalToWorld>();
-            unlitMaterial.AddComponentBinding<CameraMatrices>(0, 0, camera.entity);
+            unlitMaterial.AddComponentBinding<CameraMatrices>(0, 0, camera);
             unlitMaterial.AddTextureBinding(1, 0, squareTexture);
 
             Model cubeModel = new(world, Address.Get<CubeModel>());
@@ -90,7 +90,6 @@ namespace Abacus
             MeshRenderer ballRenderer = ballEntity.Become<MeshRenderer>();
             ballRenderer.Mesh = sphereMesh;
             ballRenderer.Material = unlitMaterial;
-            ballRenderer.Camera = camera;
             ballEntity.AddComponent(Color.Red);
             Transform ballTransform = ballEntity.Become<Transform>();
             ballTransform.LocalPosition = new(0f, 4f, 0f);
@@ -101,7 +100,6 @@ namespace Abacus
             MeshRenderer floorRenderer = floorEntity.Become<MeshRenderer>();
             floorRenderer.Mesh = cubeMesh;
             floorRenderer.Material = unlitMaterial;
-            floorRenderer.Camera = camera;
             floorEntity.AddComponent(Color.Green);
 
             //create directional gravity
@@ -114,7 +112,6 @@ namespace Abacus
             MeshRenderer quadRenderer = quadEntity.Become<MeshRenderer>();
             quadRenderer.Mesh = quadMesh;
             quadRenderer.Material = unlitMaterial;
-            quadRenderer.Camera = camera;
             quadEntity.AddComponent(Color.Blue);
             Transform quadTransform = quadEntity.Become<Transform>();
             quadTransform.LocalPosition = new(-2f, 2f, 0f);
@@ -217,7 +214,7 @@ namespace Abacus
                 (Vector3 origin, Vector3 direction) = cameraProjection.GetRayFromScreenPoint(screenPoint);
                 unsafe
                 {
-                    Raycast raycast = new(origin, direction, new(&RaycastHitCallback), 5f, (ulong)delta.Ticks);
+                    RaycastRequest raycast = new(origin, direction, new(&RaycastHitCallback), 5f, (ulong)delta.Ticks);
                     simulator.TryHandleMessage(raycast);
                 }
 
@@ -244,7 +241,6 @@ namespace Abacus
                     MeshRenderer projectileRenderer = projectileEntity.Become<MeshRenderer>();
                     projectileRenderer.Mesh = sphereMesh;
                     projectileRenderer.Material = unlitMaterial;
-                    projectileRenderer.Camera = camera;
                     projectileEntity.AddComponent(Color.White);
                     projectileEntity.AddComponent(new DestroyAfterTime(5f));
                     Transform projectileTransform = projectile.transform;
@@ -259,7 +255,7 @@ namespace Abacus
         }
 
         [UnmanagedCallersOnly]
-        private unsafe static void RaycastHitCallback(World world, Raycast raycast, RaycastHit* hitsPointer, uint hitCount)
+        private unsafe static void RaycastHitCallback(World world, RaycastRequest raycast, RaycastHit* hitsPointer, uint hitCount)
         {
             TimeSpan delta = new((long)raycast.identifier);
             USpan<RaycastHit> hits = new(hitsPointer, hitCount);

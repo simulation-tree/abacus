@@ -1,4 +1,5 @@
 ﻿using Automations;
+using Cameras;
 using Cameras.Components;
 using Data;
 using DefaultPresentationAssets;
@@ -70,8 +71,8 @@ namespace Abacus
             window.ClearColor = new(0, 0, 0, 0);
 
             Settings settings = new(world);
-            camera = new(world, window.destination, CameraFieldOfView.FromDegrees(60));
-            Transform cameraTransform = camera.entity.Become<Transform>();
+            camera = new(world, window, CameraFieldOfView.FromDegrees(60));
+            Transform cameraTransform = camera.AsEntity().Become<Transform>();
             cameraTransform.LocalPosition = new(0, 0, -1);
 
             Texture squareTexture = new(world, Address.Get<SquareTexture>());
@@ -118,12 +119,11 @@ namespace Abacus
             MeshRenderer playerRenderer = playerBody.AsEntity().Become<MeshRenderer>();
             playerRenderer.Mesh = quadMesh;
             playerRenderer.Material = playerMaterial;
-            playerRenderer.Camera = camera;
-            playerBody.AsEntity().AddComponent(Color.White);
-            playerBody.AsEntity().AddComponent(new GroundedState());
-            playerBody.AsEntity().AddComponent(new AnimatedSprite());
-            playerBody.AsEntity().AddComponent(new IsPlayer(true));
-            playerBody.AsEntity().AddComponent(new Jetpack());
+            playerBody.AddComponent(Color.White);
+            playerBody.AddComponent(new GroundedState());
+            playerBody.AddComponent(new AnimatedSprite());
+            playerBody.AddComponent(new IsPlayer(true));
+            playerBody.AddComponent(new Jetpack());
 
             StateMachine playerAnimationStateMachine = new(world);
             playerAnimationStateMachine.AddState("Idle");
@@ -370,12 +370,12 @@ namespace Abacus
             {
                 Entity player = new(world, playerEntity);
                 Transform playerTransform = player.As<Transform>();
-                simulator.TryHandleMessage(new Raycast(playerTransform.WorldPosition, -Vector3.UnitY, new(&GroundHitCallback), 0.5f, player.GetEntityValue()));
+                simulator.TryHandleMessage(new RaycastRequest(playerTransform.WorldPosition, -Vector3.UnitY, new(&GroundHitCallback), 0.5f, player.GetEntityValue()));
                 player.SetComponent(new GroundedState(false));
             }
 
             [UnmanagedCallersOnly]
-            static void GroundHitCallback(World world, Raycast raycast, RaycastHit* hits, uint hitCount)
+            static void GroundHitCallback(World world, RaycastRequest raycast, RaycastHit* hits, uint hitCount)
             {
                 uint playerEntity = (uint)raycast.identifier;
                 for (uint i = 0; i < hitCount; i++)

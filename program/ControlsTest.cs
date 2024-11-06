@@ -1,12 +1,11 @@
-﻿using Data;
+﻿using Cameras;
+using Data;
 using InputDevices;
 using InteractionKit;
 using InteractionKit.Components;
 using InteractionKit.Functions;
 using Programs;
 using Programs.Functions;
-using Rendering;
-using Rendering.Components;
 using Simulation;
 using System;
 using System.Diagnostics;
@@ -52,7 +51,7 @@ namespace Abacus
             window.IsResizable = true;
 
             Settings settings = new(world);
-            Camera camera = new(world, window, new CameraOrthographicSize(1f));
+            Camera camera = Camera.CreateOrthographic(world, window, 1f);
             Canvas canvas = new(world, camera);
 
             VirtualWindow box = VirtualWindow.Create<ControlsDemoWindow>(world, canvas);
