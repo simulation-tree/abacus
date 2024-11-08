@@ -240,6 +240,8 @@ namespace Abacus
                 MeshRenderer chunkRenderer = mesh.AsEntity().Become<MeshRenderer>();
                 chunkRenderer.Mesh = mesh;
                 chunkRenderer.Material = unlitMaterial;
+                chunkRenderer.Mask = 1;
+
                 chunkRenderer.AddComponent(Color.White);
                 Transform chunkTransform = chunkRenderer.AsEntity().Become<Transform>();
                 chunkTransform.LocalPosition = new Vector3(cx, cy, cz) * chunkSize;

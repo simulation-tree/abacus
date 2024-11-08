@@ -90,6 +90,8 @@ namespace Abacus
             MeshRenderer ballRenderer = ballEntity.Become<MeshRenderer>();
             ballRenderer.Mesh = sphereMesh;
             ballRenderer.Material = unlitMaterial;
+            ballRenderer.Mask = 1;
+
             ballEntity.AddComponent(Color.Red);
             Transform ballTransform = ballEntity.Become<Transform>();
             ballTransform.LocalPosition = new(0f, 4f, 0f);
@@ -100,6 +102,8 @@ namespace Abacus
             MeshRenderer floorRenderer = floorEntity.Become<MeshRenderer>();
             floorRenderer.Mesh = cubeMesh;
             floorRenderer.Material = unlitMaterial;
+            floorRenderer.Mask = 1;
+
             floorEntity.AddComponent(Color.Green);
 
             //create directional gravity
@@ -112,6 +116,8 @@ namespace Abacus
             MeshRenderer quadRenderer = quadEntity.Become<MeshRenderer>();
             quadRenderer.Mesh = quadMesh;
             quadRenderer.Material = unlitMaterial;
+            quadRenderer.Mask = 1;
+
             quadEntity.AddComponent(Color.Blue);
             Transform quadTransform = quadEntity.Become<Transform>();
             quadTransform.LocalPosition = new(-2f, 2f, 0f);
@@ -214,7 +220,7 @@ namespace Abacus
                 (Vector3 origin, Vector3 direction) = cameraProjection.GetRayFromScreenPoint(screenPoint);
                 unsafe
                 {
-                    RaycastRequest raycast = new(origin, direction, new(&RaycastHitCallback), 5f, (ulong)delta.Ticks);
+                    RaycastRequest raycast = new(world, origin, direction, new(&RaycastHitCallback), 5f, (ulong)delta.Ticks);
                     simulator.TryHandleMessage(raycast);
                 }
 
@@ -241,6 +247,8 @@ namespace Abacus
                     MeshRenderer projectileRenderer = projectileEntity.Become<MeshRenderer>();
                     projectileRenderer.Mesh = sphereMesh;
                     projectileRenderer.Material = unlitMaterial;
+                    projectileRenderer.Mask = 1;
+
                     projectileEntity.AddComponent(Color.White);
                     projectileEntity.AddComponent(new DestroyAfterTime(5f));
                     Transform projectileTransform = projectile.transform;

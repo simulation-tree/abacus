@@ -119,6 +119,8 @@ namespace Abacus
             MeshRenderer playerRenderer = playerBody.AsEntity().Become<MeshRenderer>();
             playerRenderer.Mesh = quadMesh;
             playerRenderer.Material = playerMaterial;
+            playerRenderer.Mask = 1;
+
             playerBody.AddComponent(Color.White);
             playerBody.AddComponent(new GroundedState());
             playerBody.AddComponent(new AnimatedSprite());
@@ -370,7 +372,7 @@ namespace Abacus
             {
                 Entity player = new(world, playerEntity);
                 Transform playerTransform = player.As<Transform>();
-                simulator.TryHandleMessage(new RaycastRequest(playerTransform.WorldPosition, -Vector3.UnitY, new(&GroundHitCallback), 0.5f, player.GetEntityValue()));
+                simulator.TryHandleMessage(new RaycastRequest(world, playerTransform.WorldPosition, -Vector3.UnitY, new(&GroundHitCallback), 0.5f, player.GetEntityValue()));
                 player.SetComponent(new GroundedState(false));
             }
 

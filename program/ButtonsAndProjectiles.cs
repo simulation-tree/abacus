@@ -183,7 +183,7 @@ namespace Abacus
                 {
                     Vector2 screenPoint = worldCamera.Destination.GetScreenPointFromPosition(mouse.Position);
                     (Vector3 origin, Vector3 direction) ray = worldCamera.GetMatrices().GetRayFromScreenPoint(screenPoint);
-                    simulator.TryHandleMessage(new RaycastRequest(ray.origin, ray.direction, new(&OnRaycastHit)));
+                    simulator.TryHandleMessage(new RaycastRequest(world, ray.origin, ray.direction, new(&OnRaycastHit)));
 
                     [UnmanagedCallersOnly]
                     static void OnRaycastHit(World world, RaycastRequest raycast, RaycastHit* hits, uint hitsCount)
