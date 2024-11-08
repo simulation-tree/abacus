@@ -3,7 +3,6 @@ using Data;
 using InputDevices;
 using InteractionKit;
 using Programs;
-using Programs.Functions;
 using Simulation;
 using System;
 using System.Diagnostics;
@@ -18,9 +17,9 @@ namespace Abacus
     {
         private readonly Window window;
 
-        unsafe readonly StartFunction IProgram.Start => new(&Start);
-        unsafe readonly UpdateFunction IProgram.Update => new(&Update);
-        unsafe readonly FinishFunction IProgram.Finish => new(&Finish);
+        unsafe readonly StartProgramFunction IProgram.Start => new(&Start);
+        unsafe readonly UpdateProgramFunction IProgram.Update => new(&Update);
+        unsafe readonly FinishProgramFunction IProgram.Finish => new(&Finish);
 
         [UnmanagedCallersOnly]
         private static void Start(Simulator simulator, Allocation allocation, World world)
@@ -69,7 +68,7 @@ namespace Abacus
             [UnmanagedCallersOnly]
             static void Pressed(Entity buttonEntity)
             {
-                Debug.WriteLine($"Button {buttonEntity} pressed");
+                Trace.WriteLine($"Button {buttonEntity} pressed");
             }
         }
 

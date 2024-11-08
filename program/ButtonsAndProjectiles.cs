@@ -12,9 +12,9 @@ using Physics;
 using Physics.Components;
 using Physics.Events;
 using Programs;
-using Programs.Functions;
 using Rendering;
 using Rendering.Components;
+using Rendering.Functions;
 using Simulation;
 using System;
 using System.Diagnostics;
@@ -35,9 +35,9 @@ namespace Abacus
         private Vector3 cameraPosition;
         private Vector2 cameraPitchYaw;
 
-        unsafe readonly StartFunction IProgram.Start => new(&Start);
-        unsafe readonly UpdateFunction IProgram.Update => new(&Update);
-        unsafe readonly FinishFunction IProgram.Finish => new(&Finish);
+        unsafe readonly StartProgramFunction IProgram.Start => new(&Start);
+        unsafe readonly UpdateProgramFunction IProgram.Update => new(&Update);
+        unsafe readonly FinishProgramFunction IProgram.Finish => new(&Finish);
 
         [UnmanagedCallersOnly]
         private static void Start(Simulator simulator, Allocation allocation, World world)
@@ -124,13 +124,13 @@ namespace Abacus
             [UnmanagedCallersOnly]
             static void TestBoxPressed(Entity entity)
             {
-                Debug.WriteLine("Test box pressed");
+                Trace.WriteLine("Test box pressed");
             }
 
             [UnmanagedCallersOnly]
             static void AnotherBoxPressed(Entity entity)
             {
-                Debug.WriteLine("Another box pressed");
+                Trace.WriteLine("Another box pressed");
             }
 
             [UnmanagedCallersOnly]

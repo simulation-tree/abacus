@@ -11,9 +11,9 @@ using Physics;
 using Physics.Components;
 using Physics.Events;
 using Programs;
-using Programs.Functions;
 using Rendering;
 using Rendering.Components;
+using Rendering.Functions;
 using Simulation;
 using System;
 using System.Numerics;
@@ -37,9 +37,9 @@ namespace Abacus
         private readonly Body leftWallBody;
         private readonly Body rightWallBody;
 
-        readonly StartFunction IProgram.Start => new(&Start);
-        readonly UpdateFunction IProgram.Update => new(&Update);
-        readonly FinishFunction IProgram.Finish => new(&Finish);
+        readonly StartProgramFunction IProgram.Start => new(&Start);
+        readonly UpdateProgramFunction IProgram.Update => new(&Update);
+        readonly FinishProgramFunction IProgram.Finish => new(&Finish);
 
         [UnmanagedCallersOnly]
         private static void Start(Simulator simulator, Allocation allocation, World world)

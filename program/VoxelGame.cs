@@ -7,7 +7,6 @@ using Meshes;
 using Meshes.Components;
 using Models;
 using Programs;
-using Programs.Functions;
 using Rendering;
 using Simulation;
 using System;
@@ -31,9 +30,9 @@ namespace Abacus
         private Vector3 cameraPosition;
         private Vector2 cameraPitchYaw;
 
-        unsafe readonly StartFunction IProgram.Start => new(&Start);
-        unsafe readonly UpdateFunction IProgram.Update => new(&Update);
-        unsafe readonly FinishFunction IProgram.Finish => new(&Finish);
+        unsafe readonly StartProgramFunction IProgram.Start => new(&Start);
+        unsafe readonly UpdateProgramFunction IProgram.Update => new(&Update);
+        unsafe readonly FinishProgramFunction IProgram.Finish => new(&Finish);
 
         [UnmanagedCallersOnly]
         private static void Start(Simulator simulator, Allocation allocation, World world)

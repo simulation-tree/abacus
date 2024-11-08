@@ -8,11 +8,12 @@ using InputDevices.Components;
 using Meshes;
 using Models;
 using Programs;
-using Programs.Functions;
 using Rendering;
 using Rendering.Components;
+using Rendering.Functions;
 using Simulation;
 using System;
+using System.Diagnostics;
 using System.Numerics;
 using System.Runtime.InteropServices;
 using Textures;
@@ -38,9 +39,9 @@ namespace Abacus
         private readonly TextMesh exampleTextMesh;
         private readonly MeshRenderer squareBox;
 
-        unsafe readonly StartFunction IProgram.Start => new(&Start);
-        unsafe readonly UpdateFunction IProgram.Update => new(&Update);
-        unsafe readonly FinishFunction IProgram.Finish => new(&Finish);
+        unsafe readonly StartProgramFunction IProgram.Start => new(&Start);
+        unsafe readonly UpdateProgramFunction IProgram.Update => new(&Update);
+        unsafe readonly FinishProgramFunction IProgram.Finish => new(&Finish);
 
         [UnmanagedCallersOnly]
         private static void Start(Simulator simulator, Allocation allocation, World world)
@@ -75,7 +76,7 @@ namespace Abacus
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Failed to load scene, skipping that because of {ex}");
+                Trace.WriteLine($"Failed to load scene, skipping that because of {ex}");
             }
 
             //build host
@@ -236,7 +237,7 @@ namespace Abacus
             time += delta;
             if (time.TotalSeconds > 120f || window.IsDestroyed())
             {
-                Console.WriteLine("Conditions reached for finishing the demo");
+                Trace.WriteLine("Conditions reached for finishing the demo");
                 return 1; //source of "shutdown" event
             }
 
@@ -354,7 +355,7 @@ namespace Abacus
 
                 if (keyboard.WasPressed(Keyboard.Button.X))
                 {
-                    Console.WriteLine("Closed early");
+                    Trace.WriteLine("Closed early");
                     window.Dispose();
                     return false; //finished this function early, theres already a conditional check for window destruction
                 }
@@ -362,20 +363,20 @@ namespace Abacus
                 if (keyboard.WasPressed(Keyboard.Button.R))
                 {
                     bool isResizable = !window.IsResizable;
-                    Console.WriteLine($"Resizable {isResizable}");
+                    Trace.WriteLine($"Resizable {isResizable}");
                     window.IsResizable = isResizable;
                 }
 
                 if (keyboard.WasPressed(Keyboard.Button.B))
                 {
                     bool isBorderless = !window.IsBorderless;
-                    Console.WriteLine($"Borderless {isBorderless}");
+                    Trace.WriteLine($"Borderless {isBorderless}");
                     window.IsBorderless = isBorderless;
                 }
 
                 if (keyboard.WasPressed(Keyboard.Button.F))
                 {
-                    Console.WriteLine("Window fullscreen state toggled");
+                    Trace.WriteLine("Window fullscreen state toggled");
                     if (window.IsFullscreen)
                     {
                         window.BecomeWindowed();
@@ -389,7 +390,7 @@ namespace Abacus
                 if (keyboard.WasPressed(Keyboard.Button.N))
                 {
                     window.IsMinimized = !window.IsMinimized;
-                    Console.WriteLine($"Window hidden state toggled to {window.IsMinimized}");
+                    Trace.WriteLine($"Window hidden state toggled to {window.IsMinimized}");
                 }
 
                 if (keyboard.WasPressed(Keyboard.Button.M))
@@ -403,7 +404,7 @@ namespace Abacus
                         window.BecomeMaximized();
                     }
 
-                    Console.WriteLine($"Window maximized state toggled {window.IsMaximized}");
+                    Trace.WriteLine($"Window maximized state toggled {window.IsMaximized}");
                 }
 
                 ButtonState left = keyboard.GetButtonState(Keyboard.Button.Left);
@@ -496,21 +497,21 @@ namespace Abacus
                 ButtonState left = mouse.GetButtonState(Mouse.Button.LeftButton);
                 if (left.WasPressed)
                 {
-                    Console.WriteLine($"Left button pressed at {position}");
+                    Trace.WriteLine($"Left button pressed at {position}");
                 }
                 else if (left.WasReleased)
                 {
-                    Console.WriteLine($"Left button released at {position}");
+                    Trace.WriteLine($"Left button released at {position}");
                 }
 
                 ButtonState right = mouse.GetButtonState(Mouse.Button.RightButton);
                 if (right.WasPressed)
                 {
-                    Console.WriteLine($"Right button pressed at {position}");
+                    Trace.WriteLine($"Right button pressed at {position}");
                 }
                 else if (right.WasReleased)
                 {
-                    Console.WriteLine($"Right button released at {position}");
+                    Trace.WriteLine($"Right button released at {position}");
                 }
             }
         }

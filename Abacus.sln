@@ -121,10 +121,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HTTP", "..\http\source\HTTP
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HTTP Tests", "..\http\tests\HTTP Tests.csproj", "{A885CE89-FD27-46DE-B029-AB1F70157D8D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AssimpNet", "..\model-systems\AssimpNet-master\AssimpNet\AssimpNet.csproj", "{C2C5CD26-38B7-49B9-902D-475A699F76D8}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AssimpNet.Test", "..\model-systems\AssimpNet-master\AssimpNet.Test\AssimpNet.Test.csproj", "{17489B74-4943-4316-9823-D3C0D2387B2A}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Collections", "..\collections\source\Collections.csproj", "{3F837705-F616-4783-A02D-435280C328B1}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Collection Tests", "..\collections\tests\Collection Tests.csproj", "{4DAD4809-2B13-4EFF-A912-76EC66D1112C}"
@@ -371,14 +367,6 @@ Global
 		{A885CE89-FD27-46DE-B029-AB1F70157D8D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A885CE89-FD27-46DE-B029-AB1F70157D8D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A885CE89-FD27-46DE-B029-AB1F70157D8D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C2C5CD26-38B7-49B9-902D-475A699F76D8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C2C5CD26-38B7-49B9-902D-475A699F76D8}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C2C5CD26-38B7-49B9-902D-475A699F76D8}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C2C5CD26-38B7-49B9-902D-475A699F76D8}.Release|Any CPU.Build.0 = Release|Any CPU
-		{17489B74-4943-4316-9823-D3C0D2387B2A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{17489B74-4943-4316-9823-D3C0D2387B2A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{17489B74-4943-4316-9823-D3C0D2387B2A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{17489B74-4943-4316-9823-D3C0D2387B2A}.Release|Any CPU.Build.0 = Release|Any CPU
 		{3F837705-F616-4783-A02D-435280C328B1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{3F837705-F616-4783-A02D-435280C328B1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3F837705-F616-4783-A02D-435280C328B1}.Release|Any CPU.ActiveCfg = Release|Any CPU
