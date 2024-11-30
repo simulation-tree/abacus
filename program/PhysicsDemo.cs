@@ -8,10 +8,9 @@ using Models;
 using Physics;
 using Physics.Components;
 using Physics.Events;
-using Programs;
 using Rendering;
-using Rendering.Functions;
 using Simulation;
+using Simulation.Functions;
 using System;
 using System.Numerics;
 using System.Runtime.InteropServices;
@@ -20,6 +19,7 @@ using Transforms;
 using Transforms.Components;
 using Unmanaged;
 using Windows;
+using Worlds;
 
 namespace Abacus
 {
@@ -37,9 +37,9 @@ namespace Abacus
         private Vector3 cameraPosition;
         private Vector2 cameraPitchYaw;
 
-        unsafe readonly StartProgramFunction IProgram.Start => new(&Start);
-        unsafe readonly UpdateProgramFunction IProgram.Update => new(&Update);
-        unsafe readonly FinishProgramFunction IProgram.Finish => new(&Finish);
+        unsafe readonly StartProgram IProgram.Start => new(&Start);
+        unsafe readonly UpdateProgram IProgram.Update => new(&Update);
+        unsafe readonly FinishProgram IProgram.Finish => new(&Finish);
 
         [UnmanagedCallersOnly]
         private static void Start(Simulator simulator, Allocation allocation, World world)
@@ -80,13 +80,13 @@ namespace Abacus
             unlitMaterial.AddTextureBinding(1, 0, squareTexture);
 
             Model cubeModel = new(world, Address.Get<CubeModel>());
-            cubeMesh = new Mesh(world, cubeModel.entity);
+            cubeMesh = new Mesh(world, cubeModel);
             Model sphereModel = new(world, Address.Get<SphereModel>());
-            sphereMesh = new(world, sphereModel.entity);
+            sphereMesh = new(world, sphereModel);
 
             //create ball
             ballBody = new(world, new SphereShape(0.5f), IsBody.Type.Dynamic, new Vector3(0f, 3f, 0f));
-            Entity ballEntity = ballBody.transform.entity;
+            Entity ballEntity = ballBody;
             MeshRenderer ballRenderer = ballEntity.Become<MeshRenderer>();
             ballRenderer.Mesh = sphereMesh;
             ballRenderer.Material = unlitMaterial;
@@ -98,7 +98,7 @@ namespace Abacus
 
             //create floor
             floorBody = new(world, new CubeShape(0.5f, 0.5f, 0.5f), IsBody.Type.Static);
-            Entity floorEntity = floorBody.transform.entity;
+            Entity floorEntity = floorBody;
             MeshRenderer floorRenderer = floorEntity.Become<MeshRenderer>();
             floorRenderer.Mesh = cubeMesh;
             floorRenderer.Material = unlitMaterial;
@@ -111,7 +111,7 @@ namespace Abacus
 
             //create floating quad
             Model quadModel = new(world, Address.Get<QuadModel>());
-            Mesh quadMesh = new(world, quadModel.entity);
+            Mesh quadMesh = new(world, quadModel);
             quadEntity = new(world);
             MeshRenderer quadRenderer = quadEntity.Become<MeshRenderer>();
             quadRenderer.Mesh = quadMesh;
@@ -146,7 +146,7 @@ namespace Abacus
 
             if (world.TryGetFirst(out Keyboard keyboard))
             {
-                Transform floorTransform = floorBody.transform;
+                Transform floorTransform = floorBody;
                 if (keyboard.WasPressed(Keyboard.Button.G))
                 {
                     using RandomGenerator rng = new();
@@ -202,7 +202,7 @@ namespace Abacus
                 {
                     ballBody.LinearVelocity = Vector3.Zero;
                     ballBody.AngularVelocity = Vector3.Zero;
-                    Transform ballTransform = ballBody.transform;
+                    Transform ballTransform = ballBody;
                     ballTransform.WorldPosition = new Vector3(0f, 4f, 0f) + floorTransform.WorldPosition;
                 }
 
@@ -243,7 +243,7 @@ namespace Abacus
 
                     Vector3 launchForce = Vector3.Normalize(cameraTransform.WorldForward + Vector3.UnitY * 0.2f) * 8f;
                     Body projectile = new(world, new SphereShape(0.5f), IsBody.Type.Dynamic, launchForce);
-                    Entity projectileEntity = projectile.transform.entity;
+                    Entity projectileEntity = projectile;
                     MeshRenderer projectileRenderer = projectileEntity.Become<MeshRenderer>();
                     projectileRenderer.Mesh = sphereMesh;
                     projectileRenderer.Material = unlitMaterial;
@@ -251,7 +251,7 @@ namespace Abacus
 
                     projectileEntity.AddComponent(Color.White);
                     projectileEntity.AddComponent(new DestroyAfterTime(5f));
-                    Transform projectileTransform = projectile.transform;
+                    Transform projectileTransform = projectile;
                     projectileTransform.LocalPosition = cameraTransform.WorldPosition;
                     projectileTransform.LocalScale = new(0.4f, 0.4f, 0.4f);
                 }

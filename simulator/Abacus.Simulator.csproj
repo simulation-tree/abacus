@@ -39,20 +39,24 @@
 	<ItemGroup>
 		<ProjectReference Include="..\..\automations\source\Automations.csproj" />
 		<ProjectReference Include="..\..\cameras\source\Cameras.csproj" />
-		<ProjectReference Include="..\..\data-systems\source\Data Systems.csproj" />
+		<ProjectReference Include="..\..\data-systems\source\Data.Systems.csproj" />
 		<ProjectReference Include="..\..\data\source\Data.csproj" />
-		<ProjectReference Include="..\..\font-systems\source\Font Systems.csproj" />
-		<ProjectReference Include="..\..\input-device-systems\source\Input Device Systems.csproj" />
-		<ProjectReference Include="..\..\interaction-kit\source\Interaction Kit.csproj" />
-		<ProjectReference Include="..\..\model-systems\source\Model Systems.csproj" />
-		<ProjectReference Include="..\..\physics-systems\source\Phyics Systems.csproj" />
-		<ProjectReference Include="..\..\shader-systems\source\Shader Systems.csproj" />
-		<ProjectReference Include="..\..\text-rendering-systems\source\Text Rendering Systems.csproj" />
-		<ProjectReference Include="..\..\texture-systems\source\Texture Systems.csproj" />
-		<ProjectReference Include="..\..\transform-systems\source\Transform Systems.csproj" />
-		<ProjectReference Include="..\..\vulkan-renderer\source\Vulkan Renderer.csproj" />
-		<ProjectReference Include="..\..\window-systems\source\Window Systems.csproj" />
-		<ProjectReference Include="..\program\Abacus Program.csproj" />
+		<ProjectReference Include="..\..\font-systems\source\Fonts.Systems.csproj" />
+		<ProjectReference Include="..\..\input-device-systems\source\InputDevices.Systems.csproj" />
+		<ProjectReference Include="..\..\interaction-kit\source\InteractionKit.csproj" />
+		<ProjectReference Include="..\..\model-systems\source\Models.Systems.csproj" />
+		<ProjectReference Include="..\..\physics-systems\source\Physics.Systems.csproj" />
+		<ProjectReference Include="..\..\shader-systems\source\Shaders.Systems.csproj" />
+		<ProjectReference Include="..\..\simulation\generator\Simulation.Generator.csproj">
+			<OutputItemType>Analyzer</OutputItemType>
+			<ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+		</ProjectReference>
+		<ProjectReference Include="..\..\text-rendering-systems\source\TextRendering.Systems.csproj" />
+		<ProjectReference Include="..\..\texture-systems\source\Texture.Systems.csproj" />
+		<ProjectReference Include="..\..\transform-systems\source\Transforms.Systems.csproj" />
+		<ProjectReference Include="..\..\vulkan-renderer\source\VulkanRenderer.csproj" />
+		<ProjectReference Include="..\..\window-systems\source\Windows.Systems.csproj" />
+		<ProjectReference Include="..\program\Abacus.Program.csproj" />
 	</ItemGroup>
 
 </Project>

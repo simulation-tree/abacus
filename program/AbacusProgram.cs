@@ -7,11 +7,10 @@ using InputDevices;
 using InputDevices.Components;
 using Meshes;
 using Models;
-using Programs;
 using Rendering;
 using Rendering.Components;
-using Rendering.Functions;
 using Simulation;
+using Simulation.Functions;
 using System;
 using System.Diagnostics;
 using System.Numerics;
@@ -21,6 +20,7 @@ using Transforms;
 using Transforms.Components;
 using Unmanaged;
 using Windows;
+using Worlds;
 
 namespace Abacus
 {
@@ -39,9 +39,9 @@ namespace Abacus
         private readonly TextMesh exampleTextMesh;
         private readonly MeshRenderer squareBox;
 
-        unsafe readonly StartProgramFunction IProgram.Start => new(&Start);
-        unsafe readonly UpdateProgramFunction IProgram.Update => new(&Update);
-        unsafe readonly FinishProgramFunction IProgram.Finish => new(&Finish);
+        unsafe readonly StartProgram IProgram.Start => new(&Start);
+        unsafe readonly UpdateProgram IProgram.Update => new(&Update);
+        unsafe readonly FinishProgram IProgram.Finish => new(&Finish);
 
         [UnmanagedCallersOnly]
         private static void Start(Simulator simulator, Allocation allocation, World world)
@@ -85,12 +85,12 @@ namespace Abacus
             //find existing camera or create new one
             if (!world.TryGetFirstEntityWithComponent<IsCamera>(out uint cameraEntity))
             {
-                camera = new(world, window.destination, CameraFieldOfView.FromDegrees(90f));
+                camera = new(world, window, CameraFieldOfView.FromDegrees(90f));
             }
             else
             {
                 camera = new(world, cameraEntity);
-                camera.Destination = window.destination;
+                camera.Destination = window;
             }
 
             //build scene
@@ -129,7 +129,7 @@ namespace Abacus
             manuallyBuiltMesh.AddTriangle(2, 3, 0);
 
             Model quadModel = new(world, Address.Get<QuadModel>());
-            Mesh quadMesh = new(world, quadModel.entity);
+            Mesh quadMesh = new(world, quadModel);
             testImage = new(world, "*/Assets/Textures/texture.jpg");
             //Shader shader = new(world, "*/Assets/Shaders/unlit.vertex.glsl", "*/Assets/Shaders/unlit.fragment.glsl");
 
@@ -177,8 +177,8 @@ namespace Abacus
 
             //render request itself (not reusable)
             TextRenderer text = new(world, exampleTextMesh, textMaterial);
-            text.Parent = squareBox;
-            Entity textEntity = text.entity;
+            text.SetParent(squareBox);
+            Entity textEntity = text;
             textEntity.AddComponent(Color.Green);
             textEntity.AddComponent(Anchor.BottomLeft);
             Transform textTransform = textEntity.Become<Transform>();
@@ -186,8 +186,8 @@ namespace Abacus
 
             TextMesh anotherTextMesh = new(world, "top right corner?", cascadiaMono);
             TextRenderer anotherText = new(world, anotherTextMesh, textMaterial);
-            anotherText.Parent = squareBox;
-            Entity anotherTextEntity = anotherText.entity;
+            anotherText.SetParent(squareBox);
+            Entity anotherTextEntity = anotherText;
             anotherTextEntity.AddComponent(Color.Blue);
             anotherTextEntity.AddComponent(Anchor.TopRight);
             anotherTextEntity.AddComponent(new Pivot(1f, 1f));
@@ -295,7 +295,7 @@ namespace Abacus
                 Keyboard keyboard = new(world, keyboardEntity);
                 if (keyboard.WasPressed(Keyboard.Button.J))
                 {
-                    dummyRenderer.IsEnabled = !dummyRenderer.IsEnabled;
+                    dummyRenderer.SetEnabled(!dummyRenderer.IsEnabled());
                 }
 
                 if (keyboard.IsPressed(Keyboard.Button.O))
@@ -318,7 +318,7 @@ namespace Abacus
                 {
                     Material dummyMaterial = dummyRenderer.Material;
                     ref MaterialTextureBinding textureBinding = ref dummyMaterial.GetTextureBindingRef(1, 0);
-                    bool shouldToggle = textureBinding.TextureEntity == waveImage.entity.value;
+                    bool shouldToggle = textureBinding.TextureEntity == waveImage.GetEntityValue();
                     textureBinding.SetTexture(shouldToggle ? testImage : waveImage);
 
                     using RandomGenerator rng = new();

@@ -11,11 +11,9 @@ using Models;
 using Physics;
 using Physics.Components;
 using Physics.Events;
-using Programs;
 using Rendering;
-using Rendering.Components;
-using Rendering.Functions;
 using Simulation;
+using Simulation.Functions;
 using System;
 using System.Diagnostics;
 using System.Numerics;
@@ -25,6 +23,7 @@ using Transforms;
 using Transforms.Components;
 using Unmanaged;
 using Windows;
+using Worlds;
 
 namespace Abacus
 {
@@ -35,9 +34,9 @@ namespace Abacus
         private Vector3 cameraPosition;
         private Vector2 cameraPitchYaw;
 
-        unsafe readonly StartProgramFunction IProgram.Start => new(&Start);
-        unsafe readonly UpdateProgramFunction IProgram.Update => new(&Update);
-        unsafe readonly FinishProgramFunction IProgram.Finish => new(&Finish);
+        unsafe readonly StartProgram IProgram.Start => new(&Start);
+        unsafe readonly UpdateProgram IProgram.Update => new(&Update);
+        unsafe readonly FinishProgram IProgram.Finish => new(&Finish);
 
         [UnmanagedCallersOnly]
         private static void Start(Simulator simulator, Allocation allocation, World world)
@@ -66,17 +65,17 @@ namespace Abacus
             window.IsResizable = true;
             window.BecomeMaximized();
 
-            worldCamera = new(world, window.destination, CameraFieldOfView.FromDegrees(90));
+            worldCamera = new(world, window, CameraFieldOfView.FromDegrees(90));
             Transform cameraTransform = worldCamera.AsEntity().Become<Transform>();
             cameraTransform.LocalPosition = new(0, 0, -10);
             cameraPosition = cameraTransform.LocalPosition;
 
-            Camera uiCamera = new(world, window.destination, new CameraOrthographicSize(1f));
+            Camera uiCamera = new(world, window, new CameraOrthographicSize(1f));
 
             //global references
             Texture squareTexture = new(world, Address.Get<SquareTexture>());
             Model cubeModel = new(world, Address.Get<CubeModel>());
-            Mesh cubeMesh = new(world, cubeModel.entity);
+            Mesh cubeMesh = new(world, cubeModel);
             Font robotoFont = new(world, Address.Get<RobotoFont>());
 
             Material unlitWorldMaterial = new(world, Address.Get<UnlitTexturedMaterial>());
@@ -113,8 +112,8 @@ namespace Abacus
 
             TextMesh textMesh = new(world, "abacus 123 hiii", robotoFont);
             TextRenderer textRenderer = new(world, textMesh, textMaterial, uiCamera.Mask);
-            textRenderer.Parent = anotherBox.AsEntity();
-            Transform textTransform = textRenderer.entity.Become<Transform>();
+            textRenderer.SetParent(anotherBox);
+            Transform textTransform = textRenderer.AsEntity().Become<Transform>();
             textTransform.LocalPosition = new(4f, -4f, 0.1f);
             textTransform.LocalScale = Vector3.One * 32f;
             textRenderer.AddComponent(Color.Orange);
@@ -160,12 +159,12 @@ namespace Abacus
 
             if (world.TryGetFirst(out Mouse mouse))
             {
-                if (!mouse.device.entity.ContainsComponent<IsPointer>())
+                if (!mouse.AsEntity().ContainsComponent<IsPointer>())
                 {
-                    mouse.device.entity.AddComponent(new IsPointer(mouse.Position, default));
+                    mouse.AddComponent(new IsPointer(mouse.Position, default));
                 }
 
-                ref IsPointer pointer = ref mouse.device.entity.GetComponentRef<IsPointer>();
+                ref IsPointer pointer = ref mouse.AsEntity().GetComponentRef<IsPointer>();
                 pointer.position = mouse.Position;
                 pointer.action = default;
                 pointer.scroll = mouse.Scroll;

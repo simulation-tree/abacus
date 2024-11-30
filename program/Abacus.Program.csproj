@@ -1,0 +1,111 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Library</OutputType>
+        <TargetFramework>net9.0</TargetFramework>
+        <ImplicitUsings>disable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+        <IsAotCompatible>True</IsAotCompatible>
+        <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
+        <WarningLevel>8</WarningLevel>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+        <IsAotCompatible>True</IsAotCompatible>
+        <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
+        <WarningLevel>8</WarningLevel>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <Compile Remove="Assets\Models\**" />
+        <EmbeddedResource Remove="Assets\Models\**" />
+        <None Remove="Assets\Models\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Remove="Assets\Cav.world" />
+        <None Remove="Assets\Textures\Blocks\Cobblestone.png" />
+        <None Remove="Assets\Textures\Blocks\Dirt.png" />
+        <None Remove="Assets\Textures\Blocks\Grass.png" />
+        <None Remove="Assets\Textures\Blocks\GrassSide.png" />
+        <None Remove="Assets\Textures\Blocks\Stone.png" />
+        <None Remove="Assets\Textures\Spaceman\Falling.png" />
+        <None Remove="Assets\Textures\Spaceman\Idle.png" />
+        <None Remove="Assets\Textures\Spaceman\Idle2.png" />
+        <None Remove="Assets\Textures\Spaceman\JumpingUp.png" />
+        <None Remove="Assets\Textures\Spaceman\Skid.png" />
+        <None Remove="Assets\Textures\Spaceman\Walk.png" />
+        <None Remove="Assets\Textures\Spaceman\Walk2.png" />
+        <None Remove="Assets\Textures\texture.jpg" />
+        <None Remove="Assets\Textures\wave.png" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Resource Include="Assets\Cav.world">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </Resource>
+        <Resource Include="Assets\Textures\Blocks\Dirt.png">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </Resource>
+        <Resource Include="Assets\Textures\Blocks\Grass.png">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </Resource>
+        <Resource Include="Assets\Textures\Blocks\GrassSide.png">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </Resource>
+        <Resource Include="Assets\Textures\Blocks\Stone.png">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </Resource>
+        <Resource Include="Assets\Textures\Spaceman\Falling.png">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </Resource>
+        <Resource Include="Assets\Textures\Spaceman\Idle.png">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </Resource>
+        <Resource Include="Assets\Textures\Spaceman\Idle2.png">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </Resource>
+        <Resource Include="Assets\Textures\Spaceman\JumpingUp.png">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </Resource>
+        <Resource Include="Assets\Textures\Spaceman\Skid.png">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </Resource>
+        <Resource Include="Assets\Textures\Spaceman\Walk.png">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </Resource>
+        <Resource Include="Assets\Textures\Spaceman\Walk2.png">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </Resource>
+        <Resource Include="Assets\Textures\texture.jpg">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </Resource>
+        <Resource Include="Assets\Textures\wave.png">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </Resource>
+        <Resource Include="Assets\Textures\Blocks\Cobblestone.png">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </Resource>
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\worlds\source\Worlds.csproj" />
+        <ProjectReference Include="..\..\automations\source\Automations.csproj" />
+        <ProjectReference Include="..\..\cameras\source\Cameras.csproj" />
+        <ProjectReference Include="..\..\data\source\Data.csproj" />
+        <ProjectReference Include="..\..\default-presentation-assets\source\DefaultPresentationAssets.csproj" />
+        <ProjectReference Include="..\..\input-devices\source\InputDevices.csproj" />
+        <ProjectReference Include="..\..\interaction-kit\source\InteractionKit.csproj" />
+        <ProjectReference Include="..\..\models\source\Models.csproj" />
+        <ProjectReference Include="..\..\physics\source\Physics.csproj" />
+        <ProjectReference Include="..\..\rendering\source\Rendering.csproj" />
+        <ProjectReference Include="..\..\text-rendering\source\TextRendering.csproj" />
+        <ProjectReference Include="..\..\transforms\source\Transforms.csproj" />
+        <ProjectReference Include="..\..\windows\source\Windows.csproj" />
+    </ItemGroup>
+
+</Project>

@@ -6,9 +6,9 @@ using DefaultPresentationAssets;
 using Meshes;
 using Meshes.Components;
 using Models;
-using Programs;
 using Rendering;
 using Simulation;
+using Simulation.Functions;
 using System;
 using System.Numerics;
 using System.Runtime.InteropServices;
@@ -17,6 +17,7 @@ using Transforms;
 using Transforms.Components;
 using Unmanaged;
 using Windows;
+using Worlds;
 
 namespace Abacus
 {
@@ -30,9 +31,9 @@ namespace Abacus
         private Vector3 cameraPosition;
         private Vector2 cameraPitchYaw;
 
-        unsafe readonly StartProgramFunction IProgram.Start => new(&Start);
-        unsafe readonly UpdateProgramFunction IProgram.Update => new(&Update);
-        unsafe readonly FinishProgramFunction IProgram.Finish => new(&Finish);
+        unsafe readonly StartProgram IProgram.Start => new(&Start);
+        unsafe readonly UpdateProgram IProgram.Update => new(&Update);
+        unsafe readonly FinishProgram IProgram.Finish => new(&Finish);
 
         [UnmanagedCallersOnly]
         private static void Start(Simulator simulator, Allocation allocation, World world)
@@ -72,7 +73,7 @@ namespace Abacus
             chunkMaterial.AddTextureBinding(1, 0, chunkAtlas, TextureFiltering.Nearest);
 
             Model quadModel = new(world, Address.Get<QuadModel>());
-            quadMesh = new(world, quadModel.entity);
+            quadMesh = new(world, quadModel);
 
             MeshRenderer quadRenderer = new(world, quadMesh, chunkMaterial);
             quadRenderer.AsEntity().AddComponent(Color.White);

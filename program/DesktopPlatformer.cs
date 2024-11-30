@@ -10,11 +10,10 @@ using Models;
 using Physics;
 using Physics.Components;
 using Physics.Events;
-using Programs;
 using Rendering;
 using Rendering.Components;
-using Rendering.Functions;
 using Simulation;
+using Simulation.Functions;
 using System;
 using System.Numerics;
 using System.Runtime.InteropServices;
@@ -23,6 +22,7 @@ using Transforms;
 using Transforms.Components;
 using Unmanaged;
 using Windows;
+using Worlds;
 
 namespace Abacus
 {
@@ -37,9 +37,9 @@ namespace Abacus
         private readonly Body leftWallBody;
         private readonly Body rightWallBody;
 
-        readonly StartProgramFunction IProgram.Start => new(&Start);
-        readonly UpdateProgramFunction IProgram.Update => new(&Update);
-        readonly FinishProgramFunction IProgram.Finish => new(&Finish);
+        readonly StartProgram IProgram.Start => new(&Start);
+        readonly UpdateProgram IProgram.Update => new(&Update);
+        readonly FinishProgram IProgram.Finish => new(&Finish);
 
         [UnmanagedCallersOnly]
         private static void Start(Simulator simulator, Allocation allocation, World world)
@@ -77,7 +77,7 @@ namespace Abacus
 
             Texture squareTexture = new(world, Address.Get<SquareTexture>());
             Model cubeModel = new(world, Address.Get<CubeModel>());
-            Mesh cubeMesh = new(world, cubeModel.entity);
+            Mesh cubeMesh = new(world, cubeModel);
 
             Mesh quadMesh = new(world);
             USpan<Vector3> positions = quadMesh.CreatePositions(4);

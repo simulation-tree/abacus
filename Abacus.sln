@@ -3,127 +3,125 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.5.002.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Abacus Program", "program\Abacus Program.csproj", "{E4B86E6D-5CD9-49F6-AE1E-731441F3FA1D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Abacus.Program", "program\Abacus.Program.csproj", "{E4B86E6D-5CD9-49F6-AE1E-731441F3FA1D}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Unmanaged", "..\unmanaged\source\Unmanaged.csproj", "{4F36256C-74BF-4DE6-AFC3-FFCE7B2466ED}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Unmanaged Tests", "..\unmanaged\tests\Unmanaged Tests.csproj", "{830C86AF-C962-4312-B06D-C3E44670612B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Unmanaged.Tests", "..\unmanaged\tests\Unmanaged.Tests.csproj", "{830C86AF-C962-4312-B06D-C3E44670612B}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Simulation", "..\simulation\source\Simulation.csproj", "{B45D7D5A-952B-499B-84BE-C227702B3907}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Simulation.Tests", "..\simulation\tests\Simulation.Tests.csproj", "{90E52703-708C-4C88-94D8-C04E7F0EA8F3}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Simulation Tests", "..\simulation\tests\Simulation Tests.csproj", "{90E52703-708C-4C88-94D8-C04E7F0EA8F3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Data.Systems", "..\data-systems\source\Data.Systems.csproj", "{5D496538-C722-4944-B34D-4DD9886B0A94}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Data", "..\data\source\Data.csproj", "{3320B43C-300F-4C4C-BDE8-F96CCB4CCCF7}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Data Systems", "..\data-systems\source\Data Systems.csproj", "{5D496538-C722-4944-B34D-4DD9886B0A94}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Data Systems Tests", "..\data-systems\tests\Data Systems Tests.csproj", "{7C948C1B-A0B3-4415-BA49-F6CAFE30D37C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Data.Systems.Tests", "..\data-systems\tests\Data.Systems.Tests.csproj", "{7C948C1B-A0B3-4415-BA49-F6CAFE30D37C}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Windows", "..\windows\source\Windows.csproj", "{0D750B6B-45FD-4414-AEC2-F80CEFB0273B}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Window Systems", "..\window-systems\source\Window Systems.csproj", "{76930CFD-AD16-4893-AAD2-53AD27E3C341}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Windows.Systems", "..\window-systems\source\Windows.Systems.csproj", "{76930CFD-AD16-4893-AAD2-53AD27E3C341}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Transforms", "..\transforms\source\Transforms.csproj", "{39E150EA-4A9D-4514-B52F-11D256548EA2}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Transform Systems", "..\transform-systems\source\Transform Systems.csproj", "{4D74AF3E-3D20-4570-B060-E3D19D6CC4A3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Transforms.Systems", "..\transform-systems\source\Transforms.Systems.csproj", "{4D74AF3E-3D20-4570-B060-E3D19D6CC4A3}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Transform Systems Tests", "..\transform-systems\tests\Transform Systems Tests.csproj", "{B3E489C1-35B5-45B0-9B73-62BB10FEE1DD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Transforms.Systems.Tests", "..\transform-systems\tests\Transforms.Systems.Tests.csproj", "{B3E489C1-35B5-45B0-9B73-62BB10FEE1DD}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Serialization", "..\serialization\source\Serialization.csproj", "{E4625327-2396-4D4F-90F3-22397E8E674B}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Serialization Tests", "..\serialization\tests\Serialization Tests.csproj", "{448F224B-233C-4512-B139-2972218D440E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Serialization.Tests", "..\serialization\tests\Serialization.Tests.csproj", "{448F224B-233C-4512-B139-2972218D440E}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Shaders", "..\shaders\source\Shaders.csproj", "{69BB28E5-90C4-4962-8576-C2D716608BB3}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Shader Systems", "..\shader-systems\source\Shader Systems.csproj", "{D3CEF030-1DE5-44C4-BCB1-D02B9346989B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Shaders.Systems", "..\shader-systems\source\Shaders.Systems.csproj", "{D3CEF030-1DE5-44C4-BCB1-D02B9346989B}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Shader Systems Tests", "..\shader-systems\tests\Shader Systems Tests.csproj", "{CC777039-9EE7-4899-8521-37B3838E987D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Shaders.Systems.Tests", "..\shader-systems\tests\Shaders.Systems.Tests.csproj", "{CC777039-9EE7-4899-8521-37B3838E987D}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Textures", "..\textures\source\Textures.csproj", "{840FA434-5A83-42BF-93CE-5A1BE940BF93}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Texture Systems", "..\texture-systems\source\Texture Systems.csproj", "{EBB2C2FC-A07D-4121-8553-BE0631B51A31}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Texture.Systems", "..\texture-systems\source\Texture.Systems.csproj", "{EBB2C2FC-A07D-4121-8553-BE0631B51A31}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Texture Systems Tests", "..\texture-systems\tests\Texture Systems Tests.csproj", "{E7F75F83-5801-461E-BC73-E56E77E7CBD9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Texture.Systems.Tests", "..\texture-systems\tests\Texture.Systems.Tests.csproj", "{E7F75F83-5801-461E-BC73-E56E77E7CBD9}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Meshes", "..\meshes\source\Meshes.csproj", "{B6629824-D756-4F63-B4E0-1FA9FF328F8F}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Mesh Tests", "..\meshes\tests\Mesh Tests.csproj", "{2CCDC102-59A5-4034-A145-C19960187A93}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Meshes.Tests", "..\meshes\tests\Meshes.Tests.csproj", "{2CCDC102-59A5-4034-A145-C19960187A93}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Models", "..\models\source\Models.csproj", "{33D9A598-60C0-445D-AF89-FAF8C4C5E477}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Model Systems", "..\model-systems\source\Model Systems.csproj", "{5DCB423D-934E-48CB-975B-8DA455F65EE5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Models.Systems", "..\model-systems\source\Models.Systems.csproj", "{5DCB423D-934E-48CB-975B-8DA455F65EE5}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Model Tests", "..\model-systems\tests\Model Tests.csproj", "{AE847B99-7E91-4462-B7FD-24BE89AFFC94}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Models.Systems.Tests", "..\model-systems\tests\Models.Systems.Tests.csproj", "{AE847B99-7E91-4462-B7FD-24BE89AFFC94}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fonts", "..\fonts\source\Fonts.csproj", "{06C486AA-794A-44ED-A11F-1620FE4288D2}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Font Systems", "..\font-systems\source\Font Systems.csproj", "{DDA2F9DB-E40C-4D0F-BB6A-A81D87E57AD8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fonts.Systems", "..\font-systems\source\Fonts.Systems.csproj", "{DDA2F9DB-E40C-4D0F-BB6A-A81D87E57AD8}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Font System Tests", "..\font-systems\tests\Font System Tests.csproj", "{0C5CDCE6-7C0E-4D23-99C9-0743ACA906AA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fonts.Systems.Tests", "..\font-systems\tests\Fonts.Systems.Tests.csproj", "{0C5CDCE6-7C0E-4D23-99C9-0743ACA906AA}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bin Packer", "..\bin-packer\source\Bin Packer.csproj", "{3D8D114D-D887-4641-AB7A-77AA0CED95AF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BinPacker", "..\bin-packer\source\BinPacker.csproj", "{3D8D114D-D887-4641-AB7A-77AA0CED95AF}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bin Packer Tests", "..\bin-packer\tests\Bin Packer Tests.csproj", "{C8F6D419-0357-4123-ABED-B493A8168D36}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BinPacker.Tests", "..\bin-packer\tests\BinPacker.Tests.csproj", "{C8F6D419-0357-4123-ABED-B493A8168D36}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Vulkan Renderer", "..\vulkan-renderer\source\Vulkan Renderer.csproj", "{97DD8320-13BC-4D81-BDFF-D96B46C0A99C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VulkanRenderer", "..\vulkan-renderer\source\VulkanRenderer.csproj", "{97DD8320-13BC-4D81-BDFF-D96B46C0A99C}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Rendering", "..\rendering\source\Rendering.csproj", "{7546C6F8-5899-4409-85F0-55BC4BCC7AE8}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Logging", "..\logging\source\Logging.csproj", "{80587BC5-C5B2-4CB2-AB7F-5A2F9CD3C2F2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DefaultPresentationAssets", "..\default-presentation-assets\source\DefaultPresentationAssets.csproj", "{802C782A-F191-44B7-BC63-71E8598572B5}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Logging Tests", "..\logging\tests\Logging Tests.csproj", "{9C2D1CDC-25BC-4A50-B65E-B39F3522A9EC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ExpressionMachine", "..\expression-machine\source\ExpressionMachine.csproj", "{096482A3-3A3B-4F90-A002-DB95DD0C1D23}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Commander", "..\commander\source\Commander.csproj", "{73FCA6FD-6382-48A5-BD30-8CB8F90852D9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ExpressionMachine.Tests", "..\expression-machine\tests\ExpressionMachine.Tests.csproj", "{FBA88BE3-0BDF-4A19-9D78-0C9ED70D5EAD}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Commander Tests", "..\commander\tests\Commander Tests.csproj", "{87E850D6-AF48-4FDA-AF5F-A6CCB237DDEB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TextRendering", "..\text-rendering\source\TextRendering.csproj", "{4B3EF1BB-8882-498E-87DF-E85BBA2F850F}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Default Presentation Assets", "..\default-presentation-assets\source\Default Presentation Assets.csproj", "{802C782A-F191-44B7-BC63-71E8598572B5}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Expression Machine", "..\expression-machine\source\Expression Machine.csproj", "{096482A3-3A3B-4F90-A002-DB95DD0C1D23}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Expression Machine Tests", "..\expression-machine\tests\Expression Machine Tests.csproj", "{FBA88BE3-0BDF-4A19-9D78-0C9ED70D5EAD}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Text Rendering", "..\text-rendering\source\Text Rendering.csproj", "{4B3EF1BB-8882-498E-87DF-E85BBA2F850F}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Text Rendering Systems", "..\text-rendering-systems\source\Text Rendering Systems.csproj", "{8B15A900-2AF1-4CD5-A38D-6E61CA5ACB05}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TextRendering.Systems", "..\text-rendering-systems\source\TextRendering.Systems.csproj", "{8B15A900-2AF1-4CD5-A38D-6E61CA5ACB05}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FreeType", "..\freetype\source\FreeType.csproj", "{0EC8D10D-604A-4F10-B758-7349A040824D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Text Rendering Systems Tests", "..\text-rendering-systems\tests\Text Rendering Systems Tests.csproj", "{1428A37A-82DB-4DD8-A065-1C31D98D3FCC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TextRendering.Systems.Tests", "..\text-rendering-systems\tests\TextRendering.Systems.Tests.csproj", "{1428A37A-82DB-4DD8-A065-1C31D98D3FCC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Abacus Simulator", "simulator\Abacus Simulator.csproj", "{92E6B3ED-0000-4C49-A52C-744048818EC8}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Abacus.Simulator", "simulator\Abacus.Simulator.csproj", "{92E6B3ED-0000-4C49-A52C-744048818EC8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Interaction Kit", "..\interaction-kit\source\Interaction Kit.csproj", "{F1D4D545-EFB1-4C47-8409-D479FD185CCE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InteractionKit", "..\interaction-kit\source\InteractionKit.csproj", "{F1D4D545-EFB1-4C47-8409-D479FD185CCE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Interaction Kit Tests", "..\interaction-kit\tests\Interaction Kit Tests.csproj", "{E0E8BF0A-EC9B-4D3D-9937-1A9DB073D759}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InteractionKit.Tests", "..\interaction-kit\tests\InteractionKit.Tests.csproj", "{E0E8BF0A-EC9B-4D3D-9937-1A9DB073D759}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Input Devices", "..\input-devices\source\Input Devices.csproj", "{855E3B7E-16E0-4657-AC8F-04037EC51435}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InputDevices", "..\input-devices\source\InputDevices.csproj", "{855E3B7E-16E0-4657-AC8F-04037EC51435}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Input Device Systems", "..\input-device-systems\source\Input Device Systems.csproj", "{1884B2E1-2499-445E-AD1F-34B46E2A8D05}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InputDevices.Systems", "..\input-device-systems\source\InputDevices.Systems.csproj", "{1884B2E1-2499-445E-AD1F-34B46E2A8D05}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Physics", "..\physics\source\Physics.csproj", "{BF99DEA0-2541-46B8-844B-5C2FDD614A39}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Phyics Systems", "..\physics-systems\source\Phyics Systems.csproj", "{A56B920D-DF45-407C-9916-ABA596A03E53}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Physics.Systems", "..\physics-systems\source\Physics.Systems.csproj", "{A56B920D-DF45-407C-9916-ABA596A03E53}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Physics Systems Tests", "..\physics-systems\tests\Physics Systems Tests.csproj", "{49468477-DE41-4E03-A01E-47E33A5F19E2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Physics.Systems.Tests", "..\physics-systems\tests\Physics.Systems.Tests.csproj", "{49468477-DE41-4E03-A01E-47E33A5F19E2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Transform Tests", "..\transforms\tests\Transform Tests.csproj", "{6C067D9E-2BE1-40FA-B983-C3CABF759C37}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Transforms.Tests", "..\transforms\tests\Transforms.Tests.csproj", "{6C067D9E-2BE1-40FA-B983-C3CABF759C37}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cameras", "..\cameras\source\Cameras.csproj", "{D134340B-1934-4D52-84C3-1B54202A01B6}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Automations", "..\automations\source\Automations.csproj", "{53418108-07B5-4F45-B36C-0046D6F661E1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Automation Tests", "..\automations\tests\Automation Tests.csproj", "{7140D494-FE02-4304-9F3B-5F2068D1B04E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Automations.Tests", "..\automations\tests\Automations.Tests.csproj", "{7140D494-FE02-4304-9F3B-5F2068D1B04E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Camera Tests", "..\cameras\tests\Camera Tests.csproj", "{B60DF5DC-E91A-44B0-9D59-542C524DC4A5}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cameras.Tests", "..\cameras\tests\Cameras.Tests.csproj", "{B60DF5DC-E91A-44B0-9D59-542C524DC4A5}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HTTP", "..\http\source\HTTP.csproj", "{C030BD95-CCE4-4DE3-A75A-7058320056A8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HTTP Tests", "..\http\tests\HTTP Tests.csproj", "{A885CE89-FD27-46DE-B029-AB1F70157D8D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HTTP.Tests", "..\http\tests\HTTP.Tests.csproj", "{A885CE89-FD27-46DE-B029-AB1F70157D8D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Collections", "..\collections\source\Collections.csproj", "{3F837705-F616-4783-A02D-435280C328B1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Collection Tests", "..\collections\tests\Collection Tests.csproj", "{4DAD4809-2B13-4EFF-A912-76EC66D1112C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Simulation", "..\simulation\source\Simulation.csproj", "{4631B9F2-BEB3-F8CA-2FD6-D496F6D9C84B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Worlds", "..\worlds\source\Worlds.csproj", "{463C9203-730C-2099-6DE2-F4BCCAD48639}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Worlds.Tests", "..\worlds\tests\Worlds.Tests.csproj", "{2C7614C0-2DDE-1864-B8B9-95AE2BDEC1DE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Worlds.TypeTableGenerator", "..\worlds\generator\Worlds.TypeTableGenerator.csproj", "{357A1888-0960-752D-8D10-4F52F43F8DEF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Data", "..\data\source\Data.csproj", "{F2DEC065-03F9-68FA-9C00-C095D268E1C5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Collections.Tests", "..\collections\tests\Collections.Tests.csproj", "{E070EAAB-8044-4316-278F-11AE89B3F694}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -143,18 +141,10 @@ Global
 		{830C86AF-C962-4312-B06D-C3E44670612B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{830C86AF-C962-4312-B06D-C3E44670612B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{830C86AF-C962-4312-B06D-C3E44670612B}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B45D7D5A-952B-499B-84BE-C227702B3907}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B45D7D5A-952B-499B-84BE-C227702B3907}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B45D7D5A-952B-499B-84BE-C227702B3907}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B45D7D5A-952B-499B-84BE-C227702B3907}.Release|Any CPU.Build.0 = Release|Any CPU
 		{90E52703-708C-4C88-94D8-C04E7F0EA8F3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{90E52703-708C-4C88-94D8-C04E7F0EA8F3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{90E52703-708C-4C88-94D8-C04E7F0EA8F3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{90E52703-708C-4C88-94D8-C04E7F0EA8F3}.Release|Any CPU.Build.0 = Release|Any CPU
-		{3320B43C-300F-4C4C-BDE8-F96CCB4CCCF7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{3320B43C-300F-4C4C-BDE8-F96CCB4CCCF7}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{3320B43C-300F-4C4C-BDE8-F96CCB4CCCF7}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{3320B43C-300F-4C4C-BDE8-F96CCB4CCCF7}.Release|Any CPU.Build.0 = Release|Any CPU
 		{5D496538-C722-4944-B34D-4DD9886B0A94}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{5D496538-C722-4944-B34D-4DD9886B0A94}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5D496538-C722-4944-B34D-4DD9886B0A94}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -263,22 +253,6 @@ Global
 		{7546C6F8-5899-4409-85F0-55BC4BCC7AE8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7546C6F8-5899-4409-85F0-55BC4BCC7AE8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7546C6F8-5899-4409-85F0-55BC4BCC7AE8}.Release|Any CPU.Build.0 = Release|Any CPU
-		{80587BC5-C5B2-4CB2-AB7F-5A2F9CD3C2F2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{80587BC5-C5B2-4CB2-AB7F-5A2F9CD3C2F2}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{80587BC5-C5B2-4CB2-AB7F-5A2F9CD3C2F2}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{80587BC5-C5B2-4CB2-AB7F-5A2F9CD3C2F2}.Release|Any CPU.Build.0 = Release|Any CPU
-		{9C2D1CDC-25BC-4A50-B65E-B39F3522A9EC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{9C2D1CDC-25BC-4A50-B65E-B39F3522A9EC}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{9C2D1CDC-25BC-4A50-B65E-B39F3522A9EC}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{9C2D1CDC-25BC-4A50-B65E-B39F3522A9EC}.Release|Any CPU.Build.0 = Release|Any CPU
-		{73FCA6FD-6382-48A5-BD30-8CB8F90852D9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{73FCA6FD-6382-48A5-BD30-8CB8F90852D9}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{73FCA6FD-6382-48A5-BD30-8CB8F90852D9}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{73FCA6FD-6382-48A5-BD30-8CB8F90852D9}.Release|Any CPU.Build.0 = Release|Any CPU
-		{87E850D6-AF48-4FDA-AF5F-A6CCB237DDEB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{87E850D6-AF48-4FDA-AF5F-A6CCB237DDEB}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{87E850D6-AF48-4FDA-AF5F-A6CCB237DDEB}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{87E850D6-AF48-4FDA-AF5F-A6CCB237DDEB}.Release|Any CPU.Build.0 = Release|Any CPU
 		{802C782A-F191-44B7-BC63-71E8598572B5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{802C782A-F191-44B7-BC63-71E8598572B5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{802C782A-F191-44B7-BC63-71E8598572B5}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -371,10 +345,30 @@ Global
 		{3F837705-F616-4783-A02D-435280C328B1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3F837705-F616-4783-A02D-435280C328B1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3F837705-F616-4783-A02D-435280C328B1}.Release|Any CPU.Build.0 = Release|Any CPU
-		{4DAD4809-2B13-4EFF-A912-76EC66D1112C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{4DAD4809-2B13-4EFF-A912-76EC66D1112C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{4DAD4809-2B13-4EFF-A912-76EC66D1112C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{4DAD4809-2B13-4EFF-A912-76EC66D1112C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4631B9F2-BEB3-F8CA-2FD6-D496F6D9C84B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4631B9F2-BEB3-F8CA-2FD6-D496F6D9C84B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4631B9F2-BEB3-F8CA-2FD6-D496F6D9C84B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4631B9F2-BEB3-F8CA-2FD6-D496F6D9C84B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{463C9203-730C-2099-6DE2-F4BCCAD48639}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{463C9203-730C-2099-6DE2-F4BCCAD48639}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{463C9203-730C-2099-6DE2-F4BCCAD48639}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{463C9203-730C-2099-6DE2-F4BCCAD48639}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2C7614C0-2DDE-1864-B8B9-95AE2BDEC1DE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2C7614C0-2DDE-1864-B8B9-95AE2BDEC1DE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2C7614C0-2DDE-1864-B8B9-95AE2BDEC1DE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2C7614C0-2DDE-1864-B8B9-95AE2BDEC1DE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{357A1888-0960-752D-8D10-4F52F43F8DEF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{357A1888-0960-752D-8D10-4F52F43F8DEF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{357A1888-0960-752D-8D10-4F52F43F8DEF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{357A1888-0960-752D-8D10-4F52F43F8DEF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F2DEC065-03F9-68FA-9C00-C095D268E1C5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F2DEC065-03F9-68FA-9C00-C095D268E1C5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F2DEC065-03F9-68FA-9C00-C095D268E1C5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F2DEC065-03F9-68FA-9C00-C095D268E1C5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E070EAAB-8044-4316-278F-11AE89B3F694}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E070EAAB-8044-4316-278F-11AE89B3F694}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E070EAAB-8044-4316-278F-11AE89B3F694}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E070EAAB-8044-4316-278F-11AE89B3F694}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

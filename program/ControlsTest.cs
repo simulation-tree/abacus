@@ -4,8 +4,8 @@ using InputDevices;
 using InteractionKit;
 using InteractionKit.Components;
 using InteractionKit.Functions;
-using Programs;
 using Simulation;
+using Simulation.Functions;
 using System;
 using System.Diagnostics;
 using System.Numerics;
@@ -13,6 +13,7 @@ using System.Runtime.InteropServices;
 using Transforms.Components;
 using Unmanaged;
 using Windows;
+using Worlds;
 
 namespace Abacus
 {
@@ -20,9 +21,9 @@ namespace Abacus
     {
         private readonly Window window;
 
-        unsafe readonly StartProgramFunction IProgram.Start => new(&Start);
-        unsafe readonly UpdateProgramFunction IProgram.Update => new(&Update);
-        unsafe readonly FinishProgramFunction IProgram.Finish => new(&Finish);
+        unsafe readonly StartProgram IProgram.Start => new(&Start);
+        unsafe readonly UpdateProgram IProgram.Update => new(&Update);
+        unsafe readonly FinishProgram IProgram.Finish => new(&Finish);
 
         [UnmanagedCallersOnly]
         private static void Start(Simulator simulator, Allocation allocation, World world)
@@ -169,7 +170,7 @@ namespace Abacus
                 float y = -gap;
 
                 Label testLabel = new(world, canvas, "Hello, World!");
-                testLabel.Parent = window.Container;
+                testLabel.SetParent(window.Container);
                 testLabel.Anchor = Anchor.TopLeft;
                 testLabel.Color = Color.Black;
                 testLabel.Position = new(4f, y);
@@ -178,7 +179,7 @@ namespace Abacus
                 y -= singleLineHeight + gap;
 
                 Button testButton = new(world, new(&PressedTestButton), canvas);
-                testButton.Parent = window.Container;
+                testButton.SetParent(window.Container);
                 testButton.Color = new Color(0.2f, 0.2f, 0.2f);
                 testButton.Anchor = Anchor.TopLeft;
                 testButton.Pivot = new(0f, 1f, 0f);
@@ -186,7 +187,7 @@ namespace Abacus
                 testButton.Position = new(4f, y);
 
                 Label testButtonLabel = new(world, canvas, "Press count: 0");
-                testButtonLabel.Parent = testButton.AsEntity();
+                testButtonLabel.SetParent(testButton);
                 testButtonLabel.Anchor = Anchor.TopLeft;
                 testButtonLabel.Position = new(4f, -4f);
                 testButtonLabel.Pivot = new(0f, 1f, 0f);
@@ -194,7 +195,7 @@ namespace Abacus
                 y -= singleLineHeight + gap;
 
                 Toggle testToggle = new(world, canvas);
-                testToggle.Parent = window.Container;
+                testToggle.SetParent(window.Container);
                 testToggle.Position = new(4f, y);
                 testToggle.Size = new(24, singleLineHeight);
                 testToggle.Anchor = Anchor.TopLeft;
@@ -205,7 +206,7 @@ namespace Abacus
                 y -= singleLineHeight + gap;
 
                 ScrollBar horizontalScrollBar = new(world, canvas, Vector2.UnitX, 0.25f);
-                horizontalScrollBar.Parent = window.Container;
+                horizontalScrollBar.SetParent(window.Container);
                 horizontalScrollBar.Position = new(4f, y);
                 horizontalScrollBar.Size = new(180f, singleLineHeight);
                 horizontalScrollBar.Anchor = Anchor.TopLeft;
@@ -216,7 +217,7 @@ namespace Abacus
                 y -= singleLineHeight + gap;
 
                 Dropdown testDropdown = new(world, canvas);
-                testDropdown.Parent = window.Container;
+                testDropdown.SetParent(window.Container);
                 testDropdown.Position = new(4f, y);
                 testDropdown.Size = new(180f, singleLineHeight);
                 testDropdown.Anchor = Anchor.TopLeft;
@@ -250,7 +251,7 @@ namespace Abacus
                 y -= singleLineHeight + gap;
 
                 TextField testTextField = new(world, canvas);
-                testTextField.Parent = window.Container;
+                testTextField.SetParent(window.Container);
                 testTextField.Position = new(4f, y);
                 testTextField.Size = new(180f, singleLineHeight);
                 testTextField.Anchor = Anchor.TopLeft;
@@ -265,9 +266,9 @@ namespace Abacus
                 dataEntity.AddComponent(0f);
                 dataEntity.AddComponent(new FixedString("babash"));
 
-                ControlField testControlField = new(world, canvas, "Test", dataEntity, RuntimeType.Get<bool>());
+                ControlField testControlField = new(world, canvas, "Test", dataEntity, ComponentType.Get<bool>());
                 testControlField.LabelColor = Color.Black;
-                testControlField.Parent = window.Container;
+                testControlField.SetParent(window.Container);
                 testControlField.Anchor = Anchor.TopLeft;
                 testControlField.Pivot = new(0f, 1f, 0f);
                 testControlField.Position = new(4f, y);
@@ -276,7 +277,7 @@ namespace Abacus
                 y -= singleLineHeight + gap;
 
                 Tree testTree = new(world, canvas);
-                testTree.Parent = window.Container;
+                testTree.SetParent(window.Container);
                 testTree.Position = new(4f, y);
                 testTree.Size = new(180f, singleLineHeight);
                 testTree.Anchor = Anchor.TopLeft;
@@ -298,7 +299,7 @@ namespace Abacus
                 for (int i = 0; i < 20; i++)
                 {
                     Image box = new(world, canvas);
-                    box.Parent = window.Container;
+                    box.SetParent(window.Container);
                     box.Size = new(60f, 20f);
                     box.Position = new(200f, i * 26f);
                     box.Color = Color.FromHSV((i * 0.1f) % 1, 1, 1);

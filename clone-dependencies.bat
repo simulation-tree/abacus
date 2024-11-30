@@ -1,8 +1,7 @@
 cd ..
 git clone https://github.com/game-simulations/unmanaged.git
+git clone https://github.com/game-simulations/collections.git
 git clone https://github.com/game-simulations/simulation.git
-git clone https://github.com/game-simulations/logging.git
-git clone https://github.com/game-simulations/commander.git
 git clone https://github.com/game-simulations/data.git
 git clone https://github.com/game-simulations/meshes.git
 git clone https://github.com/game-simulations/models.git
@@ -19,7 +18,6 @@ git clone https://github.com/game-simulations/windows.git
 git clone https://github.com/game-simulations/input-devices.git
 git clone https://github.com/game-simulations/interaction-kit.git
 git clone https://github.com/game-simulations/physics.git
-git clone https://github.com/game-simulations/programs.git
 git clone https://github.com/game-simulations/simulator.git
 git clone https://github.com/game-simulations/freetype.git
 git clone https://github.com/game-simulations/default-presentation-assets.git

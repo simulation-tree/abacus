@@ -1,8 +1,9 @@
-﻿using Programs;
-using Simulation;
+﻿using Simulation;
+using Simulation.Functions;
 using System;
 using System.Runtime.InteropServices;
 using Unmanaged;
+using Worlds;
 
 namespace Abacus
 {
@@ -10,9 +11,9 @@ namespace Abacus
     {
         private TimeSpan time;
 
-        unsafe readonly StartProgramFunction IProgram.Start => new(&Start);
-        unsafe readonly UpdateProgramFunction IProgram.Update => new(&Update);
-        unsafe readonly FinishProgramFunction IProgram.Finish => new(&Finish);
+        unsafe readonly StartProgram IProgram.Start => new(&Start);
+        unsafe readonly UpdateProgram IProgram.Update => new(&Update);
+        unsafe readonly FinishProgram IProgram.Finish => new(&Finish);
 
         [UnmanagedCallersOnly]
         private static void Start(Simulator simulator, Allocation allocation, World world)
