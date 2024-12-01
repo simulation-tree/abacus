@@ -68,9 +68,9 @@ namespace AbacusSimulator
             simulator.Dispose();
         }
 
-        public readonly void Update(TimeSpan delta)
+        public readonly void Update()
         {
-            simulator.Update(delta);
+            simulator.Update();
         }
     }
 }

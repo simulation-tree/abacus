@@ -68,7 +68,7 @@ namespace Abacus
             //load scene built in unity
             try
             {
-                //DataRequest scene = new(world, "*/Assets/Cav.world");
+                //DataRequest scene = new(world, "Assets/Cav.world");
                 //using BinaryReader reader = new(scene.GetBytes());
                 //using World sceneWorld = reader.ReadObject<World>();
                 //world.Clear();
@@ -130,8 +130,8 @@ namespace Abacus
 
             Model quadModel = new(world, Address.Get<QuadModel>());
             Mesh quadMesh = new(world, quadModel);
-            testImage = new(world, "*/Assets/Textures/texture.jpg");
-            //Shader shader = new(world, "*/Assets/Shaders/unlit.vertex.glsl", "*/Assets/Shaders/unlit.fragment.glsl");
+            testImage = new(world, "Assets/Textures/texture.jpg");
+            //Shader shader = new(world, "Assets/Shaders/unlit.vertex.glsl", "Assets/Shaders/unlit.fragment.glsl");
 
             Material material = new(world, Address.Get<UnlitTexturedMaterial>());
             material.AddPushBinding<Color>();
@@ -143,7 +143,7 @@ namespace Abacus
             dummyRenderer.AddComponent(Color.Yellow);
             dummyRenderer.AsEntity().Become<Transform>();
 
-            waveImage = new(world, "*/Assets/Textures/wave.png");
+            waveImage = new(world, "Assets/Textures/wave.png");
             Material testMaterial = new(world, Address.Get<UnlitTexturedMaterial>());
             testMaterial.AddPushBinding<Color>();
             testMaterial.AddPushBinding<LocalToWorld>();

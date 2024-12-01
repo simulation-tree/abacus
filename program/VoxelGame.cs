@@ -111,11 +111,11 @@ namespace Abacus
 
         private readonly AtlasTexture GetChunkAtlas(Simulator simulator, World world)
         {
-            Texture dirt = new(world, "*/Assets/Textures/Blocks/Dirt.png");
-            Texture grass = new(world, "*/Assets/Textures/Blocks/Grass.png");
-            Texture stone = new(world, "*/Assets/Textures/Blocks/Stone.png");
-            Texture grassSide = new(world, "*/Assets/Textures/Blocks/GrassSide.png");
-            Texture cobblestone = new(world, "*/Assets/Textures/Blocks/Cobblestone.png");
+            Texture dirt = new(world, "Assets/Textures/Blocks/Dirt.png");
+            Texture grass = new(world, "Assets/Textures/Blocks/Grass.png");
+            Texture stone = new(world, "Assets/Textures/Blocks/Stone.png");
+            Texture grassSide = new(world, "Assets/Textures/Blocks/GrassSide.png");
+            Texture cobblestone = new(world, "Assets/Textures/Blocks/Cobblestone.png");
 
             simulator.UpdateSystems(TimeSpan.MinValue);
 

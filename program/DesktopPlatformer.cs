@@ -200,13 +200,13 @@ namespace Abacus
 
         private readonly AtlasTexture GetPlayerAtlas(Simulator simulator, World world)
         {
-            Texture idle = new(world, "*/Assets/Textures/Spaceman/Idle.png");
-            Texture idle2 = new(world, "*/Assets/Textures/Spaceman/Idle2.png");
-            Texture falling = new(world, "*/Assets/Textures/Spaceman/Falling.png");
-            Texture jumpingUp = new(world, "*/Assets/Textures/Spaceman/JumpingUp.png");
-            Texture skid = new(world, "*/Assets/Textures/Spaceman/Skid.png");
-            Texture walk = new(world, "*/Assets/Textures/Spaceman/Walk.png");
-            Texture walk2 = new(world, "*/Assets/Textures/Spaceman/Walk2.png");
+            Texture idle = new(world, "Assets/Textures/Spaceman/Idle.png");
+            Texture idle2 = new(world, "Assets/Textures/Spaceman/Idle2.png");
+            Texture falling = new(world, "Assets/Textures/Spaceman/Falling.png");
+            Texture jumpingUp = new(world, "Assets/Textures/Spaceman/JumpingUp.png");
+            Texture skid = new(world, "Assets/Textures/Spaceman/Skid.png");
+            Texture walk = new(world, "Assets/Textures/Spaceman/Walk.png");
+            Texture walk2 = new(world, "Assets/Textures/Spaceman/Walk2.png");
 
             simulator.UpdateSystems(TimeSpan.MinValue);
 
@@ -494,6 +494,7 @@ namespace Abacus
             return a + (b - a) * t;
         }
 
+        [Component]
         public struct GroundedState
         {
             public bool value;
@@ -504,6 +505,7 @@ namespace Abacus
             }
         }
 
+        [Component]
         public struct AnimatedSprite
         {
             public FixedString spriteName;
@@ -514,6 +516,7 @@ namespace Abacus
             }
         }
 
+        [Component]
         public struct IsPlayer
         {
             public bool main;
@@ -524,6 +527,7 @@ namespace Abacus
             }
         }
 
+        [Component]
         public struct Jetpack
         {
             public float availableTime;

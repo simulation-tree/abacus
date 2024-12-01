@@ -10,7 +10,7 @@ using Worlds;
 
 namespace Abacus
 {
-    public struct WindowThatFollowsTheMouse : IProgram
+    public readonly struct WindowThatFollowsTheMouse : IProgram
     {
         private readonly World world;
         private readonly Window followerWindow;

@@ -45,51 +45,51 @@
     </ItemGroup>
 
     <ItemGroup>
-        <Resource Include="Assets\Cav.world">
+        <Content Include="Assets\Cav.world">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-        </Resource>
-        <Resource Include="Assets\Textures\Blocks\Dirt.png">
+        </Content>
+        <Content Include="Assets\Textures\Blocks\Dirt.png">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-        </Resource>
-        <Resource Include="Assets\Textures\Blocks\Grass.png">
+        </Content>
+        <Content Include="Assets\Textures\Blocks\Grass.png">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-        </Resource>
-        <Resource Include="Assets\Textures\Blocks\GrassSide.png">
+        </Content>
+        <Content Include="Assets\Textures\Blocks\GrassSide.png">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-        </Resource>
-        <Resource Include="Assets\Textures\Blocks\Stone.png">
+        </Content>
+        <Content Include="Assets\Textures\Blocks\Stone.png">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-        </Resource>
-        <Resource Include="Assets\Textures\Spaceman\Falling.png">
+        </Content>
+        <Content Include="Assets\Textures\Spaceman\Falling.png">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-        </Resource>
-        <Resource Include="Assets\Textures\Spaceman\Idle.png">
+        </Content>
+        <Content Include="Assets\Textures\Spaceman\Idle.png">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-        </Resource>
-        <Resource Include="Assets\Textures\Spaceman\Idle2.png">
+        </Content>
+        <Content Include="Assets\Textures\Spaceman\Idle2.png">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-        </Resource>
-        <Resource Include="Assets\Textures\Spaceman\JumpingUp.png">
+        </Content>
+        <Content Include="Assets\Textures\Spaceman\JumpingUp.png">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-        </Resource>
-        <Resource Include="Assets\Textures\Spaceman\Skid.png">
+        </Content>
+        <Content Include="Assets\Textures\Spaceman\Skid.png">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-        </Resource>
-        <Resource Include="Assets\Textures\Spaceman\Walk.png">
+        </Content>
+        <Content Include="Assets\Textures\Spaceman\Walk.png">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-        </Resource>
-        <Resource Include="Assets\Textures\Spaceman\Walk2.png">
+        </Content>
+        <Content Include="Assets\Textures\Spaceman\Walk2.png">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-        </Resource>
-        <Resource Include="Assets\Textures\texture.jpg">
+        </Content>
+        <Content Include="Assets\Textures\texture.jpg">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-        </Resource>
-        <Resource Include="Assets\Textures\wave.png">
+        </Content>
+        <Content Include="Assets\Textures\wave.png">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-        </Resource>
-        <Resource Include="Assets\Textures\Blocks\Cobblestone.png">
+        </Content>
+        <Content Include="Assets\Textures\Blocks\Cobblestone.png">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-        </Resource>
+        </Content>
     </ItemGroup>
 
     <ItemGroup>

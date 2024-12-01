@@ -2,6 +2,7 @@
 using Simulation;
 using System;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Unmanaged;
 using Worlds;
 
@@ -11,6 +12,7 @@ namespace AbacusSimulator
     {
         private static int Main(string[] args)
         {
+            RuntimeHelpers.RunClassConstructor(typeof(TypeTable).TypeHandle);
             Trace.Listeners.Add(new TextWriterTraceListener($"{DateTime.Now:yyyy-dd-M--HH-mm-ss}.log", "listener"));
             Trace.AutoFlush = true;
             Trace.WriteLine("Starting simulator program");
@@ -20,18 +22,12 @@ namespace AbacusSimulator
             {
                 using (AbacusSimulator simulator = new(world))
                 {
-                    using (Program program = Program.Create<VoxelGame>(world))
+                    using (Program program = Program.Create<ControlsTest>(world))
                     {
-                        DateTime lastTime = DateTime.UtcNow;
-                        do
+                        while (!program.IsFinished(out returnCode))
                         {
-                            DateTime now = DateTime.UtcNow;
-                            TimeSpan delta = now - lastTime;
-                            lastTime = now;
-
-                            simulator.Update(delta);
+                            simulator.Update();
                         }
-                        while (!program.IsFinished(out returnCode));
                     }
                 }
             }
