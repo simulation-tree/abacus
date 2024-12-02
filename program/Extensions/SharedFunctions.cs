@@ -6,6 +6,7 @@ using Worlds;
 
 public static class SharedFunctions
 {
+    private static bool invertY;
     private static Vector2 lastPointerPosition;
     private static bool hasLastPointerPosition;
 
@@ -50,6 +51,11 @@ public static class SharedFunctions
             moveBackward |= backward.IsPressed;
             moveUp |= up.IsPressed;
             moveDown |= down.IsPressed;
+
+            if (keyboard.WasPressed(Keyboard.Button.Y))
+            {
+                invertY = !invertY;
+            }
         }
 
         Vector3 moveDirection = default;
@@ -104,6 +110,11 @@ public static class SharedFunctions
             }
 
             Vector2 pointerMoveDelta = (pointerPosition - lastPointerPosition) * lookSensitivity;
+            if (invertY)
+            {
+                pointerMoveDelta.Y *= -1;
+            }
+
             lastPointerPosition = pointerPosition;
             pitchYaw.X += pointerMoveDelta.X * 0.01f;
             pitchYaw.Y += pointerMoveDelta.Y * 0.01f;

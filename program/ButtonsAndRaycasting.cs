@@ -27,7 +27,7 @@ using Worlds;
 
 namespace Abacus
 {
-    public struct ButtonsAndProjectiles : IProgram
+    public struct ButtonsAndRaycasting : IProgram
     {
         private readonly Window window;
         private readonly Camera worldCamera;
@@ -41,24 +41,24 @@ namespace Abacus
         [UnmanagedCallersOnly]
         private static void Start(Simulator simulator, Allocation allocation, World world)
         {
-            allocation.Write(new ButtonsAndProjectiles(world));
+            allocation.Write(new ButtonsAndRaycasting(world));
         }
 
         [UnmanagedCallersOnly]
         private static uint Update(Simulator simulator, Allocation allocation, World world, TimeSpan delta)
         {
-            ref ButtonsAndProjectiles program = ref allocation.Read<ButtonsAndProjectiles>();
+            ref ButtonsAndRaycasting program = ref allocation.Read<ButtonsAndRaycasting>();
             return program.Update(simulator, world, delta);
         }
 
         [UnmanagedCallersOnly]
         private static void Finish(Simulator simulator, Allocation allocation, World world, uint returnCode)
         {
-            ref ButtonsAndProjectiles program = ref allocation.Read<ButtonsAndProjectiles>();
+            ref ButtonsAndRaycasting program = ref allocation.Read<ButtonsAndRaycasting>();
             program.CleanUp();
         }
 
-        private unsafe ButtonsAndProjectiles(World world)
+        private unsafe ButtonsAndRaycasting(World world)
         {
             //window to render everything
             window = new(world, "Fly", default, new(900, 600), "vulkan", new(&WindowClosed));

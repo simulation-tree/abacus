@@ -1,4 +1,5 @@
 ﻿using Abacus;
+using Data;
 using Simulation;
 using System;
 using System.Diagnostics;
@@ -13,6 +14,8 @@ namespace AbacusSimulator
         private static int Main(string[] args)
         {
             RuntimeHelpers.RunClassConstructor(typeof(TypeTable).TypeHandle);
+            RuntimeHelpers.RunClassConstructor(typeof(EmbeddedAddressTable).TypeHandle);
+
             Trace.Listeners.Add(new TextWriterTraceListener($"{DateTime.Now:yyyy-dd-M--HH-mm-ss}.log", "listener"));
             Trace.AutoFlush = true;
             Trace.WriteLine("Starting simulator program");
@@ -22,7 +25,7 @@ namespace AbacusSimulator
             {
                 using (AbacusSimulator simulator = new(world))
                 {
-                    using (Program program = Program.Create<PhysicsDemo>(world))
+                    using (Program program = Program.Create<VoxelGame>(world))
                     {
                         while (!program.IsFinished(out returnCode))
                         {
