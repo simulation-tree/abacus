@@ -487,6 +487,7 @@ namespace Abacus
             }
         }
 
+        [Array]
         public readonly struct BlockID
         {
             private readonly uint value;
@@ -497,6 +498,7 @@ namespace Abacus
             }
         }
 
+        [Component]
         public readonly struct IsChunk
         {
             public readonly uint chunkSize;

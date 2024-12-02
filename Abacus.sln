@@ -105,10 +105,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Automations.Tests", "..\aut
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cameras.Tests", "..\cameras\tests\Cameras.Tests.csproj", "{B60DF5DC-E91A-44B0-9D59-542C524DC4A5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HTTP", "..\http\source\HTTP.csproj", "{C030BD95-CCE4-4DE3-A75A-7058320056A8}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HTTP.Tests", "..\http\tests\HTTP.Tests.csproj", "{A885CE89-FD27-46DE-B029-AB1F70157D8D}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Collections", "..\collections\source\Collections.csproj", "{3F837705-F616-4783-A02D-435280C328B1}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Simulation", "..\simulation\source\Simulation.csproj", "{4631B9F2-BEB3-F8CA-2FD6-D496F6D9C84B}"
@@ -333,14 +329,6 @@ Global
 		{B60DF5DC-E91A-44B0-9D59-542C524DC4A5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B60DF5DC-E91A-44B0-9D59-542C524DC4A5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B60DF5DC-E91A-44B0-9D59-542C524DC4A5}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C030BD95-CCE4-4DE3-A75A-7058320056A8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C030BD95-CCE4-4DE3-A75A-7058320056A8}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C030BD95-CCE4-4DE3-A75A-7058320056A8}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C030BD95-CCE4-4DE3-A75A-7058320056A8}.Release|Any CPU.Build.0 = Release|Any CPU
-		{A885CE89-FD27-46DE-B029-AB1F70157D8D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A885CE89-FD27-46DE-B029-AB1F70157D8D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A885CE89-FD27-46DE-B029-AB1F70157D8D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A885CE89-FD27-46DE-B029-AB1F70157D8D}.Release|Any CPU.Build.0 = Release|Any CPU
 		{3F837705-F616-4783-A02D-435280C328B1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{3F837705-F616-4783-A02D-435280C328B1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3F837705-F616-4783-A02D-435280C328B1}.Release|Any CPU.ActiveCfg = Release|Any CPU

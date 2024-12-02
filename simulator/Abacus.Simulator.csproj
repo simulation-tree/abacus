@@ -12,28 +12,28 @@
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-	  <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
-	  <WarningLevel>8</WarningLevel>
+		<TreatWarningsAsErrors>True</TreatWarningsAsErrors>
+		<WarningLevel>8</WarningLevel>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-	  <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
-	  <WarningLevel>8</WarningLevel>
+		<TreatWarningsAsErrors>True</TreatWarningsAsErrors>
+		<WarningLevel>8</WarningLevel>
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <Compile Remove="Assets\**" />
-	  <EmbeddedResource Remove="Assets\**" />
-	  <None Remove="Assets\**" />
+		<Compile Remove="Assets\**" />
+		<EmbeddedResource Remove="Assets\**" />
+		<None Remove="Assets\**" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <PackageReference Include="Alimer.Bindings.SDL" Version="3.9.4" />
-	  <PackageReference Include="Silk.NET.Assimp" Version="2.22.0" />
-	  <PackageReference Include="Vortice.ShaderCompiler" Version="1.8.0" />
-	  <PackageReference Include="Vortice.SPIRV" Version="1.0.3" />
-	  <PackageReference Include="Vortice.SpirvCross" Version="1.5.1" />
-	  <PackageReference Include="Vortice.Vulkan" Version="1.9.9" />
+		<PackageReference Include="Alimer.Bindings.SDL" Version="3.9.4" />
+		<PackageReference Include="OpenAssetImporter" Version="0.0.6" />
+		<PackageReference Include="Vortice.ShaderCompiler" Version="1.8.0" />
+		<PackageReference Include="Vortice.SPIRV" Version="1.0.3" />
+		<PackageReference Include="Vortice.SpirvCross" Version="1.5.1" />
+		<PackageReference Include="Vortice.Vulkan" Version="1.9.9" />
 	</ItemGroup>
 
 	<ItemGroup>

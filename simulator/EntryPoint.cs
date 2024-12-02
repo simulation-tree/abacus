@@ -22,7 +22,7 @@ namespace AbacusSimulator
             {
                 using (AbacusSimulator simulator = new(world))
                 {
-                    using (Program program = Program.Create<ControlsTest>(world))
+                    using (Program program = Program.Create<PhysicsDemo>(world))
                     {
                         while (!program.IsFinished(out returnCode))
                         {
