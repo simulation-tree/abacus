@@ -83,12 +83,18 @@ namespace Abacus
             ballTransform.LocalPosition = new(0f, 4f, 0f);
 
             int chunkRadius = 4;
+            using List<Chunk> generatedChunks = new();
             for (int cx = -chunkRadius; cx < chunkRadius; cx++)
             {
                 for (int cz = -chunkRadius; cz < chunkRadius; cz++)
                 {
-                    GenerateChunk(world, cx, 0, cz);
+                    generatedChunks.Add(GenerateChunk(world, cx, 0, cz));
                 }
+            }
+
+            foreach (Chunk chunk in generatedChunks)
+            {
+                chunk.UpdateMeshToMatchBlocks(chunkAtlas);
             }
         }
 
@@ -126,18 +132,18 @@ namespace Abacus
             return atlasTexture;
         }
 
-        private readonly void GenerateChunk(World world, int cx, int cy, int cz)
+        private readonly Chunk GenerateChunk(World world, int cx, int cy, int cz)
         {
             using RandomGenerator rng = new();
             FastNoiseLite noise = new();
             noise.SetNoiseType(FastNoiseLite.NoiseType.OpenSimplex2);
             float frequency = 4f;
             float amplitude = 6f;
-            uint chunkSize = 16;
+            byte chunkSize = 16;
             Chunk chunk = new(world, cx, cy, cz, chunkSize, chunkMaterial);
-            for (uint x = 0; x < chunkSize; x++)
+            for (byte x = 0; x < chunkSize; x++)
             {
-                for (uint z = 0; z < chunkSize; z++)
+                for (byte z = 0; z < chunkSize; z++)
                 {
                     float wx = cx * chunkSize + x;
                     float wz = cz * chunkSize + z;
@@ -145,9 +151,9 @@ namespace Abacus
                     int wy = (int)(e * amplitude);
                     if (wy >= cy * chunkSize && wy < (cy + 1) * chunkSize)
                     {
-                        uint y = (uint)(wy - cy * chunkSize);
+                        byte y = (byte)(wy - cy * chunkSize);
                         uint height = 0;
-                        for (; y != uint.MaxValue; y--)
+                        for (; y != byte.MaxValue; y--)
                         {
                             if (height == 0)
                             {
@@ -174,7 +180,7 @@ namespace Abacus
                 }
             }
 
-            chunk.UpdateMeshToMatchBlocks(chunkAtlas);
+            return chunk;
         }
 
         private static bool AnyWindowOpen(World world)
@@ -201,16 +207,16 @@ namespace Abacus
 
             public readonly uint Capacity => mesh.AsEntity().GetArrayLength<BlockID>();
             public readonly ref uint this[uint index] => ref Blocks[index];
-            public readonly ref uint this[uint x, uint y, uint z] => ref this[GetIndex(x, y, z, ChunkSize)];
-            public readonly uint ChunkSize => mesh.AsEntity().GetComponent<IsChunk>().chunkSize;
+            public readonly ref uint this[byte x, byte y, byte z] => ref this[VoxelMeshGeneration.GetIndex(x, y, z, ChunkSize)];
+            public readonly byte ChunkSize => mesh.AsEntity().GetComponent<IsChunk>().chunkSize;
 
             readonly uint IEntity.Value => mesh.GetEntityValue();
             readonly World IEntity.World => mesh.GetWorld();
             readonly Definition IEntity.Definition => new Definition().AddComponentTypes<IsMesh, IsChunk>().AddArrayTypes<uint, BlockID>();
 
-            public Chunk(World world, int cx, int cy, int cz, uint chunkSize, Material unlitMaterial)
+            public Chunk(World world, int cx, int cy, int cz, byte chunkSize, Material unlitMaterial)
             {
-                uint capacity = chunkSize * chunkSize * chunkSize;
+                uint capacity = (uint)(chunkSize * chunkSize * chunkSize);
                 mesh = new(world);
                 mesh.AddComponent(new IsChunk(chunkSize));
                 mesh.CreatePositions(0);
@@ -236,29 +242,314 @@ namespace Abacus
 
             public readonly void UpdateMeshToMatchBlocks(AtlasTexture chunkAtlas)
             {
-                uint chunkSize = ChunkSize;
+                World world = mesh.GetWorld();
+                byte chunkSize = ChunkSize;
                 Vector3 chunkPosition = mesh.AsEntity().As<Transform>().WorldPosition;
                 int cx = (int)MathF.Floor(chunkPosition.X / chunkSize);
                 int cy = (int)MathF.Floor(chunkPosition.Y / chunkSize);
                 int cz = (int)MathF.Floor(chunkPosition.Z / chunkSize);
                 USpan<uint> blocks = Blocks;
+                USpan<uint> blocksLeft = GetBlocks(world, cx - 1, cy, cz);
+                USpan<uint> blocksRight = GetBlocks(world, cx + 1, cy, cz);
+                USpan<uint> blocksDown = GetBlocks(world, cx, cy - 1, cz);
+                USpan<uint> blocksUp = GetBlocks(world, cx, cy + 1, cz);
+                USpan<uint> blocksBackward = GetBlocks(world, cx, cy, cz - 1);
+                USpan<uint> blocksForward = GetBlocks(world, cx, cy, cz + 1);
                 uint capacity = Capacity;
                 using Array<Vector3> vertices = new(capacity * VerticesPerFace * FacesPerBlock);
                 using Array<Vector2> uvs = new(capacity * VerticesPerFace * FacesPerBlock);
                 using Array<Color> colors = new(capacity * VerticesPerFace * FacesPerBlock);
                 using Array<uint> triangles = new(capacity * TrianglesPerFace * FacesPerBlock);
                 using RandomGenerator rng = new();
-                uint verticeIndex = 0;
-                uint triangleIndex = 0;
+                VoxelMeshGeneration generation = new(blocks, blocksLeft, blocksRight, blocksDown, blocksUp, blocksBackward, blocksForward, chunkSize, vertices, uvs, colors, triangles, rng, capacity, chunkAtlas);
+                generation.Generate();
+                USpan<Vector3> meshPositions = mesh.ResizePositions(generation.verticeIndex);
+                USpan<Vector2> meshUVs = mesh.ResizeUVs(generation.verticeIndex);
+                USpan<Color> meshColors = mesh.ResizeColors(generation.verticeIndex);
+                USpan<uint> meshTriangles = mesh.ResizeTriangles(generation.triangleIndex);
+                vertices.AsSpan(0, generation.verticeIndex).CopyTo(meshPositions);
+                uvs.AsSpan(0, generation.verticeIndex).CopyTo(meshUVs);
+                colors.AsSpan(0, generation.verticeIndex).CopyTo(meshColors);
+                triangles.AsSpan(0, generation.triangleIndex).CopyTo(meshTriangles);
+                mesh.IncrementVersion();
+            }
+
+            public static USpan<uint> GetBlocks(World world, int cx, int cy, int cz)
+            {
+                using ComponentQuery<IsChunk, Position> chunkQuery = new();
+                chunkQuery.Update(world);
+                foreach (var x in chunkQuery)
+                {
+                    uint chunkSize = x.Component1.chunkSize;
+                    Vector3 worldPosition = x.Component2.value;
+                    int chunkX = (int)MathF.Floor(worldPosition.X / chunkSize);
+                    int chunkY = (int)MathF.Floor(worldPosition.Y / chunkSize);
+                    int chunkZ = (int)MathF.Floor(worldPosition.Z / chunkSize);
+                    if (chunkX == cx && chunkY == cy && chunkZ == cz)
+                    {
+                        return world.GetArray<BlockID>(x.entity).As<uint>();
+                    }
+                }
+
+                return default;
+            }
+        }
+
+        public ref struct VoxelMeshGeneration
+        {
+            private readonly USpan<uint> blocks;
+            private readonly USpan<uint> blocksLeft;
+            private readonly USpan<uint> blocksRight;
+            private readonly USpan<uint> blocksDown;
+            private readonly USpan<uint> blocksUp;
+            private readonly USpan<uint> blocksBackward;
+            private readonly USpan<uint> blocksForward;
+            private readonly byte chunkSize;
+            private readonly Array<Vector3> vertices;
+            private readonly Array<Vector2> uvs;
+            private readonly Array<Color> colors;
+            private readonly Array<uint> triangles;
+            private readonly RandomGenerator rng;
+            private readonly uint capacity;
+            private readonly AtlasTexture chunkAtlas;
+
+            public uint verticeIndex;
+            public uint triangleIndex;
+
+            public VoxelMeshGeneration(USpan<uint> blocks, USpan<uint> blocksLeft, USpan<uint> blocksRight, USpan<uint> blocksDown, USpan<uint> blocksUp, USpan<uint> blocksBackward, USpan<uint> blocksForward, byte chunkSize, Array<Vector3> vertices, Array<Vector2> uvs, Array<Color> colors, Array<uint> triangles, RandomGenerator rng, uint capacity, AtlasTexture chunkAtlas)
+            {
+                this.blocks = blocks;
+                this.blocksLeft = blocksLeft;
+                this.blocksRight = blocksRight;
+                this.blocksDown = blocksDown;
+                this.blocksUp = blocksUp;
+                this.blocksBackward = blocksBackward;
+                this.blocksForward = blocksForward;
+                this.chunkSize = chunkSize;
+                this.vertices = vertices;
+                this.uvs = uvs;
+                this.colors = colors;
+                this.triangles = triangles;
+                this.rng = rng;
+                this.capacity = capacity;
+                this.chunkAtlas = chunkAtlas;
+            }
+
+            private readonly bool ShouldGenerateFace(uint index, Direction direction)
+            {
+                uint neighbourBlock = GetNeighbourBlock(index, direction);
+                return neighbourBlock == default;
+            }
+
+            private readonly uint GetNeighbourBlock(uint index, Direction direction)
+            {
+                if (direction == Direction.Left)
+                {
+                    if (index % chunkSize != 0)
+                    {
+                        return blocks[index - 1];
+                    }
+                    else if (blocksLeft.Length > 0)
+                    {
+                        return default;
+                        //return blocksLeft[index + chunkSize - 1];
+                    }
+                    else
+                    {
+                        return default;
+                    }
+                }
+                else if (direction == Direction.Right)
+                {
+                    if ((index + 1) % chunkSize != 0)
+                    {
+                        return blocks[index + 1];
+                    }
+                    else if (blocksRight.Length > 0)
+                    {
+                        return default;
+                        //return blocksRight[index - chunkSize + 1];
+                    }
+                    else
+                    {
+                        return default;
+                    }
+                }
+                else if (direction == Direction.Down)
+                {
+                    if (index / chunkSize % chunkSize != 0)
+                    {
+                        return blocks[index - chunkSize];
+                    }
+                    else if (blocksDown.Length > 0)
+                    {
+                        return default;
+                        //return blocksDown[(uint)(index + chunkSize * (chunkSize - 1))];
+                    }
+                    else
+                    {
+                        return default;
+                    }
+                }
+                else if (direction == Direction.Up)
+                {
+                    if (index / chunkSize % chunkSize != chunkSize - 1)
+                    {
+                        return blocks[index + chunkSize];
+                    }
+                    else if (blocksUp.Length > 0)
+                    {
+                        return default;
+                        //return blocksUp[(uint)(index - chunkSize * (chunkSize - 1))];
+                    }
+                    else
+                    {
+                        return default;
+                    }
+                }
+                else if (direction == Direction.Backward)
+                {
+                    if (index / (chunkSize * chunkSize) % chunkSize != 0)
+                    {
+                        return blocks[(uint)(index - chunkSize * chunkSize)];
+                    }
+                    else if (blocksBackward.Length > 0)
+                    {
+                        return default;
+                        //return blocksBackward[(uint)(index + chunkSize * chunkSize * (chunkSize - 1))];
+                    }
+                    else
+                    {
+                        return default;
+                    }
+                }
+                else if (direction == Direction.Forward)
+                {
+                    if (index / (chunkSize * chunkSize) % chunkSize != chunkSize - 1)
+                    {
+                        return blocks[(uint)(index + chunkSize * chunkSize)];
+                    }
+                    else if (blocksForward.Length > 0)
+                    {
+                        return default;
+                        //return blocksForward[(uint)(index - chunkSize * chunkSize * (chunkSize - 1))];
+                    }
+                    else
+                    {
+                        return default;
+                    }
+                }
+                else
+                {
+                    return default;
+                }
+            }
+
+            private void AddTriangles()
+            {
+                uint startIndex = verticeIndex - 4;
+                triangles[triangleIndex++] = startIndex + 2;
+                triangles[triangleIndex++] = startIndex + 1;
+                triangles[triangleIndex++] = startIndex;
+                triangles[triangleIndex++] = startIndex;
+                triangles[triangleIndex++] = startIndex + 3;
+                triangles[triangleIndex++] = startIndex + 2;
+            }
+
+            private readonly void AddUVs(uint blockId, Direction direction, RandomGenerator rng)
+            {
+                uint startIndex = verticeIndex - 4;
+                int rotation = 0;
+                AtlasSprite sprite;
+                if (blockId == 1)
+                {
+                    sprite = chunkAtlas["Dirt"];
+                    rotation = rng.NextInt(4);
+                }
+                else if (blockId == 2)
+                {
+                    if (direction == Direction.Up)
+                    {
+                        sprite = chunkAtlas["Grass"];
+                        rotation = rng.NextInt(4);
+                    }
+                    else if (direction == Direction.Down)
+                    {
+                        sprite = chunkAtlas["Dirt"];
+                    }
+                    else
+                    {
+                        sprite = chunkAtlas["GrassSide"];
+                        if (direction == Direction.Forward)
+                        {
+                            rotation = 0;
+                        }
+                        else
+                        {
+                            rotation = 3;
+                        }
+                    }
+                }
+                else if (blockId == 3)
+                {
+                    sprite = chunkAtlas["Cobblestone"];
+                    rotation = rng.NextInt(4);
+                }
+                else if (blockId == 4)
+                {
+                    sprite = chunkAtlas["Stone"];
+                    rotation = rng.NextInt(4);
+                }
+                else
+                {
+                    throw new InvalidOperationException($"Unknown block {blockId}");
+                }
+
+                Vector4 rect = sprite.region;
+                if (rotation == 1)
+                {
+                    uvs[startIndex + 1] = new Vector2(rect.X, rect.Y);
+                    uvs[startIndex + 2] = new Vector2(rect.Z, rect.Y);
+                    uvs[startIndex + 3] = new Vector2(rect.Z, rect.W);
+                    uvs[startIndex + 0] = new Vector2(rect.X, rect.W);
+                }
+                else if (rotation == 2)
+                {
+                    uvs[startIndex + 2] = new Vector2(rect.X, rect.Y);
+                    uvs[startIndex + 3] = new Vector2(rect.Z, rect.Y);
+                    uvs[startIndex + 0] = new Vector2(rect.Z, rect.W);
+                    uvs[startIndex + 1] = new Vector2(rect.X, rect.W);
+                }
+                else if (rotation == 3)
+                {
+                    uvs[startIndex + 3] = new Vector2(rect.X, rect.Y);
+                    uvs[startIndex + 0] = new Vector2(rect.Z, rect.Y);
+                    uvs[startIndex + 1] = new Vector2(rect.Z, rect.W);
+                    uvs[startIndex + 2] = new Vector2(rect.X, rect.W);
+                }
+                else
+                {
+                    uvs[startIndex + 0] = new Vector2(rect.X, rect.Y);
+                    uvs[startIndex + 1] = new Vector2(rect.Z, rect.Y);
+                    uvs[startIndex + 2] = new Vector2(rect.Z, rect.W);
+                    uvs[startIndex + 3] = new Vector2(rect.X, rect.W);
+                }
+
+                colors[startIndex + 0] = Color.White;
+                colors[startIndex + 1] = Color.White;
+                colors[startIndex + 2] = Color.White;
+                colors[startIndex + 3] = Color.White;
+            }
+
+            public void Generate()
+            {
                 for (uint i = 0; i < capacity; i++)
                 {
                     uint blockId = blocks[i];
                     if (blockId != default)
                     {
-                        uint x = i % chunkSize;
-                        uint y = (i / chunkSize) % chunkSize;
-                        uint z = i / (chunkSize * chunkSize);
-                        if (ShouldGenerateFace(x, y, z, blockId, Direction.Up, blocks, chunkSize))
+                        (byte x, byte y, byte z) = GetXYZ(i, chunkSize);
+                        if (ShouldGenerateFace(i, Direction.Up))
                         {
                             vertices[verticeIndex++] = new(x, y + 1f, z);
                             vertices[verticeIndex++] = new(x, y + 1f, z + 1f);
@@ -269,7 +560,7 @@ namespace Abacus
                             AddUVs(blockId, Direction.Up, rng);
                         }
 
-                        if (ShouldGenerateFace(x, y, z, blockId, Direction.Down, blocks, chunkSize))
+                        if (ShouldGenerateFace(i, Direction.Down))
                         {
                             vertices[verticeIndex++] = new Vector3(x, y, z);
                             vertices[verticeIndex++] = new Vector3(x + 1f, y, z);
@@ -280,7 +571,7 @@ namespace Abacus
                             AddUVs(blockId, Direction.Down, rng);
                         }
 
-                        if (ShouldGenerateFace(x, y, z, blockId, Direction.Right, blocks, chunkSize))
+                        if (ShouldGenerateFace(i, Direction.Right))
                         {
                             vertices[verticeIndex++] = new Vector3(x + 1f, y, z);
                             vertices[verticeIndex++] = new Vector3(x + 1f, y + 1f, z);
@@ -291,7 +582,7 @@ namespace Abacus
                             AddUVs(blockId, Direction.Right, rng);
                         }
 
-                        if (ShouldGenerateFace(x, y, z, blockId, Direction.Left, blocks, chunkSize))
+                        if (ShouldGenerateFace(i, Direction.Left))
                         {
                             vertices[verticeIndex++] = new Vector3(x, y, z + 1f);
                             vertices[verticeIndex++] = new Vector3(x, y + 1f, z + 1f);
@@ -302,7 +593,7 @@ namespace Abacus
                             AddUVs(blockId, Direction.Left, rng);
                         }
 
-                        if (ShouldGenerateFace(x, y, z, blockId, Direction.Forward, blocks, chunkSize))
+                        if (ShouldGenerateFace(i, Direction.Forward))
                         {
                             vertices[verticeIndex++] = new Vector3(x, y, z + 1f);
                             vertices[verticeIndex++] = new Vector3(x + 1f, y, z + 1f);
@@ -313,7 +604,7 @@ namespace Abacus
                             AddUVs(blockId, Direction.Forward, rng);
                         }
 
-                        if (ShouldGenerateFace(x, y, z, blockId, Direction.Backward, blocks, chunkSize))
+                        if (ShouldGenerateFace(i, Direction.Backward))
                         {
                             vertices[verticeIndex++] = new Vector3(x, y, z);
                             vertices[verticeIndex++] = new Vector3(x, y + 1f, z);
@@ -325,147 +616,19 @@ namespace Abacus
                         }
                     }
                 }
-
-                bool ShouldGenerateFace(uint x, uint y, uint z, uint blockId, Direction direction, USpan<uint> blocks, uint chunkSize)
-                {
-                    if (direction == Direction.Left && x > 0)
-                    {
-                        return blocks[GetIndex(x - 1, y, z, chunkSize)] == default;
-                    }
-                    else if (direction == Direction.Right && x < chunkSize - 1)
-                    {
-                        return blocks[GetIndex(x + 1, y, z, chunkSize)] == default;
-                    }
-                    else if (direction == Direction.Down && y > 0)
-                    {
-                        return blocks[GetIndex(x, y - 1, z, chunkSize)] == default;
-                    }
-                    else if (direction == Direction.Up && y < chunkSize - 1)
-                    {
-                        return blocks[GetIndex(x, y + 1, z, chunkSize)] == default;
-                    }
-                    else if (direction == Direction.Backward && z > 0)
-                    {
-                        return blocks[GetIndex(x, y, z - 1, chunkSize)] == default;
-                    }
-                    else if (direction == Direction.Forward && z < chunkSize - 1)
-                    {
-                        return blocks[GetIndex(x, y, z + 1, chunkSize)] == default;
-                    }
-
-                    return true;
-                }
-
-                void AddTriangles()
-                {
-                    uint startIndex = verticeIndex - 4;
-                    triangles[triangleIndex++] = startIndex + 2;
-                    triangles[triangleIndex++] = startIndex + 1;
-                    triangles[triangleIndex++] = startIndex;
-                    triangles[triangleIndex++] = startIndex;
-                    triangles[triangleIndex++] = startIndex + 3;
-                    triangles[triangleIndex++] = startIndex + 2;
-                }
-
-                void AddUVs(uint blockId, Direction direction, RandomGenerator rng)
-                {
-                    uint startIndex = verticeIndex - 4;
-                    int rotation = 0;
-                    AtlasSprite sprite;
-                    if (blockId == 1)
-                    {
-                        sprite = chunkAtlas["Dirt"];
-                        rotation = rng.NextInt(4);
-                    }
-                    else if (blockId == 2)
-                    {
-                        if (direction == Direction.Up)
-                        {
-                            sprite = chunkAtlas["Grass"];
-                            rotation = rng.NextInt(4);
-                        }
-                        else if (direction == Direction.Down)
-                        {
-                            sprite = chunkAtlas["Dirt"];
-                        }
-                        else
-                        {
-                            sprite = chunkAtlas["GrassSide"];
-                            if (direction == Direction.Forward)
-                            {
-                                rotation = 0;
-                            }
-                            else
-                            {
-                                rotation = 3;
-                            }
-                        }
-                    }
-                    else if (blockId == 3)
-                    {
-                        sprite = chunkAtlas["Cobblestone"];
-                        rotation = rng.NextInt(4);
-                    }
-                    else if (blockId == 4)
-                    {
-                        sprite = chunkAtlas["Stone"];
-                        rotation = rng.NextInt(4);
-                    }
-                    else
-                    {
-                        throw new InvalidOperationException($"Unknown block {blockId}");
-                    }
-
-                    Vector4 rect = sprite.region;
-                    if (rotation == 1)
-                    {
-                        uvs[startIndex + 1] = new Vector2(rect.X, rect.Y);
-                        uvs[startIndex + 2] = new Vector2(rect.Z, rect.Y);
-                        uvs[startIndex + 3] = new Vector2(rect.Z, rect.W);
-                        uvs[startIndex + 0] = new Vector2(rect.X, rect.W);
-                    }
-                    else if (rotation == 2)
-                    {
-                        uvs[startIndex + 2] = new Vector2(rect.X, rect.Y);
-                        uvs[startIndex + 3] = new Vector2(rect.Z, rect.Y);
-                        uvs[startIndex + 0] = new Vector2(rect.Z, rect.W);
-                        uvs[startIndex + 1] = new Vector2(rect.X, rect.W);
-                    }
-                    else if (rotation == 3)
-                    {
-                        uvs[startIndex + 3] = new Vector2(rect.X, rect.Y);
-                        uvs[startIndex + 0] = new Vector2(rect.Z, rect.Y);
-                        uvs[startIndex + 1] = new Vector2(rect.Z, rect.W);
-                        uvs[startIndex + 2] = new Vector2(rect.X, rect.W);
-                    }
-                    else
-                    {
-                        uvs[startIndex + 0] = new Vector2(rect.X, rect.Y);
-                        uvs[startIndex + 1] = new Vector2(rect.Z, rect.Y);
-                        uvs[startIndex + 2] = new Vector2(rect.Z, rect.W);
-                        uvs[startIndex + 3] = new Vector2(rect.X, rect.W);
-                    }
-
-                    colors[startIndex + 0] = Color.White;
-                    colors[startIndex + 1] = Color.White;
-                    colors[startIndex + 2] = Color.White;
-                    colors[startIndex + 3] = Color.White;
-                }
-
-                USpan<Vector3> meshPositions = mesh.ResizePositions(verticeIndex);
-                USpan<Vector2> meshUVs = mesh.ResizeUVs(verticeIndex);
-                USpan<Color> meshColors = mesh.ResizeColors(verticeIndex);
-                USpan<uint> meshTriangles = mesh.ResizeTriangles(triangleIndex);
-                vertices.AsSpan(0, verticeIndex).CopyTo(meshPositions);
-                uvs.AsSpan(0, verticeIndex).CopyTo(meshUVs);
-                colors.AsSpan(0, verticeIndex).CopyTo(meshColors);
-                triangles.AsSpan(0, triangleIndex).CopyTo(meshTriangles);
-                mesh.IncrementVersion();
             }
 
-            public static uint GetIndex(uint x, uint y, uint z, uint chunkSize)
+            public static uint GetIndex(byte x, byte y, byte z, byte chunkSize)
             {
-                return x + y * chunkSize + z * chunkSize * chunkSize;
+                return (uint)(x + y * chunkSize + z * chunkSize * chunkSize);
+            }
+
+            public static (byte x, byte y, byte z) GetXYZ(uint index, byte chunkSize)
+            {
+                byte x = (byte)(index % chunkSize);
+                byte y = (byte)((index / chunkSize) % chunkSize);
+                byte z = (byte)(index / (chunkSize * chunkSize));
+                return (x, y, z);
             }
         }
 
@@ -483,9 +646,9 @@ namespace Abacus
         [Component]
         public readonly struct IsChunk
         {
-            public readonly uint chunkSize;
+            public readonly byte chunkSize;
 
-            public IsChunk(uint chunkSize)
+            public IsChunk(byte chunkSize)
             {
                 this.chunkSize = chunkSize;
             }
