@@ -13,7 +13,6 @@ using Physics.Components;
 using Physics.Events;
 using Rendering;
 using Simulation;
-using Simulation.Functions;
 using System;
 using System.Diagnostics;
 using System.Numerics;
@@ -27,39 +26,89 @@ using Worlds;
 
 namespace Abacus
 {
-    public struct ButtonsAndRaycasting : IProgram
+    public partial struct ButtonsAndRaycasting : IProgram
     {
+        private readonly Simulator simulator;
         private readonly Window window;
         private readonly Camera worldCamera;
         private Vector3 cameraPosition;
         private Vector2 cameraPitchYaw;
 
-        unsafe readonly StartProgram IProgram.Start => new(&Start);
-        unsafe readonly UpdateProgram IProgram.Update => new(&Update);
-        unsafe readonly FinishProgram IProgram.Finish => new(&Finish);
+        private readonly World World => window.GetWorld();
 
-        [UnmanagedCallersOnly]
-        private static void Start(Simulator simulator, Allocation allocation, World world)
+        void IProgram.Start(in Simulator simulator, in Allocation allocation, in World world)
         {
-            allocation.Write(new ButtonsAndRaycasting(world));
+            allocation.Write(new ButtonsAndRaycasting(simulator, world));
         }
 
-        [UnmanagedCallersOnly]
-        private static uint Update(Simulator simulator, Allocation allocation, World world, TimeSpan delta)
+        unsafe StatusCode IProgram.Update(in TimeSpan delta)
         {
-            ref ButtonsAndRaycasting program = ref allocation.Read<ButtonsAndRaycasting>();
-            return program.Update(simulator, world, delta);
+            if (window.IsDestroyed())
+            {
+                return StatusCode.Success(1);
+            }
+
+            Transform cameraTransform = worldCamera.AsEntity().Become<Transform>();
+            SharedFunctions.MoveCameraAround(World, cameraTransform, delta, ref cameraPosition, ref cameraPitchYaw, new(1f, 1f));
+
+            if (World.TryGetFirst(out Mouse mouse))
+            {
+                if (!mouse.AsEntity().ContainsComponent<IsPointer>())
+                {
+                    mouse.AddComponent(new IsPointer(mouse.Position, default));
+                }
+
+                ref IsPointer pointer = ref mouse.AsEntity().GetComponentRef<IsPointer>();
+                pointer.position = mouse.Position;
+                pointer.action = default;
+                pointer.scroll = mouse.Scroll;
+                if (mouse.IsPressed(Mouse.Button.LeftButton))
+                {
+                    pointer.HasPrimaryIntent = true;
+                }
+
+                if (mouse.IsPressed(Mouse.Button.RightButton))
+                {
+                    pointer.HasSecondaryIntent = true;
+                }
+
+                if (mouse.WasPressed(Mouse.Button.LeftButton))
+                {
+                    Vector2 screenPoint = worldCamera.Destination.GetScreenPointFromPosition(mouse.Position);
+                    (Vector3 origin, Vector3 direction) ray = worldCamera.GetMatrices().GetRayFromScreenPoint(screenPoint);
+                    simulator.TryHandleMessage(new RaycastRequest(World, ray.origin, ray.direction, new(&OnRaycastHit)));
+
+                    [UnmanagedCallersOnly]
+                    static void OnRaycastHit(World world, RaycastRequest raycast, RaycastHit* hits, uint hitsCount)
+                    {
+                        for (uint i = 0; i < hitsCount; i++)
+                        {
+                            RaycastHit hit = hits[i];
+                            ref Position position = ref world.TryGetComponentRef<Position>(hit.entity, out bool contains);
+                            if (contains)
+                            {
+                                position.value.X += 0.1f;
+                            }
+                        }
+                    }
+                }
+            }
+
+            return StatusCode.Continue;
         }
 
-        [UnmanagedCallersOnly]
-        private static void Finish(Simulator simulator, Allocation allocation, World world, uint returnCode)
+        void IProgram.Finish(in StatusCode statusCode)
         {
-            ref ButtonsAndRaycasting program = ref allocation.Read<ButtonsAndRaycasting>();
-            program.CleanUp();
+            if (!window.IsDestroyed())
+            {
+                window.Dispose();
+            }
         }
 
-        private unsafe ButtonsAndRaycasting(World world)
+        private unsafe ButtonsAndRaycasting(Simulator simulator, World world)
         {
+            this.simulator = simulator;
+
             //window to render everything
             window = new(world, "Fly", default, new(900, 600), "vulkan", new(&WindowClosed));
             window.IsResizable = true;
@@ -137,70 +186,6 @@ namespace Abacus
             {
                 window.Dispose();
             }
-        }
-
-        private readonly void CleanUp()
-        {
-            if (!window.IsDestroyed())
-            {
-                window.Dispose();
-            }
-        }
-
-        private unsafe uint Update(Simulator simulator, World world, TimeSpan delta)
-        {
-            if (window.IsDestroyed())
-            {
-                return 1;
-            }
-
-            Transform cameraTransform = worldCamera.AsEntity().Become<Transform>();
-            SharedFunctions.MoveCameraAround(world, cameraTransform, delta, ref cameraPosition, ref cameraPitchYaw, new(1f, 1f));
-
-            if (world.TryGetFirst(out Mouse mouse))
-            {
-                if (!mouse.AsEntity().ContainsComponent<IsPointer>())
-                {
-                    mouse.AddComponent(new IsPointer(mouse.Position, default));
-                }
-
-                ref IsPointer pointer = ref mouse.AsEntity().GetComponentRef<IsPointer>();
-                pointer.position = mouse.Position;
-                pointer.action = default;
-                pointer.scroll = mouse.Scroll;
-                if (mouse.IsPressed(Mouse.Button.LeftButton))
-                {
-                    pointer.HasPrimaryIntent = true;
-                }
-
-                if (mouse.IsPressed(Mouse.Button.RightButton))
-                {
-                    pointer.HasSecondaryIntent = true;
-                }
-
-                if (mouse.WasPressed(Mouse.Button.LeftButton))
-                {
-                    Vector2 screenPoint = worldCamera.Destination.GetScreenPointFromPosition(mouse.Position);
-                    (Vector3 origin, Vector3 direction) ray = worldCamera.GetMatrices().GetRayFromScreenPoint(screenPoint);
-                    simulator.TryHandleMessage(new RaycastRequest(world, ray.origin, ray.direction, new(&OnRaycastHit)));
-
-                    [UnmanagedCallersOnly]
-                    static void OnRaycastHit(World world, RaycastRequest raycast, RaycastHit* hits, uint hitsCount)
-                    {
-                        for (uint i = 0; i < hitsCount; i++)
-                        {
-                            RaycastHit hit = hits[i];
-                            ref Position position = ref world.TryGetComponentRef<Position>(hit.entity, out bool contains);
-                            if (contains)
-                            {
-                                position.value.X += 0.1f;
-                            }
-                        }
-                    }
-                }
-            }
-
-            return default;
         }
     }
 }

@@ -8,7 +8,6 @@ using Meshes.Components;
 using Models;
 using Rendering;
 using Simulation;
-using Simulation.Functions;
 using System;
 using System.Numerics;
 using System.Runtime.InteropServices;
@@ -21,42 +20,45 @@ using Worlds;
 
 namespace Abacus
 {
-    public struct VoxelGame : IProgram
+    public partial struct VoxelGame : IProgram
     {
         private readonly Window window;
         private readonly Camera camera;
         private readonly Material chunkMaterial;
         private readonly Mesh quadMesh;
         private readonly AtlasTexture chunkAtlas;
+        private readonly World world;
         private Vector3 cameraPosition;
         private Vector2 cameraPitchYaw;
 
-        unsafe readonly StartProgram IProgram.Start => new(&Start);
-        unsafe readonly UpdateProgram IProgram.Update => new(&Update);
-        unsafe readonly FinishProgram IProgram.Finish => new(&Finish);
-
-        [UnmanagedCallersOnly]
-        private static void Start(Simulator simulator, Allocation allocation, World world)
+        readonly void IProgram.Start(in Simulator simulator, in Allocation allocation, in World world)
         {
             allocation.Write(new VoxelGame(simulator, world));
         }
 
-        [UnmanagedCallersOnly]
-        private static uint Update(Simulator simulator, Allocation allocation, World world, TimeSpan delta)
+        StatusCode IProgram.Update(in TimeSpan delta)
         {
-            ref VoxelGame program = ref allocation.Read<VoxelGame>();
-            return program.Update(world, delta);
+            if (!AnyWindowOpen(world))
+            {
+                return StatusCode.Success(1);
+            }
+
+            Transform cameraTransform = camera.AsEntity().As<Transform>();
+            SharedFunctions.MoveCameraAround(world, cameraTransform, delta, ref cameraPosition, ref cameraPitchYaw, new(1f, 1f));
+            return StatusCode.Continue;
         }
 
-        [UnmanagedCallersOnly]
-        private static void Finish(Simulator simulator, Allocation allocation, World world, uint returnCode)
+        readonly void IProgram.Finish(in StatusCode statusCode)
         {
-            ref VoxelGame program = ref allocation.Read<VoxelGame>();
-            program.CleanUp();
+            if (!window.IsDestroyed())
+            {
+                window.Dispose();
+            }
         }
 
         private VoxelGame(Simulator simulator, World world)
         {
+            this.world = world;
             window = CreateWindow(world);
 
             camera = new(world, window, CameraFieldOfView.FromDegrees(90f));
@@ -80,21 +82,13 @@ namespace Abacus
             Transform ballTransform = quadRenderer.AsEntity().Become<Transform>();
             ballTransform.LocalPosition = new(0f, 4f, 0f);
 
-            int chunkRadius = 1;
+            int chunkRadius = 4;
             for (int cx = -chunkRadius; cx < chunkRadius; cx++)
             {
                 for (int cz = -chunkRadius; cz < chunkRadius; cz++)
                 {
                     GenerateChunk(world, cx, 0, cz);
                 }
-            }
-        }
-
-        private readonly void CleanUp()
-        {
-            if (!window.IsDestroyed())
-            {
-                window.Dispose();
             }
         }
 
@@ -181,18 +175,6 @@ namespace Abacus
             }
 
             chunk.UpdateMeshToMatchBlocks(chunkAtlas);
-        }
-
-        private uint Update(World world, TimeSpan delta)
-        {
-            if (!AnyWindowOpen(world))
-            {
-                return 1;
-            }
-
-            Transform cameraTransform = camera.AsEntity().As<Transform>();
-            SharedFunctions.MoveCameraAround(world, cameraTransform, delta, ref cameraPosition, ref cameraPitchYaw, new(1f, 1f));
-            return 0;
         }
 
         private static bool AnyWindowOpen(World world)

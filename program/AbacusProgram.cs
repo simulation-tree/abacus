@@ -10,7 +10,6 @@ using Models;
 using Rendering;
 using Rendering.Components;
 using Simulation;
-using Simulation.Functions;
 using System;
 using System.Diagnostics;
 using System.Numerics;
@@ -24,7 +23,7 @@ using Worlds;
 
 namespace Abacus
 {
-    public struct AbacusProgram : IProgram
+    public partial struct AbacusProgram : IProgram
     {
         private TimeSpan time;
         private Vector3 cameraPosition;
@@ -39,28 +38,43 @@ namespace Abacus
         private readonly TextMesh exampleTextMesh;
         private readonly MeshRenderer squareBox;
 
-        unsafe readonly StartProgram IProgram.Start => new(&Start);
-        unsafe readonly UpdateProgram IProgram.Update => new(&Update);
-        unsafe readonly FinishProgram IProgram.Finish => new(&Finish);
+        private readonly World World => window.GetWorld();
 
-        [UnmanagedCallersOnly]
-        private static void Start(Simulator simulator, Allocation allocation, World world)
+        void IProgram.Start(in Simulator simulator, in Allocation allocation, in World world)
         {
             allocation.Write(new AbacusProgram(world));
         }
 
-        [UnmanagedCallersOnly]
-        private static uint Update(Simulator simulator, Allocation allocation, World world, TimeSpan delta)
+        StatusCode IProgram.Update(in TimeSpan delta)
         {
-            ref AbacusProgram program = ref allocation.Read<AbacusProgram>();
-            return program.Update(world, delta);
+            time += delta;
+            if (time.TotalSeconds > 120f || window.IsDestroyed())
+            {
+                Trace.WriteLine("Conditions reached for finishing the demo");
+                return StatusCode.Success(1); //source of "shutdown" event
+            }
+
+            float deltaSeconds = (float)delta.TotalSeconds;
+            TestMouseInputs(World);
+            AnimateTestRenderer(World, deltaSeconds);
+            Transform cameraTransform = camera.AsEntity().Become<Transform>();
+            SharedFunctions.MoveCameraAround(World, cameraTransform, delta, ref cameraPosition, ref cameraPitchYaw, new(1f, 1f));
+            ModifyText(World);
+            if (TestWindowEntity(World, deltaSeconds))
+            {
+                //propagating upwards
+                return StatusCode.Success(2);
+            }
+
+            return StatusCode.Continue;
         }
 
-        [UnmanagedCallersOnly]
-        private static void Finish(Simulator simulator, Allocation allocation, World world, uint returnCode)
+        void IProgram.Finish(in StatusCode statusCode)
         {
-            ref AbacusProgram program = ref allocation.Read<AbacusProgram>();
-            program.CleanUp();
+            if (!window.IsDestroyed())
+            {
+                window.Dispose();
+            }
         }
 
         private unsafe AbacusProgram(World world)
@@ -222,38 +236,6 @@ namespace Abacus
             {
                 window.Dispose();
             }
-        }
-
-        private readonly void CleanUp()
-        {
-            if (!window.IsDestroyed())
-            {
-                window.Dispose();
-            }
-        }
-
-        private uint Update(World world, TimeSpan delta)
-        {
-            time += delta;
-            if (time.TotalSeconds > 120f || window.IsDestroyed())
-            {
-                Trace.WriteLine("Conditions reached for finishing the demo");
-                return 1; //source of "shutdown" event
-            }
-
-            float deltaSeconds = (float)delta.TotalSeconds;
-            TestMouseInputs(world);
-            AnimateTestRenderer(world, deltaSeconds);
-            Transform cameraTransform = camera.AsEntity().Become<Transform>();
-            SharedFunctions.MoveCameraAround(world, cameraTransform, delta, ref cameraPosition, ref cameraPitchYaw, new(1f, 1f));
-            ModifyText(world);
-            if (TestWindowEntity(world, deltaSeconds))
-            {
-                //propagating upwards
-                return 2;
-            }
-
-            return 0;
         }
 
         private readonly void ModifyText(World world)

@@ -3,7 +3,6 @@ using Data;
 using InputDevices;
 using InteractionKit;
 using Simulation;
-using Simulation.Functions;
 using System;
 using System.Diagnostics;
 using System.Numerics;
@@ -14,32 +13,34 @@ using Worlds;
 
 namespace Abacus
 {
-    public readonly struct SelectionTest : IProgram
+    public readonly partial struct SelectionTest : IProgram
     {
         private readonly Window window;
 
-        unsafe readonly StartProgram IProgram.Start => new(&Start);
-        unsafe readonly UpdateProgram IProgram.Update => new(&Update);
-        unsafe readonly FinishProgram IProgram.Finish => new(&Finish);
+        private readonly World World => window.GetWorld();
 
-        [UnmanagedCallersOnly]
-        private static void Start(Simulator simulator, Allocation allocation, World world)
+        void IProgram.Start(in Simulator simulator, in Allocation allocation, in World world)
         {
             allocation.Write(new SelectionTest(world));
         }
 
-        [UnmanagedCallersOnly]
-        private static uint Update(Simulator simulator, Allocation allocation, World world, TimeSpan delta)
+        StatusCode IProgram.Update(in TimeSpan delta)
         {
-            ref SelectionTest program = ref allocation.Read<SelectionTest>();
-            return Update(world);
+            if (!IsAnyWindowOpen(World))
+            {
+                return StatusCode.Success(1);
+            }
+
+            MakeFirstMouseAPointer(World);
+            return StatusCode.Continue;
         }
 
-        [UnmanagedCallersOnly]
-        private static void Finish(Simulator simulator, Allocation allocation, World world, uint returnCode)
+        void IProgram.Finish(in StatusCode statusCode)
         {
-            ref SelectionTest program = ref allocation.Read<SelectionTest>();
-            program.CleanUp();
+            if (!window.IsDestroyed())
+            {
+                window.Dispose();
+            }
         }
 
         private unsafe SelectionTest(World world)
@@ -71,25 +72,6 @@ namespace Abacus
             {
                 Trace.WriteLine($"Button {buttonEntity} pressed");
             }
-        }
-
-        private readonly void CleanUp()
-        {
-            if (!window.IsDestroyed())
-            {
-                window.Dispose();
-            }
-        }
-
-        private static uint Update(World world)
-        {
-            if (!IsAnyWindowOpen(world))
-            {
-                return 1;
-            }
-
-            MakeFirstMouseAPointer(world);
-            return 0;
         }
 
         private static bool IsAnyWindowOpen(World world)

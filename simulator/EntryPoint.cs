@@ -20,14 +20,14 @@ namespace AbacusSimulator
             Trace.AutoFlush = true;
             Trace.WriteLine("Starting simulator program");
 
-            uint returnCode;
+            StatusCode statusCode;
             using (World world = new())
             {
                 using (AbacusSimulator simulator = new(world))
                 {
                     using (Program program = Program.Create<VoxelGame>(world))
                     {
-                        while (!program.IsFinished(out returnCode))
+                        while (!program.IsFinished(out statusCode))
                         {
                             simulator.Update();
                         }
@@ -36,7 +36,14 @@ namespace AbacusSimulator
             }
 
             Allocations.ThrowIfAny();
-            return (int)returnCode;
+            if (statusCode.IsSuccess)
+            {
+                return 0;
+            }
+            else
+            {
+                return (int)statusCode.Code;
+            }
         }
     }
 }

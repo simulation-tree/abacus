@@ -13,7 +13,6 @@ using Physics.Events;
 using Rendering;
 using Rendering.Components;
 using Simulation;
-using Simulation.Functions;
 using System;
 using System.Numerics;
 using System.Runtime.InteropServices;
@@ -26,43 +25,57 @@ using Worlds;
 
 namespace Abacus
 {
-    public readonly unsafe struct DesktopPlatformer : IProgram
+    public readonly partial struct DesktopPlatformer : IProgram
     {
         private const float Gravity = 14f;
         private const float DisplayScale = 0.01f;
 
+        private readonly Simulator simulator;
         private readonly Window window;
         private readonly Camera camera;
         private readonly Body floorBody;
         private readonly Body leftWallBody;
         private readonly Body rightWallBody;
 
-        readonly StartProgram IProgram.Start => new(&Start);
-        readonly UpdateProgram IProgram.Update => new(&Update);
-        readonly FinishProgram IProgram.Finish => new(&Finish);
+        private readonly World World => window.GetWorld();
 
-        [UnmanagedCallersOnly]
-        private static void Start(Simulator simulator, Allocation allocation, World world)
+        void IProgram.Start(in Simulator simulator, in Allocation allocation, in World world)
         {
             allocation.Write(new DesktopPlatformer(simulator, world));
         }
 
-        [UnmanagedCallersOnly]
-        private static uint Update(Simulator simulator, Allocation allocation, World world, TimeSpan delta)
+        StatusCode IProgram.Update(in TimeSpan delta)
         {
-            ref DesktopPlatformer program = ref allocation.Read<DesktopPlatformer>();
-            return program.Update(simulator, world, delta);
+            if (window.IsDestroyed())
+            {
+                return StatusCode.Success(1);
+            }
+
+            UpdateCollidersToMatchDisplay(World);
+            (Vector2 direction, bool jump) = ReadInput(World);
+            MovePlayer(World, direction, jump, delta);
+            AnimatePlayerParameters(World);
+            CheckIfPlayersAreGrounded(simulator, World);
+            MakeCameraFollowPlayer(World);
+            MakeWindowFollowCamera(World);
+            UpdateRegionToMatchAnimatedSprite(World);
+            TeleportPlayerToMousePosition(World);
+            CloseWindow(World);
+            return StatusCode.Continue;
         }
 
-        [UnmanagedCallersOnly]
-        private static void Finish(Simulator simulator, Allocation allocation, World world, uint returnCode)
+        void IProgram.Finish(in StatusCode statusCode)
         {
-            ref DesktopPlatformer program = ref allocation.Read<DesktopPlatformer>();
-            program.CleanUp();
+            if (!window.IsDestroyed())
+            {
+                window.Dispose();
+            }
         }
 
-        private DesktopPlatformer(Simulator simulator, World world)
+        private unsafe DesktopPlatformer(Simulator simulator, World world)
         {
+            this.simulator = simulator;
+
             window = new(world, "Fly", default, new(200, 200), "vulkan", new(&WindowClosed));
             window.Position = new(200, 200);
             window.IsTransparent = true;
@@ -190,14 +203,6 @@ namespace Abacus
             }
         }
 
-        private readonly void CleanUp()
-        {
-            if (!window.IsDestroyed())
-            {
-                window.Dispose();
-            }
-        }
-
         private readonly AtlasTexture GetPlayerAtlas(Simulator simulator, World world)
         {
             Texture idle = new(world, "Assets/Textures/Spaceman/Idle.png");
@@ -223,26 +228,6 @@ namespace Abacus
 
             AtlasTexture atlasTexture = new(world, sprites);
             return atlasTexture;
-        }
-
-        private readonly uint Update(Simulator simulator, World world, TimeSpan delta)
-        {
-            if (window.IsDestroyed())
-            {
-                return 1;
-            }
-
-            UpdateCollidersToMatchDisplay(world);
-            (Vector2 direction, bool jump) = ReadInput(world);
-            MovePlayer(world, direction, jump, delta);
-            AnimatePlayerParameters(world);
-            CheckIfPlayersAreGrounded(simulator, world);
-            MakeCameraFollowPlayer(world);
-            MakeWindowFollowCamera(world);
-            UpdateRegionToMatchAnimatedSprite(world);
-            TeleportPlayerToMousePosition(world);
-            CloseWindow(world);
-            return 0;
         }
 
         private readonly void CloseWindow(World world)
@@ -366,7 +351,7 @@ namespace Abacus
             playerTransform.WorldPosition = playerPosition;
         }
 
-        private readonly void CheckIfPlayersAreGrounded(Simulator simulator, World world)
+        private unsafe readonly void CheckIfPlayersAreGrounded(Simulator simulator, World world)
         {
             foreach (uint playerEntity in world.GetAll<IsPlayer>())
             {

@@ -4,9 +4,7 @@ using InputDevices;
 using InteractionKit;
 using InteractionKit.Components;
 using InteractionKit.Functions;
-using Rendering.Components;
 using Simulation;
-using Simulation.Functions;
 using System;
 using System.Diagnostics;
 using System.Numerics;
@@ -18,32 +16,40 @@ using Worlds;
 
 namespace Abacus
 {
-    public readonly struct ControlsTest : IProgram
+    public readonly partial struct ControlsTest : IProgram
     {
         private readonly Window window;
 
-        unsafe readonly StartProgram IProgram.Start => new(&Start);
-        unsafe readonly UpdateProgram IProgram.Update => new(&Update);
-        unsafe readonly FinishProgram IProgram.Finish => new(&Finish);
+        private readonly World World => window.GetWorld();
 
-        [UnmanagedCallersOnly]
-        private static void Start(Simulator simulator, Allocation allocation, World world)
+        void IProgram.Start(in Simulator simulator, in Allocation allocation, in World world)
         {
             allocation.Write(new ControlsTest(world));
         }
 
-        [UnmanagedCallersOnly]
-        private static uint Update(Simulator simulator, Allocation allocation, World world, TimeSpan delta)
+        StatusCode IProgram.Update(in TimeSpan delta)
         {
-            ref ControlsTest program = ref allocation.Read<ControlsTest>();
-            return program.Update(world, delta);
+            if (!IsAnyVirtualWindowOpen(World))
+            {
+                return StatusCode.Success(1);
+            }
+
+            if (!IsAnyWindowOpen(World))
+            {
+                return StatusCode.Success(2);
+            }
+
+            MakeFirstMouseAPointer(World);
+            UpdateInteractiveContext(World);
+            return StatusCode.Continue;
         }
 
-        [UnmanagedCallersOnly]
-        private static void Finish(Simulator simulator, Allocation allocation, World world, uint returnCode)
+        void IProgram.Finish(in StatusCode statusCode)
         {
-            ref ControlsTest program = ref allocation.Read<ControlsTest>();
-            program.CleanUp();
+            if (!window.IsDestroyed())
+            {
+                window.Dispose();
+            }
         }
 
         private unsafe ControlsTest(World world)
@@ -59,31 +65,6 @@ namespace Abacus
             box.Size = new(300, 300);
             box.Position = new(40, 40);
             //box.Anchor = new(new(2f, true), new(2f, true), new(0f, false), new(2f, true), new(2f, true), new(0f, false));
-        }
-
-        private readonly void CleanUp()
-        {
-            if (!window.IsDestroyed())
-            {
-                window.Dispose();
-            }
-        }
-
-        private readonly uint Update(World world, TimeSpan delta)
-        {
-            if (!IsAnyVirtualWindowOpen(world))
-            {
-                return 1;
-            }
-
-            if (!IsAnyWindowOpen(world))
-            {
-                return 2;
-            }
-
-            MakeFirstMouseAPointer(world);
-            UpdateInteractiveContext(world);
-            return 0;
         }
 
         private static bool IsAnyVirtualWindowOpen(World world)

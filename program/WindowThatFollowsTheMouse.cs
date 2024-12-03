@@ -1,6 +1,5 @@
 ﻿using InputDevices;
 using Simulation;
-using Simulation.Functions;
 using System;
 using System.Numerics;
 using System.Runtime.InteropServices;
@@ -10,56 +9,21 @@ using Worlds;
 
 namespace Abacus
 {
-    public readonly struct WindowThatFollowsTheMouse : IProgram
+    public readonly partial struct WindowThatFollowsTheMouse : IProgram
     {
         private readonly World world;
         private readonly Window followerWindow;
 
-        unsafe readonly StartProgram IProgram.Start => new(&Start);
-        unsafe readonly UpdateProgram IProgram.Update => new(&Update);
-        unsafe readonly FinishProgram IProgram.Finish => new(&Finish);
-
-        [UnmanagedCallersOnly]
-        private static void Start(Simulator simulator, Allocation allocation, World world)
+        void IProgram.Start(in Simulator simulator, in Allocation allocation, in World world)
         {
             allocation.Write(new WindowThatFollowsTheMouse(world));
         }
 
-        [UnmanagedCallersOnly]
-        private static uint Update(Simulator simulator, Allocation allocation, World world, TimeSpan delta)
-        {
-            ref WindowThatFollowsTheMouse program = ref allocation.Read<WindowThatFollowsTheMouse>();
-            return program.Update(delta);
-        }
-
-        [UnmanagedCallersOnly]
-        private static void Finish(Simulator simulator, Allocation allocation, World world, uint returnCode)
-        {
-            ref WindowThatFollowsTheMouse program = ref allocation.Read<WindowThatFollowsTheMouse>();
-            program.CleanUp();
-        }
-
-        private unsafe WindowThatFollowsTheMouse(World world)
-        {
-            this.world = world;
-            followerWindow = new(world, "Fly", default, new(100, 100), "vulkan", new(&WindowClosed));
-            followerWindow.IsBorderless = true;
-            followerWindow.AlwaysOnTop = true;
-
-            new GlobalMouse(world);
-
-            [UnmanagedCallersOnly]
-            static void WindowClosed(Window window)
-            {
-                window.Dispose();
-            }
-        }
-
-        private readonly uint Update(TimeSpan delta)
+        StatusCode IProgram.Update(in TimeSpan delta)
         {
             if (followerWindow.IsDestroyed())
             {
-                return 1;
+                return StatusCode.Success(1);
             }
 
             bool holdingShift = false;
@@ -88,14 +52,30 @@ namespace Abacus
                 }
             }
 
-            return 0;
+            return StatusCode.Continue;
         }
 
-        private readonly void CleanUp()
+        void IProgram.Finish(in StatusCode statusCode)
         {
             if (!followerWindow.IsDestroyed())
             {
                 followerWindow.Dispose();
+            }
+        }
+
+        private unsafe WindowThatFollowsTheMouse(World world)
+        {
+            this.world = world;
+            followerWindow = new(world, "Fly", default, new(100, 100), "vulkan", new(&WindowClosed));
+            followerWindow.IsBorderless = true;
+            followerWindow.AlwaysOnTop = true;
+
+            new GlobalMouse(world);
+
+            [UnmanagedCallersOnly]
+            static void WindowClosed(Window window)
+            {
+                window.Dispose();
             }
         }
     }

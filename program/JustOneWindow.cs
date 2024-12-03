@@ -1,5 +1,4 @@
 ﻿using Simulation;
-using Simulation.Functions;
 using System;
 using System.Runtime.InteropServices;
 using Unmanaged;
@@ -8,41 +7,28 @@ using Worlds;
 
 namespace Abacus
 {
-    public readonly struct JustOneWindow : IProgram
+    public readonly partial struct JustOneWindow : IProgram
     {
         private readonly Window window;
 
-        unsafe readonly StartProgram IProgram.Start => new(&Start);
-        unsafe readonly UpdateProgram IProgram.Update => new(&Update);
-        unsafe readonly FinishProgram IProgram.Finish => new(&Finish);
+        private readonly World World => window.GetWorld();
 
-        [UnmanagedCallersOnly]
-        private static void Start(Simulator simulator, Allocation allocation, World world)
+        void IProgram.Start(in Simulator simulator, in Allocation allocation, in World world)
         {
             allocation.Write(new JustOneWindow(world));
         }
 
-        [UnmanagedCallersOnly]
-        private static uint Update(Simulator simulator, Allocation allocation, World world, TimeSpan delta)
+        StatusCode IProgram.Update(in TimeSpan delta)
         {
-            ref JustOneWindow program = ref allocation.Read<JustOneWindow>();
-            return Update(world);
+            if (!IsAnyWindowOpen(World))
+            {
+                return StatusCode.Success(1);
+            }
+
+            return StatusCode.Continue;
         }
 
-        [UnmanagedCallersOnly]
-        private static void Finish(Simulator simulator, Allocation allocation, World world, uint returnCode)
-        {
-            ref JustOneWindow program = ref allocation.Read<JustOneWindow>();
-            program.CleanUp();
-        }
-
-        private unsafe JustOneWindow(World world)
-        {
-            window = new(world, "Just One Window", new(200, 200), new(900, 720), "vulkan", new(&OnWindowClosed));
-            window.IsResizable = true;
-        }
-
-        private readonly void CleanUp()
+        void IProgram.Finish(in StatusCode statusCode)
         {
             if (!window.IsDestroyed())
             {
@@ -50,14 +36,10 @@ namespace Abacus
             }
         }
 
-        private static uint Update(World world)
+        private unsafe JustOneWindow(World world)
         {
-            if (!IsAnyWindowOpen(world))
-            {
-                return 1;
-            }
-
-            return 0;
+            window = new(world, "Just One Window", new(200, 200), new(900, 720), "vulkan", new(&OnWindowClosed));
+            window.IsResizable = true;
         }
 
         private static bool IsAnyWindowOpen(World world)
