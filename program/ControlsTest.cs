@@ -4,6 +4,7 @@ using InputDevices;
 using InteractionKit;
 using InteractionKit.Components;
 using InteractionKit.Functions;
+using Rendering;
 using Simulation;
 using System;
 using System.Diagnostics;
@@ -25,6 +26,7 @@ namespace Abacus
         private unsafe ControlsTest(World world)
         {
             window = new(world, "Editor", new(200, 200), new(900, 720), "vulkan", new(&OnWindowClosed));
+            window.GetClearColor() = Color.Grey;
             window.IsResizable = true;
 
             Settings settings = new(world);
