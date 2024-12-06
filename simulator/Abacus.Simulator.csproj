@@ -41,7 +41,7 @@
 		<ProjectReference Include="..\..\cameras\source\Cameras.csproj" />
 		<ProjectReference Include="..\..\data-systems\source\Data.Systems.csproj" />
 		<ProjectReference Include="..\..\data\source\Data.csproj" />
-		<ProjectReference Include="..\..\data\generator\Data.EmbeddedAddressTableGenerator.csproj">
+		<ProjectReference Include="..\..\data\generator\Data.EmbeddedResourcesGenerator.csproj">
 			<OutputItemType>Analyzer</OutputItemType>
 			<ReferenceOutputAssembly>false</ReferenceOutputAssembly>
 		</ProjectReference>

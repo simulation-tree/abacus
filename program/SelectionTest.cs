@@ -19,7 +19,7 @@ namespace Abacus
 
         private readonly World World => window.GetWorld();
 
-        void IProgram.Start(in Simulator simulator, in Allocation allocation, in World world)
+        void IProgram.Initialize(in Simulator simulator, in Allocation allocation, in World world)
         {
             allocation.Write(new SelectionTest(world));
         }
@@ -33,14 +33,6 @@ namespace Abacus
 
             MakeFirstMouseAPointer(World);
             return StatusCode.Continue;
-        }
-
-        void IProgram.Finish(in StatusCode statusCode)
-        {
-            if (!window.IsDestroyed())
-            {
-                window.Dispose();
-            }
         }
 
         private unsafe SelectionTest(World world)
@@ -71,6 +63,14 @@ namespace Abacus
             static void Pressed(Entity buttonEntity)
             {
                 Trace.WriteLine($"Button {buttonEntity} pressed");
+            }
+        }
+
+        void IDisposable.Dispose()
+        {
+            if (!window.IsDestroyed())
+            {
+                window.Dispose();
             }
         }
 

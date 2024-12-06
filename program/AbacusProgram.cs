@@ -40,7 +40,7 @@ namespace Abacus
 
         private readonly World World => window.GetWorld();
 
-        void IProgram.Start(in Simulator simulator, in Allocation allocation, in World world)
+        void IProgram.Initialize(in Simulator simulator, in Allocation allocation, in World world)
         {
             allocation.Write(new AbacusProgram(world));
         }
@@ -69,7 +69,7 @@ namespace Abacus
             return StatusCode.Continue;
         }
 
-        void IProgram.Finish(in StatusCode statusCode)
+        void IDisposable.Dispose()
         {
             if (!window.IsDestroyed())
             {
@@ -97,7 +97,7 @@ namespace Abacus
             window = new(world, "Window", new(100, 100), new(900, 720), "vulkan", new(&WindowClosed));
 
             //find existing camera or create new one
-            if (!world.TryGetFirstEntityWithComponent<IsCamera>(out uint cameraEntity))
+            if (!world.TryGetFirstEntityContainingComponent<IsCamera>(out uint cameraEntity))
             {
                 camera = new(world, window, CameraFieldOfView.FromDegrees(90f));
             }
@@ -272,7 +272,7 @@ namespace Abacus
 
         private readonly void AnimateTestRenderer(World world, float delta)
         {
-            foreach (uint keyboardEntity in world.GetAll<IsKeyboard>())
+            foreach (uint keyboardEntity in world.GetAllContaining<IsKeyboard>())
             {
                 Keyboard keyboard = new(world, keyboardEntity);
                 if (keyboard.WasPressed(Keyboard.Button.J))
@@ -312,7 +312,7 @@ namespace Abacus
                 }
             }
 
-            ref Color color = ref dummyRenderer.AsEntity().GetComponentRef<Color>();
+            ref Color color = ref dummyRenderer.AsEntity().GetComponent<Color>();
             float hue = color.H;
             hue += delta * 0.2f;
             while (hue > 1f)
@@ -327,7 +327,7 @@ namespace Abacus
         {
             Vector2 windowPosition = window.Position;
             Vector2 windowSize = window.Size;
-            foreach (uint keyboardEntity in world.GetAll<IsKeyboard>())
+            foreach (uint keyboardEntity in world.GetAllContaining<IsKeyboard>())
             {
                 Keyboard keyboard = new(world, keyboardEntity);
                 if (keyboard.WasPressed(Keyboard.Button.Escape))
@@ -472,7 +472,7 @@ namespace Abacus
 
         private readonly void TestMouseInputs(World world)
         {
-            foreach (uint mouseEntity in world.GetAll<IsMouse>())
+            foreach (uint mouseEntity in world.GetAllContaining<IsMouse>())
             {
                 Mouse mouse = new(world, mouseEntity);
                 Vector2 position = mouse.Position;

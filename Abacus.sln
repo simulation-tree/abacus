@@ -119,7 +119,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Data", "..\data\source\Data
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Collections.Tests", "..\collections\tests\Collections.Tests.csproj", "{E070EAAB-8044-4316-278F-11AE89B3F694}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Data.EmbeddedAddressTableGenerator", "..\data\generator\Data.EmbeddedAddressTableGenerator.csproj", "{CCA2DEC7-502D-DBE6-CD04-F3C59270CC41}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Data.EmbeddedResourcesGenerator", "..\data\generator\Data.EmbeddedResourcesGenerator.csproj", "{CCA2DEC7-502D-DBE6-CD04-F3C59270CC41}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Simulation.ImplementationGenerators", "..\simulation\generator\Simulation.ImplementationGenerators.csproj", "{F070A77B-8E83-5648-5235-515B624CBA9B}"
 EndProject

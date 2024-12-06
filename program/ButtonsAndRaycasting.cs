@@ -36,7 +36,7 @@ namespace Abacus
 
         private readonly World World => window.GetWorld();
 
-        void IProgram.Start(in Simulator simulator, in Allocation allocation, in World world)
+        void IProgram.Initialize(in Simulator simulator, in Allocation allocation, in World world)
         {
             allocation.Write(new ButtonsAndRaycasting(simulator, world));
         }
@@ -58,7 +58,7 @@ namespace Abacus
                     mouse.AddComponent(new IsPointer(mouse.Position, default));
                 }
 
-                ref IsPointer pointer = ref mouse.AsEntity().GetComponentRef<IsPointer>();
+                ref IsPointer pointer = ref mouse.AsEntity().GetComponent<IsPointer>();
                 pointer.position = mouse.Position;
                 pointer.action = default;
                 pointer.scroll = mouse.Scroll;
@@ -84,7 +84,7 @@ namespace Abacus
                         for (uint i = 0; i < hitsCount; i++)
                         {
                             RaycastHit hit = hits[i];
-                            ref Position position = ref world.TryGetComponentRef<Position>(hit.entity, out bool contains);
+                            ref Position position = ref world.TryGetComponent<Position>(hit.entity, out bool contains);
                             if (contains)
                             {
                                 position.value.X += 0.1f;
@@ -97,7 +97,7 @@ namespace Abacus
             return StatusCode.Continue;
         }
 
-        void IProgram.Finish(in StatusCode statusCode)
+        void IDisposable.Dispose()
         {
             if (!window.IsDestroyed())
             {
@@ -142,7 +142,7 @@ namespace Abacus
             textMaterial.AddPushBinding<LocalToWorld>();
 
             //crate test cube
-            MeshRenderer waveRenderer = new(world, cubeMesh, unlitWorldMaterial, worldCamera.Mask);
+            MeshRenderer waveRenderer = new(world, cubeMesh, unlitWorldMaterial, worldCamera.GetMask());
             Transform waveTransform = waveRenderer.AsEntity().Become<Transform>();
             waveRenderer.AddComponent(Color.Red);
             waveRenderer.AddComponent(new IsBody(new CubeShape(0.5f), IsBody.Type.Static));
@@ -160,7 +160,7 @@ namespace Abacus
             anotherBox.Color = Color.SkyBlue;
 
             TextMesh textMesh = new(world, "abacus 123 hiii", robotoFont);
-            TextRenderer textRenderer = new(world, textMesh, textMaterial, uiCamera.Mask);
+            TextRenderer textRenderer = new(world, textMesh, textMaterial, uiCamera.GetMask());
             textRenderer.SetParent(anotherBox);
             Transform textTransform = textRenderer.AsEntity().Become<Transform>();
             textTransform.LocalPosition = new(4f, -4f, 0.1f);

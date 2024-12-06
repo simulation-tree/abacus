@@ -14,7 +14,23 @@ namespace Abacus
         private readonly World world;
         private readonly Window followerWindow;
 
-        void IProgram.Start(in Simulator simulator, in Allocation allocation, in World world)
+        private unsafe WindowThatFollowsTheMouse(World world)
+        {
+            this.world = world;
+            followerWindow = new(world, "Fly", default, new(100, 100), "vulkan", new(&WindowClosed));
+            followerWindow.IsBorderless = true;
+            followerWindow.AlwaysOnTop = true;
+
+            new GlobalMouse(world);
+
+            [UnmanagedCallersOnly]
+            static void WindowClosed(Window window)
+            {
+                window.Dispose();
+            }
+        }
+
+        void IProgram.Initialize(in Simulator simulator, in Allocation allocation, in World world)
         {
             allocation.Write(new WindowThatFollowsTheMouse(world));
         }
@@ -55,27 +71,11 @@ namespace Abacus
             return StatusCode.Continue;
         }
 
-        void IProgram.Finish(in StatusCode statusCode)
+        void IDisposable.Dispose()
         {
             if (!followerWindow.IsDestroyed())
             {
                 followerWindow.Dispose();
-            }
-        }
-
-        private unsafe WindowThatFollowsTheMouse(World world)
-        {
-            this.world = world;
-            followerWindow = new(world, "Fly", default, new(100, 100), "vulkan", new(&WindowClosed));
-            followerWindow.IsBorderless = true;
-            followerWindow.AlwaysOnTop = true;
-
-            new GlobalMouse(world);
-
-            [UnmanagedCallersOnly]
-            static void WindowClosed(Window window)
-            {
-                window.Dispose();
             }
         }
     }

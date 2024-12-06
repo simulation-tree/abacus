@@ -39,7 +39,7 @@ namespace Abacus
 
         private readonly World World => window.GetWorld();
 
-        void IProgram.Start(in Simulator simulator, in Allocation allocation, in World world)
+        void IProgram.Initialize(in Simulator simulator, in Allocation allocation, in World world)
         {
             allocation.Write(new PhysicsDemo(simulator, world));
         }
@@ -169,7 +169,7 @@ namespace Abacus
             return StatusCode.Continue;
         }
 
-        void IProgram.Finish(in StatusCode statusCode)
+        void IDisposable.Dispose()
         {
             if (!window.IsDestroyed())
             {
@@ -254,7 +254,7 @@ namespace Abacus
             foreach (RaycastHit hit in hits)
             {
                 uint entityHit = hit.entity;
-                ref Color color = ref world.TryGetComponentRef<Color>(entityHit, out bool contains);
+                ref Color color = ref world.TryGetComponent<Color>(entityHit, out bool contains);
                 if (contains)
                 {
                     float hue = color.H;

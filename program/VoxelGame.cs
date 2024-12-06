@@ -31,31 +31,6 @@ namespace Abacus
         private Vector3 cameraPosition;
         private Vector2 cameraPitchYaw;
 
-        readonly void IProgram.Start(in Simulator simulator, in Allocation allocation, in World world)
-        {
-            allocation.Write(new VoxelGame(simulator, world));
-        }
-
-        StatusCode IProgram.Update(in TimeSpan delta)
-        {
-            if (!AnyWindowOpen(world))
-            {
-                return StatusCode.Success(1);
-            }
-
-            Transform cameraTransform = camera.AsEntity().As<Transform>();
-            SharedFunctions.MoveCameraAround(world, cameraTransform, delta, ref cameraPosition, ref cameraPitchYaw, new(1f, 1f));
-            return StatusCode.Continue;
-        }
-
-        readonly void IProgram.Finish(in StatusCode statusCode)
-        {
-            if (!window.IsDestroyed())
-            {
-                window.Dispose();
-            }
-        }
-
         private VoxelGame(Simulator simulator, World world)
         {
             this.world = world;
@@ -98,6 +73,31 @@ namespace Abacus
             }
         }
 
+        void IDisposable.Dispose()
+        {
+            if (!window.IsDestroyed())
+            {
+                window.Dispose();
+            }
+        }
+
+        readonly void IProgram.Initialize(in Simulator simulator, in Allocation allocation, in World world)
+        {
+            allocation.Write(new VoxelGame(simulator, world));
+        }
+
+        StatusCode IProgram.Update(in TimeSpan delta)
+        {
+            if (!AnyWindowOpen(world))
+            {
+                return StatusCode.Success(1);
+            }
+
+            Transform cameraTransform = camera.AsEntity().As<Transform>();
+            SharedFunctions.MoveCameraAround(world, cameraTransform, delta, ref cameraPosition, ref cameraPitchYaw, new(1f, 1f));
+            return StatusCode.Continue;
+        }
+
         private static unsafe Window CreateWindow(World world)
         {
             return new(world, "Voxel Game", new Vector2(400, 200), new(900, 720), "vulkan", new(&WindowClosed));
@@ -121,11 +121,11 @@ namespace Abacus
 
             USpan<AtlasTexture.InputSprite> sprites = stackalloc AtlasTexture.InputSprite[]
             {
-                new("Dirt", dirt.Width, dirt.Height, dirt.Pixels),
-                new("Grass", grass.Width, grass.Height, grass.Pixels),
-                new("Stone", stone.Width, stone.Height, stone.Pixels),
-                new("GrassSide", grassSide.Width, grassSide.Height, grassSide.Pixels),
-                new("Cobblestone", cobblestone.Width, cobblestone.Height, cobblestone.Pixels),
+                new("Dirt", dirt),
+                new("Grass", grass),
+                new("Stone", stone),
+                new("GrassSide", grassSide),
+                new("Cobblestone", cobblestone),
             };
 
             AtlasTexture atlasTexture = new(world, sprites);
@@ -276,18 +276,19 @@ namespace Abacus
 
             public static USpan<uint> GetBlocks(World world, int cx, int cy, int cz)
             {
-                using ComponentQuery<IsChunk, Position> chunkQuery = new();
-                chunkQuery.Update(world);
-                foreach (var x in chunkQuery)
+                ComponentQuery<IsChunk, Position> query = new(world);
+                foreach (var r in query)
                 {
-                    uint chunkSize = x.Component1.chunkSize;
-                    Vector3 worldPosition = x.Component2.value;
+                    ref IsChunk chunk = ref r.component1;
+                    ref Position position = ref r.component2;
+                    uint chunkSize = chunk.chunkSize;
+                    Vector3 worldPosition = position.value;
                     int chunkX = (int)MathF.Floor(worldPosition.X / chunkSize);
                     int chunkY = (int)MathF.Floor(worldPosition.Y / chunkSize);
                     int chunkZ = (int)MathF.Floor(worldPosition.Z / chunkSize);
                     if (chunkX == cx && chunkY == cy && chunkZ == cz)
                     {
-                        return world.GetArray<BlockID>(x.entity).As<uint>();
+                        return world.GetArray<BlockID>(r.entity).As<uint>();
                     }
                 }
 

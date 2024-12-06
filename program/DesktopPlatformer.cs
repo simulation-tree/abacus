@@ -39,7 +39,7 @@ namespace Abacus
 
         private readonly World World => window.GetWorld();
 
-        void IProgram.Start(in Simulator simulator, in Allocation allocation, in World world)
+        void IProgram.Initialize(in Simulator simulator, in Allocation allocation, in World world)
         {
             allocation.Write(new DesktopPlatformer(simulator, world));
         }
@@ -64,7 +64,7 @@ namespace Abacus
             return StatusCode.Continue;
         }
 
-        void IProgram.Finish(in StatusCode statusCode)
+        void IDisposable.Dispose()
         {
             if (!window.IsDestroyed())
             {
@@ -81,7 +81,7 @@ namespace Abacus
             window.IsTransparent = true;
             window.IsBorderless = true;
             window.AlwaysOnTop = true;
-            window.ClearColor = new(0, 0, 0, 0);
+            window.GetClearColor() = new(0, 0, 0, 0);
 
             Settings settings = new(world);
             camera = new(world, window, CameraFieldOfView.FromDegrees(60));
@@ -217,13 +217,13 @@ namespace Abacus
 
             USpan<AtlasTexture.InputSprite> sprites = stackalloc AtlasTexture.InputSprite[]
             {
-                new("Idle.png", idle.Width, idle.Height, idle.Pixels),
-                new("Idle2.png", idle2.Width, idle2.Height, idle2.Pixels),
-                new("Falling.png", falling.Width, falling.Height, falling.Pixels),
-                new("JumpingUp.png", jumpingUp.Width, jumpingUp.Height, jumpingUp.Pixels),
-                new("Skid.png", skid.Width, skid.Height, skid.Pixels),
-                new("Walk.png", walk.Width, walk.Height, walk.Pixels),
-                new("Walk2.png", walk2.Width, walk2.Height, walk2.Pixels),
+                new("Idle.png", idle),
+                new("Idle2.png", idle2),
+                new("Falling.png", falling),
+                new("JumpingUp.png", jumpingUp),
+                new("Skid.png", skid),
+                new("Walk.png", walk),
+                new("Walk2.png", walk2),
             };
 
             AtlasTexture atlasTexture = new(world, sprites);
@@ -304,7 +304,7 @@ namespace Abacus
 
         private static Entity GetMainPlayer(World world)
         {
-            foreach (uint playerEntity in world.GetAll<IsPlayer>())
+            foreach (uint playerEntity in world.GetAllContaining<IsPlayer>())
             {
                 IsPlayer component = world.GetComponent<IsPlayer>(playerEntity);
                 if (component.main)
@@ -353,7 +353,7 @@ namespace Abacus
 
         private unsafe readonly void CheckIfPlayersAreGrounded(Simulator simulator, World world)
         {
-            foreach (uint playerEntity in world.GetAll<IsPlayer>())
+            foreach (uint playerEntity in world.GetAllContaining<IsPlayer>())
             {
                 Entity player = new(world, playerEntity);
                 Transform playerTransform = player.As<Transform>();
@@ -428,7 +428,7 @@ namespace Abacus
 
         private readonly void AnimatePlayerParameters(World world)
         {
-            foreach (uint playerEntity in world.GetAll<IsPlayer>())
+            foreach (uint playerEntity in world.GetAllContaining<IsPlayer>())
             {
                 Entity player = new(world, playerEntity);
                 Body playerBody = player.As<Body>();
@@ -459,10 +459,18 @@ namespace Abacus
             }
         }
 
-        private static void UpdateRegionToMatchAnimatedSprite(World world)
+        private static float Lerp(float a, float b, float t)
         {
-            world.ForEach((in uint entity, ref AnimatedSprite animatedSprite, ref IsRenderer _) =>
+            return a + (b - a) * t;
+        }
+
+        private readonly void UpdateRegionToMatchAnimatedSprite(World world)
+        {
+            ComponentQuery<AnimatedSprite, IsRenderer> query = new(world);
+            foreach (var r in query)
             {
+                ref AnimatedSprite animatedSprite = ref r.component1;
+                uint entity = r.entity;
                 MeshRenderer renderer = new(world, entity);
                 Material material = renderer.Material;
                 ref MaterialTextureBinding binding = ref material.GetTextureBindingRef(1, 0);
@@ -471,12 +479,7 @@ namespace Abacus
                 {
                     binding.SetRegion(sprite.region);
                 }
-            });
-        }
-
-        private static float Lerp(float a, float b, float t)
-        {
-            return a + (b - a) * t;
+            }
         }
 
         [Component]

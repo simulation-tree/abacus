@@ -10,18 +10,25 @@ public static class SharedFunctions
     private static Vector2 lastPointerPosition;
     private static bool hasLastPointerPosition;
 
-    public static void DestroyTemporaryEntities(this World world, TimeSpan delta)
+    public static void DestroyTemporaryEntities(this World world, TimeSpan deltaSpan)
     {
-        using ComponentQuery<DestroyAfterTime> query = new();
-        query.Update(world);
-        foreach (var r in query)
+        using Operation operation = new();
+        ComponentQuery<DestroyAfterTime> query = new(world);
+        float delta = (float)deltaSpan.TotalSeconds;
+        foreach (var e in query)
         {
-            ref DestroyAfterTime destroyTimer = ref r.Component1;
-            destroyTimer.time -= (float)delta.TotalSeconds;
-            if (destroyTimer.time <= 0)
+            ref DestroyAfterTime destroy = ref e.component1;
+            destroy.time -= delta;
+            if (destroy.time <= 0)
             {
-                world.DestroyEntity(r.entity);
+                operation.SelectEntity(e.entity);
             }
+        }
+
+        if (operation.Count > 0)
+        {
+            operation.DestroySelected();
+            world.Perform(operation);
         }
     }
 

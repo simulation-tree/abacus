@@ -22,7 +22,33 @@ namespace Abacus
 
         private readonly World World => window.GetWorld();
 
-        void IProgram.Start(in Simulator simulator, in Allocation allocation, in World world)
+        private unsafe ControlsTest(World world)
+        {
+            window = new(world, "Editor", new(200, 200), new(900, 720), "vulkan", new(&OnWindowClosed));
+            window.IsResizable = true;
+
+            Settings settings = new(world);
+            Camera camera = Camera.CreateOrthographic(world, window, 1f);
+            Canvas canvas = new(world, camera);
+
+            VirtualWindow box = VirtualWindow.Create<ControlsDemoWindow>(world, canvas);
+            box.Size = new(300, 300);
+            box.Position = new(40, 40);
+            //box.Anchor = new(new(2f, true), new(2f, true), new(0f, false), new(2f, true), new(2f, true), new(0f, false));
+
+            Image image = new(world, canvas);
+            image.Size = new(200, 200);
+            image.Position = new(100, 100);
+            image.SetParent(canvas);
+
+            Label anotherLabel = new(world, canvas, "Hello there");
+            anotherLabel.SetParent(canvas);
+            anotherLabel.Position = new(105, 105);
+            anotherLabel.Color = Color.Black;
+            anotherLabel.Z = 0.2f;
+        }
+
+        void IProgram.Initialize(in Simulator simulator, in Allocation allocation, in World world)
         {
             allocation.Write(new ControlsTest(world));
         }
@@ -44,27 +70,12 @@ namespace Abacus
             return StatusCode.Continue;
         }
 
-        void IProgram.Finish(in StatusCode statusCode)
+        void IDisposable.Dispose()
         {
             if (!window.IsDestroyed())
             {
                 window.Dispose();
             }
-        }
-
-        private unsafe ControlsTest(World world)
-        {
-            window = new(world, "Editor", new(200, 200), new(900, 720), "vulkan", new(&OnWindowClosed));
-            window.IsResizable = true;
-
-            Settings settings = new(world);
-            Camera camera = Camera.CreateOrthographic(world, window, 1f);
-            Canvas canvas = new(world, camera);
-
-            VirtualWindow box = VirtualWindow.Create<ControlsDemoWindow>(world, canvas);
-            box.Size = new(300, 300);
-            box.Position = new(40, 40);
-            //box.Anchor = new(new(2f, true), new(2f, true), new(0f, false), new(2f, true), new(2f, true), new(0f, false));
         }
 
         private static bool IsAnyVirtualWindowOpen(World world)
