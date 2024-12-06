@@ -73,7 +73,7 @@ namespace Abacus
             }
         }
 
-        void IDisposable.Dispose()
+        void IProgram.Finish(in StatusCode statusCode)
         {
             if (!window.IsDestroyed())
             {
@@ -81,7 +81,7 @@ namespace Abacus
             }
         }
 
-        readonly void IProgram.Initialize(in Simulator simulator, in Allocation allocation, in World world)
+        readonly void IProgram.Start(in Simulator simulator, in Allocation allocation, in World world)
         {
             allocation.Write(new VoxelGame(simulator, world));
         }

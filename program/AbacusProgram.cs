@@ -40,7 +40,7 @@ namespace Abacus
 
         private readonly World World => window.GetWorld();
 
-        void IProgram.Initialize(in Simulator simulator, in Allocation allocation, in World world)
+        void IProgram.Start(in Simulator simulator, in Allocation allocation, in World world)
         {
             allocation.Write(new AbacusProgram(world));
         }
@@ -69,7 +69,7 @@ namespace Abacus
             return StatusCode.Continue;
         }
 
-        void IDisposable.Dispose()
+        void IProgram.Finish(in StatusCode statusCode)
         {
             if (!window.IsDestroyed())
             {
