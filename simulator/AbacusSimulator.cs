@@ -26,25 +26,25 @@ namespace AbacusSimulator
         public AbacusSimulator(World world)
         {
             simulator = new(world);
-            simulator.AddSystem(new DataImportSystem());
-            simulator.AddSystem(new AutomationPlayingSystem());
-            simulator.AddSystem(new StateMachineSystem());
-            simulator.AddSystem(new StateAutomationSystem());
-            simulator.AddSystem(new ModelImportSystem());
-            simulator.AddSystem(new TransformSystem());
-            simulator.AddSystem(new WindowSystem());
-            simulator.AddSystem(new GlobalKeyboardAndMouseSystem());
-            simulator.AddSystem(new WindowDevicesSystems());
-            simulator.AddSystem(new TextureImportSystem());
-            simulator.AddSystem(new ShaderImportSystem());
-            simulator.AddSystem(new FontImportSystem());
-            simulator.AddSystem(new TextRasterizationSystem());
-            simulator.AddSystem(new PhysicsSystem());
-            simulator.AddSystem(new CameraSystem());
-            simulator.AddSystem(new InteractionSystems());
+            simulator.AddSystem<DataImportSystem>();
+            simulator.AddSystem<AutomationPlayingSystem>();
+            simulator.AddSystem<StateMachineSystem>();
+            simulator.AddSystem<StateAutomationSystem>();
+            simulator.AddSystem<ModelImportSystem>();
+            simulator.AddSystem<TransformSystem>();
+            simulator.AddSystem<WindowSystem>();
+            simulator.AddSystem<GlobalKeyboardAndMouseSystem>();
+            simulator.AddSystem<WindowDevicesSystems>();
+            simulator.AddSystem<TextureImportSystem>();
+            simulator.AddSystem<ShaderImportSystem>();
+            simulator.AddSystem<FontImportSystem>();
+            simulator.AddSystem<TextRasterizationSystem>();
+            simulator.AddSystem<PhysicsSystem>();
+            simulator.AddSystem<CameraSystem>();
+            simulator.AddSystem<InteractionSystems>();
 
-            ref RenderingSystems renderingSystems = ref simulator.AddSystem(new RenderingSystems()).Value;
-            renderingSystems.RegisterRenderSystem<VulkanRenderer>();
+            ref RenderingSystems renderingSystems = ref simulator.AddSystem<RenderingSystems>().Value;
+            renderingSystems.RegisterRenderingBackend<VulkanRenderer>();
         }
 
         public readonly void Dispose()
