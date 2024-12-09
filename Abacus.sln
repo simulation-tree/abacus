@@ -125,6 +125,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Simulation.ImplementationGe
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rendering.Tests", "..\rendering\tests\Rendering.Tests.csproj", "{8CD55406-C8F5-88B1-F5AD-4FE34E2122B9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Clipboard", "..\clipboard\Clipboard.csproj", "{E08BACE1-DA35-A7F7-66E2-F9BD41A87AD9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -375,6 +377,10 @@ Global
 		{8CD55406-C8F5-88B1-F5AD-4FE34E2122B9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8CD55406-C8F5-88B1-F5AD-4FE34E2122B9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8CD55406-C8F5-88B1-F5AD-4FE34E2122B9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E08BACE1-DA35-A7F7-66E2-F9BD41A87AD9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E08BACE1-DA35-A7F7-66E2-F9BD41A87AD9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E08BACE1-DA35-A7F7-66E2-F9BD41A87AD9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E08BACE1-DA35-A7F7-66E2-F9BD41A87AD9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

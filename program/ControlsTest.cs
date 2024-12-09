@@ -43,9 +43,9 @@ namespace Abacus
             image.Position = new(100, 100);
             image.SetParent(canvas);
 
-            Label anotherLabel = new(world, canvas, "Hello there");
+            Label anotherLabel = new(world, canvas, "Hello there\nWith another line\nNice");
             anotherLabel.SetParent(canvas);
-            anotherLabel.Position = new(105, 105);
+            anotherLabel.Position = new(105, 150);
             anotherLabel.Color = Color.Black;
             anotherLabel.Z = 0.2f;
         }
@@ -280,9 +280,13 @@ namespace Abacus
 
                 testTree.AddLeaf("Game Object");
 
+                y -= singleLineHeight;
+
                 TreeNode canvasLeaf = testTree.AddLeaf("Canvas");
                 canvasLeaf.AddLeaf("Button");
                 canvasLeaf.AddLeaf("Toggle");
+
+                y -= singleLineHeight;
 
                 TreeNode playerLeaf = canvasLeaf.AddLeaf("Player");
                 playerLeaf.AddLeaf("Health");
@@ -290,6 +294,9 @@ namespace Abacus
 
                 testTree.AddLeaf("Game Object (1)");
                 testTree.AddLeaf("Game Object (2)");
+
+                y -= singleLineHeight;
+                y -= singleLineHeight + gap;
 
                 for (int i = 0; i < 20; i++)
                 {
@@ -299,6 +306,15 @@ namespace Abacus
                     box.Position = new(200f, i * 26f);
                     box.Color = Color.FromHSV((i * 0.1f) % 1, 1, 1);
                 }
+
+                TextField multiLineTextField = new(world, canvas);
+                multiLineTextField.SetParent(window.Container);
+                multiLineTextField.Position = new(4f, y);
+                multiLineTextField.Size = new(180f, singleLineHeight * 3);
+                multiLineTextField.Anchor = Anchor.TopLeft;
+                multiLineTextField.Pivot = new(0f, 1f, 0f);
+                multiLineTextField.BackgroundColor = new(0.2f, 0.2f, 0.2f);
+                multiLineTextField.TextColor = Color.White;
             }
 
             [UnmanagedCallersOnly]
