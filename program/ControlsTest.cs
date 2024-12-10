@@ -48,14 +48,13 @@ namespace Abacus
             anotherLabel.Color = Color.Black;
             anotherLabel.Z = 0.2f;
 
-            rightClickMenu = new(world, new(&ChoseMenuOption));
-            rightClickMenu.SetParent(canvas);
-            rightClickMenu.AddOption("Stop", canvas);
-            rightClickMenu.AddOption("And Listen", canvas);
-            rightClickMenu.AddOption("OoOoh", canvas);
-            rightClickMenu.AddOption("Deep.../First", canvas);
-            rightClickMenu.AddOption("Deep.../Second", canvas);
-            rightClickMenu.AddOption("Deep.../Third", canvas);
+            rightClickMenu = new(canvas, new(&ChoseMenuOption));
+            rightClickMenu.AddOption("Stop");
+            rightClickMenu.AddOption("And Listen");
+            rightClickMenu.AddOption("OoOoh");
+            rightClickMenu.AddOption("Deep.../First");
+            rightClickMenu.AddOption("Deep.../Second");
+            rightClickMenu.AddOption("Deep.../Third");
             rightClickMenu.Size = new(100, settings.SingleLineHeight);
             rightClickMenu.Position = new(200, 300);
             rightClickMenu.Pivot = new(0, 1f, 0f);
@@ -245,16 +244,16 @@ namespace Abacus
                 testDropdown.TriangleColor = Color.White;
 
                 Menu testDropdownMenu = testDropdown.Menu;
-                testDropdownMenu.AddOption("Option A", canvas);
-                testDropdownMenu.AddOption("Option B", canvas);
-                OptionPath lastOption = testDropdownMenu.AddOption("Option C", canvas);
-                testDropdownMenu.AddOption("Option D/Apple", canvas);
-                testDropdownMenu.AddOption("Option D/Banana", canvas);
-                testDropdownMenu.AddOption("Option D/Cherry", canvas);
-                testDropdownMenu.AddOption("Option D/More.../Toyota", canvas);
-                testDropdownMenu.AddOption("Option D/More.../Honda", canvas);
-                testDropdownMenu.AddOption("Option D/More.../Hyndai", canvas);
-                testDropdownMenu.AddOption("Option D/More.../Mitsubishi", canvas);
+                testDropdownMenu.AddOption("Option A");
+                testDropdownMenu.AddOption("Option B");
+                OptionPath lastOption = testDropdownMenu.AddOption("Option C");
+                testDropdownMenu.AddOption("Option D/Apple");
+                testDropdownMenu.AddOption("Option D/Banana");
+                testDropdownMenu.AddOption("Option D/Cherry");
+                testDropdownMenu.AddOption("Option D/More.../Toyota");
+                testDropdownMenu.AddOption("Option D/More.../Honda");
+                testDropdownMenu.AddOption("Option D/More.../Hyndai");
+                testDropdownMenu.AddOption("Option D/More.../Mitsubishi");
 
                 testDropdown.SelectedOption = lastOption;
                 testDropdown.Callback = new(&DropdownOptionChanged);
