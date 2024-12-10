@@ -31,6 +31,7 @@ namespace AbacusSimulator
             simulator.AddSystem<StateMachineSystem>();
             simulator.AddSystem<StateAutomationSystem>();
             simulator.AddSystem<ModelImportSystem>();
+            simulator.AddSystem<InteractionSystems>();
             simulator.AddSystem<TransformSystem>();
             simulator.AddSystem<WindowSystem>();
             simulator.AddSystem<GlobalKeyboardAndMouseSystem>();
@@ -41,7 +42,6 @@ namespace AbacusSimulator
             simulator.AddSystem<TextRasterizationSystem>();
             simulator.AddSystem<PhysicsSystem>();
             simulator.AddSystem<CameraSystem>();
-            simulator.AddSystem<InteractionSystems>();
 
             ref RenderingSystems renderingSystems = ref simulator.AddSystem<RenderingSystems>().Value;
             renderingSystems.RegisterRenderingBackend<VulkanRenderer>();
@@ -50,7 +50,6 @@ namespace AbacusSimulator
         public readonly void Dispose()
         {
             simulator.RemoveSystem<RenderingSystems>();
-            simulator.RemoveSystem<InteractionSystems>();
             simulator.RemoveSystem<CameraSystem>();
             simulator.RemoveSystem<PhysicsSystem>();
             simulator.RemoveSystem<TextRasterizationSystem>();
@@ -61,6 +60,7 @@ namespace AbacusSimulator
             simulator.RemoveSystem<GlobalKeyboardAndMouseSystem>();
             simulator.RemoveSystem<WindowSystem>();
             simulator.RemoveSystem<TransformSystem>();
+            simulator.RemoveSystem<InteractionSystems>();
             simulator.RemoveSystem<ModelImportSystem>();
             simulator.RemoveSystem<StateAutomationSystem>();
             simulator.RemoveSystem<StateMachineSystem>();
