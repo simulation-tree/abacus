@@ -266,7 +266,7 @@ namespace Abacus
                 USpan<Vector3> meshPositions = mesh.ResizePositions(generation.verticeIndex);
                 USpan<Vector2> meshUVs = mesh.ResizeUVs(generation.verticeIndex);
                 USpan<Color> meshColors = mesh.ResizeColors(generation.verticeIndex);
-                USpan<uint> meshTriangles = mesh.ResizeTriangles(generation.triangleIndex);
+                USpan<uint> meshTriangles = mesh.ResizeIndices(generation.triangleIndex);
                 vertices.AsSpan(0, generation.verticeIndex).CopyTo(meshPositions);
                 uvs.AsSpan(0, generation.verticeIndex).CopyTo(meshUVs);
                 colors.AsSpan(0, generation.verticeIndex).CopyTo(meshColors);
