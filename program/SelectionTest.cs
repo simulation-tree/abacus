@@ -44,17 +44,17 @@ namespace Abacus
             Camera camera = Camera.CreateOrthographic(world, window, 1f);
             Canvas canvas = new(world, camera);
 
-            Button buttonA = new(world, new(&Pressed), canvas);
+            Button buttonA = new(new(&Pressed), canvas);
             buttonA.Position = new(100, 60);
             buttonA.Size = new(32, 32);
             buttonA.Color = Color.Red;
 
-            Button buttonB = new(world, new(&Pressed), canvas);
+            Button buttonB = new(new(&Pressed), canvas);
             buttonB.Position = new(200, 60);
             buttonB.Size = new(32, 32);
             buttonB.Color = Color.Green;
 
-            Button buttonC = new(world, new(&Pressed), canvas);
+            Button buttonC = new(new(&Pressed), canvas);
             buttonC.Position = new(200 + 16, 60 + 16);
             buttonC.Size = new(32, 32);
             buttonC.Color = Color.Blue * new Color(1f, 1f, 1f, 0.5f);

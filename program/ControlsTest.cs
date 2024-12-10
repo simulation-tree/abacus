@@ -20,6 +20,7 @@ namespace Abacus
     public readonly partial struct ControlsTest : IProgram
     {
         private readonly Window window;
+        private readonly Menu rightClickMenu;
 
         private readonly World World => window.GetWorld();
 
@@ -38,16 +39,34 @@ namespace Abacus
             box.Position = new(40, 40);
             //box.Anchor = new(new(2f, true), new(2f, true), new(0f, false), new(2f, true), new(2f, true), new(0f, false));
 
-            Image image = new(world, canvas);
+            Image image = new(canvas);
             image.Size = new(200, 200);
             image.Position = new(100, 100);
-            image.SetParent(canvas);
 
-            Label anotherLabel = new(world, canvas, "Hello there\nWith another line\nNice");
-            anotherLabel.SetParent(canvas);
+            Label anotherLabel = new(canvas, "Hello there\nWith another line\nNice");
             anotherLabel.Position = new(105, 150);
             anotherLabel.Color = Color.Black;
             anotherLabel.Z = 0.2f;
+
+            rightClickMenu = new(world, new(&ChoseMenuOption));
+            rightClickMenu.SetParent(canvas);
+            rightClickMenu.AddOption("Stop", canvas);
+            rightClickMenu.AddOption("And Listen", canvas);
+            rightClickMenu.AddOption("OoOoh", canvas);
+            rightClickMenu.AddOption("Deep.../First", canvas);
+            rightClickMenu.AddOption("Deep.../Second", canvas);
+            rightClickMenu.AddOption("Deep.../Third", canvas);
+            rightClickMenu.Size = new(100, settings.SingleLineHeight);
+            rightClickMenu.Position = new(200, 300);
+            rightClickMenu.Pivot = new(0, 1f, 0f);
+            rightClickMenu.IsExpanded = false;
+        }
+
+        [UnmanagedCallersOnly]
+        private static void ChoseMenuOption(MenuOption option)
+        {
+            Trace.WriteLine($"Chose option: {option}");
+            option.rootMenu.IsExpanded = false;
         }
 
         void IProgram.Start(in Simulator simulator, in Allocation allocation, in World world)
@@ -90,7 +109,7 @@ namespace Abacus
             return world.TryGetFirst(out Window _);
         }
 
-        private static void MakeFirstMouseAPointer(World world)
+        private void MakeFirstMouseAPointer(World world)
         {
             if (world.TryGetFirst(out Mouse mouse))
             {
@@ -122,7 +141,13 @@ namespace Abacus
                     scroll.Y = -1;
                 }
 
-                pointer.Scroll = scroll * 0.1f;
+                pointer.Scroll = scroll * 0.15f;
+
+                if (mouse.WasPressed(Mouse.Button.RightButton))
+                {
+                    rightClickMenu.Position = mouse.Position;
+                    rightClickMenu.IsExpanded = true;
+                }
             }
         }
 
@@ -158,13 +183,11 @@ namespace Abacus
 
             readonly unsafe void IVirtualWindow.OnCreated(VirtualWindow window, Canvas canvas)
             {
-                World world = window.GetWorld();
-
-                float singleLineHeight = 24f;
+                float singleLineHeight = canvas.GetSettings().SingleLineHeight;
                 float gap = 4f;
                 float y = -gap;
 
-                Label testLabel = new(world, canvas, "Hello, World!");
+                Label testLabel = new(canvas, "Hello, World!");
                 testLabel.SetParent(window.Container);
                 testLabel.Anchor = Anchor.TopLeft;
                 testLabel.Color = Color.Black;
@@ -173,7 +196,7 @@ namespace Abacus
 
                 y -= singleLineHeight + gap;
 
-                Button testButton = new(world, new(&PressedTestButton), canvas);
+                Button testButton = new(new(&PressedTestButton), canvas);
                 testButton.SetParent(window.Container);
                 testButton.Color = new Color(0.2f, 0.2f, 0.2f);
                 testButton.Anchor = Anchor.TopLeft;
@@ -181,7 +204,7 @@ namespace Abacus
                 testButton.Size = new(180f, singleLineHeight);
                 testButton.Position = new(4f, y);
 
-                Label testButtonLabel = new(world, canvas, "Press count: 0");
+                Label testButtonLabel = new(canvas, "Press count: 0");
                 testButtonLabel.SetParent(testButton);
                 testButtonLabel.Anchor = Anchor.TopLeft;
                 testButtonLabel.Position = new(4f, -4f);
@@ -189,7 +212,7 @@ namespace Abacus
 
                 y -= singleLineHeight + gap;
 
-                Toggle testToggle = new(world, canvas);
+                Toggle testToggle = new(canvas);
                 testToggle.SetParent(window.Container);
                 testToggle.Position = new(4f, y);
                 testToggle.Size = new(24, singleLineHeight);
@@ -200,7 +223,7 @@ namespace Abacus
 
                 y -= singleLineHeight + gap;
 
-                ScrollBar horizontalScrollBar = new(world, canvas, Vector2.UnitX, 0.25f);
+                ScrollBar horizontalScrollBar = new(canvas, Vector2.UnitX, 0.25f);
                 horizontalScrollBar.SetParent(window.Container);
                 horizontalScrollBar.Position = new(4f, y);
                 horizontalScrollBar.Size = new(180f, singleLineHeight);
@@ -211,7 +234,7 @@ namespace Abacus
 
                 y -= singleLineHeight + gap;
 
-                Dropdown testDropdown = new(world, canvas);
+                Dropdown testDropdown = new(canvas);
                 testDropdown.SetParent(window.Container);
                 testDropdown.Position = new(4f, y);
                 testDropdown.Size = new(180f, singleLineHeight);
@@ -239,13 +262,13 @@ namespace Abacus
                 [UnmanagedCallersOnly]
                 static void DropdownOptionChanged(Dropdown dropdown, uint previous, uint current)
                 {
-                    MenuOption option = dropdown.Options[current];
+                    IsMenuOption option = dropdown.Options[current];
                     Trace.WriteLine($"Selected option: {option.text}");
                 }
 
                 y -= singleLineHeight + gap;
 
-                TextField testTextField = new(world, canvas);
+                TextField testTextField = new(canvas);
                 testTextField.SetParent(window.Container);
                 testTextField.Position = new(4f, y);
                 testTextField.Size = new(180f, singleLineHeight);
@@ -271,7 +294,7 @@ namespace Abacus
                 //
                 //y -= singleLineHeight + gap;
 
-                Tree testTree = new(world, canvas);
+                Tree testTree = new(canvas);
                 testTree.SetParent(window.Container);
                 testTree.Position = new(4f, y);
                 testTree.Size = new(180f, singleLineHeight);
@@ -300,14 +323,14 @@ namespace Abacus
 
                 for (int i = 0; i < 20; i++)
                 {
-                    Image box = new(world, canvas);
+                    Image box = new(canvas);
                     box.SetParent(window.Container);
                     box.Size = new(60f, 20f);
                     box.Position = new(200f, i * 26f);
                     box.Color = Color.FromHSV((i * 0.1f) % 1, 1, 1);
                 }
 
-                TextField multiLineTextField = new(world, canvas);
+                TextField multiLineTextField = new(canvas);
                 multiLineTextField.SetParent(window.Container);
                 multiLineTextField.Position = new(4f, y);
                 multiLineTextField.Size = new(180f, singleLineHeight * 3);

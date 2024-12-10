@@ -148,11 +148,11 @@ namespace Abacus
             waveRenderer.AddComponent(new IsBody(new CubeShape(0.5f), IsBody.Type.Static));
 
             //create ui boxes
-            Button testWindow = new(world, new(&TestBoxPressed), canvas);
+            Button testWindow = new(new(&TestBoxPressed), canvas);
             testWindow.Size = new(300, 300);
             testWindow.Position = new(20, 20);
 
-            Button anotherBox = new(world, new(&AnotherBoxPressed), canvas);
+            Button anotherBox = new(new(&AnotherBoxPressed), canvas);
             anotherBox.Size = new(190, 100);
             anotherBox.Position = new(0, 0);
             anotherBox.Anchor = Anchor.Centered;
