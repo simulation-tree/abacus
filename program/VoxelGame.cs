@@ -258,14 +258,14 @@ namespace Abacus
                 uint capacity = Capacity;
                 using Array<Vector3> vertices = new(capacity * VerticesPerFace * FacesPerBlock);
                 using Array<Vector2> uvs = new(capacity * VerticesPerFace * FacesPerBlock);
-                using Array<Color> colors = new(capacity * VerticesPerFace * FacesPerBlock);
+                using Array<Vector4> colors = new(capacity * VerticesPerFace * FacesPerBlock);
                 using Array<uint> triangles = new(capacity * TrianglesPerFace * FacesPerBlock);
                 using RandomGenerator rng = new();
                 VoxelMeshGeneration generation = new(blocks, blocksLeft, blocksRight, blocksDown, blocksUp, blocksBackward, blocksForward, chunkSize, vertices, uvs, colors, triangles, rng, capacity, chunkAtlas);
                 generation.Generate();
                 USpan<Vector3> meshPositions = mesh.ResizePositions(generation.verticeIndex);
                 USpan<Vector2> meshUVs = mesh.ResizeUVs(generation.verticeIndex);
-                USpan<Color> meshColors = mesh.ResizeColors(generation.verticeIndex);
+                USpan<Vector4> meshColors = mesh.ResizeColors(generation.verticeIndex);
                 USpan<uint> meshTriangles = mesh.ResizeIndices(generation.triangleIndex);
                 vertices.AsSpan(0, generation.verticeIndex).CopyTo(meshPositions);
                 uvs.AsSpan(0, generation.verticeIndex).CopyTo(meshUVs);
@@ -308,7 +308,7 @@ namespace Abacus
             private readonly byte chunkSize;
             private readonly Array<Vector3> vertices;
             private readonly Array<Vector2> uvs;
-            private readonly Array<Color> colors;
+            private readonly Array<Vector4> colors;
             private readonly Array<uint> triangles;
             private readonly RandomGenerator rng;
             private readonly uint capacity;
@@ -317,7 +317,7 @@ namespace Abacus
             public uint verticeIndex;
             public uint triangleIndex;
 
-            public VoxelMeshGeneration(USpan<uint> blocks, USpan<uint> blocksLeft, USpan<uint> blocksRight, USpan<uint> blocksDown, USpan<uint> blocksUp, USpan<uint> blocksBackward, USpan<uint> blocksForward, byte chunkSize, Array<Vector3> vertices, Array<Vector2> uvs, Array<Color> colors, Array<uint> triangles, RandomGenerator rng, uint capacity, AtlasTexture chunkAtlas)
+            public VoxelMeshGeneration(USpan<uint> blocks, USpan<uint> blocksLeft, USpan<uint> blocksRight, USpan<uint> blocksDown, USpan<uint> blocksUp, USpan<uint> blocksBackward, USpan<uint> blocksForward, byte chunkSize, Array<Vector3> vertices, Array<Vector2> uvs, Array<Vector4> colors, Array<uint> triangles, RandomGenerator rng, uint capacity, AtlasTexture chunkAtlas)
             {
                 this.blocks = blocks;
                 this.blocksLeft = blocksLeft;

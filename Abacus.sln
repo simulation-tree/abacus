@@ -127,6 +127,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rendering.Tests", "..\rende
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Clipboard", "..\clipboard\Clipboard.csproj", "{E08BACE1-DA35-A7F7-66E2-F9BD41A87AD9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Meshes.NineSliced", "..\meshes-nice-sliced\source\Meshes.NineSliced.csproj", "{558383BA-AD5C-5DC5-23B4-A3ED5E35F59E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Meshes.NineSliced.Tests", "..\meshes-nice-sliced\tests\Meshes.NineSliced.Tests.csproj", "{EAFB42D7-48B5-CB2B-7499-6FBB8C4996C8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -381,6 +385,14 @@ Global
 		{E08BACE1-DA35-A7F7-66E2-F9BD41A87AD9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E08BACE1-DA35-A7F7-66E2-F9BD41A87AD9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E08BACE1-DA35-A7F7-66E2-F9BD41A87AD9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{558383BA-AD5C-5DC5-23B4-A3ED5E35F59E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{558383BA-AD5C-5DC5-23B4-A3ED5E35F59E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{558383BA-AD5C-5DC5-23B4-A3ED5E35F59E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{558383BA-AD5C-5DC5-23B4-A3ED5E35F59E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EAFB42D7-48B5-CB2B-7499-6FBB8C4996C8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EAFB42D7-48B5-CB2B-7499-6FBB8C4996C8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EAFB42D7-48B5-CB2B-7499-6FBB8C4996C8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EAFB42D7-48B5-CB2B-7499-6FBB8C4996C8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

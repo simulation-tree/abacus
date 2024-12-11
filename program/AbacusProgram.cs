@@ -5,7 +5,9 @@ using DefaultPresentationAssets;
 using Fonts;
 using InputDevices;
 using InputDevices.Components;
+using InteractionKit;
 using Meshes;
+using Meshes.NineSliced;
 using Models;
 using Rendering;
 using Rendering.Components;
@@ -37,6 +39,8 @@ namespace Abacus
         private readonly Texture testImage;
         private readonly TextMesh exampleTextMesh;
         private readonly MeshRenderer squareBox;
+        private readonly Mesh9Sliced glowMesh;
+        private readonly MeshRenderer glowRenderer;
 
         private readonly World World => window.GetWorld();
 
@@ -56,6 +60,7 @@ namespace Abacus
 
             float deltaSeconds = (float)delta.TotalSeconds;
             TestMouseInputs(World);
+            UpdateGlowMeshSize(World);
             AnimateTestRenderer(World, deltaSeconds);
             Transform cameraTransform = camera.AsEntity().Become<Transform>();
             SharedFunctions.MoveCameraAround(World, cameraTransform, delta, ref cameraPosition, ref cameraPitchYaw, new(1f, 1f));
@@ -116,7 +121,7 @@ namespace Abacus
             USpan<Vector3> positions = manuallyBuiltMesh.CreatePositions(4);
             USpan<Vector2> uvs = manuallyBuiltMesh.CreateUVs(4);
             USpan<Vector3> normals = manuallyBuiltMesh.CreateNormals(4);
-            USpan<Color> colors = manuallyBuiltMesh.CreateColors(4);
+            USpan<Vector4> colors = manuallyBuiltMesh.CreateColors(4);
 
             //simple quad
             positions[0] = new(0, 0, 0);
@@ -231,11 +236,39 @@ namespace Abacus
             testTransform.LocalScale = new(8f, 8f, 1f);
             testRenderer.AsEntity().AddComponent(new RendererScissor(100, 100, 200, 200));
 
+            //9 sliced mesh test
+            Texture radialGradient = new(world, Address.Get<RadialGradientAlphaTexture>());
+
+            Material glowMaterial = new(world, Address.Get<UnlitTexturedMaterial>());
+            glowMaterial.AddPushBinding<Color>();
+            glowMaterial.AddPushBinding<LocalToWorld>();
+            glowMaterial.AddComponentBinding<CameraMatrices>(0, 0, camera);
+            glowMaterial.AddTextureBinding(1, 0, radialGradient);
+
+            glowMesh = new Mesh9Sliced(world, new(1f), new(0.5f));
+            glowMesh.AsEntity().Become<Transform>();
+
+            glowRenderer = new MeshRenderer(world, glowMesh, glowMaterial);
+            glowRenderer.AddComponent(new Color(1f, 0.5f, 0.5f, 1f));
+
+            const float Padding = 1f;
+            Transform glowTransform = glowRenderer.AsEntity().Become<Transform>();
+            glowTransform.LocalPosition = new(0, 0, 0.02f);
+            glowTransform.AddComponent(new Anchor($"-{Padding}", $"-{Padding}", "0", $"-{Padding}", $"-{Padding}", "0"));
+            glowTransform.SetParent(squareBox);
+
             [UnmanagedCallersOnly]
             static void WindowClosed(Window window)
             {
                 window.Dispose();
             }
+        }
+
+        private readonly void UpdateGlowMeshSize(World world)
+        {
+            Transform glowMeshTransform = glowMesh.AsEntity().As<Transform>();
+            Transform glowRendererTransform = glowRenderer.AsEntity().As<Transform>();
+            glowMeshTransform.LocalScale = glowRendererTransform.WorldScale;
         }
 
         private readonly void ModifyText(World world)
@@ -283,7 +316,7 @@ namespace Abacus
                 if (keyboard.IsPressed(Keyboard.Button.O))
                 {
                     Mesh mesh = dummyRenderer.Mesh;
-                    USpan<Vector3> positions = mesh.Positions;
+                    USpan<Vector3> positions = mesh.GetVertexPositions();
                     float revolveSpeed = 2f;
                     float revolveDistance = 0.7f;
                     float x = MathF.Sin((float)time.TotalSeconds * revolveSpeed) * revolveDistance;

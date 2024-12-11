@@ -93,6 +93,7 @@
     </ItemGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\..\meshes-nice-sliced\source\Meshes.NineSliced.csproj" />
         <ProjectReference Include="..\..\worlds\source\Worlds.csproj" />
         <ProjectReference Include="..\..\automations\source\Automations.csproj" />
         <ProjectReference Include="..\..\cameras\source\Cameras.csproj" />

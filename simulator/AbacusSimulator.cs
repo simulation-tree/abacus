@@ -4,6 +4,7 @@ using Data.Systems;
 using Fonts.Systems;
 using InputDevices.Systems;
 using InteractionKit.Systems;
+using Meshes.NineSliced.Systems;
 using Models.Systems;
 using Physics.Systems;
 using Rendering.Systems;
@@ -33,6 +34,7 @@ namespace AbacusSimulator
             simulator.AddSystem<ModelImportSystem>();
             simulator.AddSystem<InteractionSystems>();
             simulator.AddSystem<TransformSystem>();
+            simulator.AddSystem<Mesh9SliceUpdateSystem>();
             simulator.AddSystem<WindowSystem>();
             simulator.AddSystem<GlobalKeyboardAndMouseSystem>();
             simulator.AddSystem<WindowDevicesSystems>();
@@ -59,6 +61,7 @@ namespace AbacusSimulator
             simulator.RemoveSystem<WindowDevicesSystems>();
             simulator.RemoveSystem<GlobalKeyboardAndMouseSystem>();
             simulator.RemoveSystem<WindowSystem>();
+            simulator.RemoveSystem<Mesh9SliceUpdateSystem>();
             simulator.RemoveSystem<TransformSystem>();
             simulator.RemoveSystem<InteractionSystems>();
             simulator.RemoveSystem<ModelImportSystem>();
