@@ -25,7 +25,7 @@ namespace AbacusSimulator
             {
                 using (AbacusSimulator simulator = new(world))
                 {
-                    using (Program program = Program.Create(world, new AbacusProgram()))
+                    using (Program program = Program.Create(world, new ControlsTest()))
                     {
                         while (!program.IsFinished(out statusCode))
                         {

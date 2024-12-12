@@ -59,6 +59,8 @@ namespace Abacus
             rightClickMenu.Position = new(200, 300);
             rightClickMenu.Pivot = new(0, 1f, 0f);
             rightClickMenu.IsExpanded = false;
+
+            DropShadow dropShadow = new(canvas, image);
         }
 
         [UnmanagedCallersOnly]
