@@ -46,7 +46,7 @@ namespace Abacus
             Label anotherLabel = new(canvas, "Hello there\nWith another line\nNice");
             anotherLabel.Position = new(105, 150);
             anotherLabel.Color = Color.Black;
-            anotherLabel.Z = 0.2f;
+            anotherLabel.Z = Settings.ZScale;
 
             rightClickMenu = new(canvas, new(&ChoseMenuOption));
             rightClickMenu.AddOption("Stop");
@@ -55,6 +55,9 @@ namespace Abacus
             rightClickMenu.AddOption("Deep.../First");
             rightClickMenu.AddOption("Deep.../Second");
             rightClickMenu.AddOption("Deep.../Third");
+            rightClickMenu.AddOption("Deep.../Apple");
+            rightClickMenu.AddOption("Deep.../Banana");
+            rightClickMenu.AddOption("Deep.../Car");
             rightClickMenu.Size = new(100, settings.SingleLineHeight);
             rightClickMenu.Position = new(200, 300);
             rightClickMenu.Pivot = new(0, 1f, 0f);

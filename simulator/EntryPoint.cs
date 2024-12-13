@@ -1,4 +1,6 @@
-﻿using Abacus;
+﻿//#define EDITOR
+
+using Abacus;
 using Data;
 using Simulation;
 using System;
@@ -25,13 +27,25 @@ namespace AbacusSimulator
             {
                 using (AbacusSimulator simulator = new(world))
                 {
+#if EDITOR
+                    Program editorProgram = Program.Create(world, new ControlsTest());
+#endif
+
                     using (Program program = Program.Create(world, new ControlsTest()))
                     {
+                        bool finished = program.IsFinished(out statusCode);
+#if EDITOR
+                        finished |= editorProgram.IsFinished(out statusCode);
+#endif
                         while (!program.IsFinished(out statusCode))
                         {
                             simulator.Update();
                         }
                     }
+
+#if EDITOR
+                    editorProgram.Dispose();
+#endif
                 }
             }
 
