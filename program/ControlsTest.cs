@@ -3,6 +3,7 @@ using Data;
 using InputDevices;
 using InteractionKit;
 using InteractionKit.Components;
+using InteractionKit.ControlEditors;
 using InteractionKit.Functions;
 using Rendering;
 using Simulation;
@@ -183,7 +184,7 @@ namespace Abacus
         public readonly struct ControlsDemoWindow : IVirtualWindow
         {
             readonly FixedString IVirtualWindow.Title => "Controls Demo";
-            readonly unsafe VirtualWindowCloseFunction IVirtualWindow.CloseCallback => new(&Closed);
+            readonly unsafe VirtualWindowClose IVirtualWindow.CloseCallback => new(&Closed);
 
             readonly unsafe void IVirtualWindow.OnCreated(VirtualWindow window, Canvas canvas)
             {
@@ -283,20 +284,24 @@ namespace Abacus
 
                 y -= singleLineHeight + gap;
 
-                //Entity dataEntity = new(world);
-                //dataEntity.AddComponent(new TextCharacter());
-                //dataEntity.AddComponent(0f);
-                //dataEntity.AddComponent(new FixedString("babash"));
-                //
-                //ControlField testControlField = new(world, canvas, "Test", dataEntity, ComponentType.Get<TextCharacter>());
-                //testControlField.LabelColor = Color.Black;
-                //testControlField.SetParent(window.Container);
-                //testControlField.Anchor = Anchor.TopLeft;
-                //testControlField.Pivot = new(0f, 1f, 0f);
-                //testControlField.Position = new(4f, y);
-                //testControlField.Size = new(180f, singleLineHeight);
-                //
-                //y -= singleLineHeight + gap;
+                ComponentType.Register<bool>();
+                ComponentType.Register<float>();
+                ComponentType.Register<FixedString>();
+
+                Entity dataEntity = new(canvas.GetWorld());
+                dataEntity.AddComponent(true);
+                dataEntity.AddComponent(0f);
+                dataEntity.AddComponent(new FixedString("babash"));
+
+                ControlField testControlField = ControlField.Create<float, NumberTextEditor>(canvas, "Field 1", dataEntity);
+                testControlField.LabelColor = Color.Black;
+                testControlField.SetParent(window.Container);
+                testControlField.Anchor = Anchor.TopLeft;
+                testControlField.Pivot = new(0f, 1f, 0f);
+                testControlField.Position = new(4f, y);
+                testControlField.Size = new(180f, singleLineHeight);
+                
+                y -= singleLineHeight + gap;
 
                 Tree testTree = new(canvas);
                 testTree.SetParent(window.Container);
