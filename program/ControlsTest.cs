@@ -353,8 +353,8 @@ namespace Abacus
             private static void PressedTestButton(Entity buttonEntity)
             {
                 World world = buttonEntity.GetWorld();
-                Entity containerEntity = buttonEntity.Parent;
-                USpan<uint> children = containerEntity.Children;
+                Entity containerEntity = buttonEntity.GetParent();
+                USpan<uint> children = containerEntity.GetChildren();
                 bool toggleValue = default;
                 for (uint i = 0; i < children.Length; i++)
                 {
@@ -368,7 +368,7 @@ namespace Abacus
                     }
                 }
 
-                children = buttonEntity.Children;
+                children = buttonEntity.GetChildren();
                 for (uint i = 0; i < children.Length; i++)
                 {
                     uint child = children[i];

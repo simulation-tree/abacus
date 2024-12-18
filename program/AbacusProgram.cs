@@ -233,7 +233,7 @@ namespace Abacus
             Transform testTransform = testRenderer.AsEntity().Become<Transform>();
             testTransform.LocalPosition = new(-7, -4, -2);
             testTransform.LocalScale = new(8f, 8f, 1f);
-            testRenderer.AsEntity().AddComponent(new RendererScissor(100, 100, 200, 200));
+            testRenderer.AddComponent(new RendererScissor(100, 100, 200, 200));
 
             //9 sliced mesh test
             Texture radialGradient = new(world, Address.Get<RadialGradientAlphaTexture>());

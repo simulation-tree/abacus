@@ -19,6 +19,7 @@ namespace AbacusSimulator
             RuntimeHelpers.RunClassConstructor(typeof(EmbeddedAddressTable).TypeHandle);
 
             Trace.Listeners.Add(new TextWriterTraceListener($"{DateTime.Now:yyyy-dd-M--HH-mm-ss}.log", "listener"));
+            Trace.Listeners.Add(new TextWriterTraceListener("latest.log", "listener"));
             Trace.AutoFlush = true;
             Trace.WriteLine("Starting simulator program");
 
@@ -52,10 +53,12 @@ namespace AbacusSimulator
             Allocations.ThrowIfAny();
             if (statusCode.IsSuccess)
             {
+                Trace.WriteLine($"Program finished successfully with status code {statusCode.Code}");
                 return 0;
             }
             else
             {
+                Trace.WriteLine($"Program failed with status code {statusCode.Code}");
                 return statusCode.Code;
             }
         }
