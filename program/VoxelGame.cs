@@ -3,6 +3,7 @@ using Cameras.Components;
 using Collections;
 using Data;
 using DefaultPresentationAssets;
+using InputDevices;
 using Meshes;
 using Meshes.Components;
 using Models;
@@ -28,12 +29,14 @@ namespace Abacus
         private readonly Mesh quadMesh;
         private readonly AtlasTexture chunkAtlas;
         private readonly World world;
+        private readonly VoxelTerrainGenerator terrainGenerator;
         private Vector3 cameraPosition;
         private Vector2 cameraPitchYaw;
 
         private VoxelGame(Simulator simulator, World world)
         {
             this.world = world;
+            terrainGenerator = new("goomba");
             window = CreateWindow(world);
 
             camera = new(world, window, CameraFieldOfView.FromDegrees(90f));
@@ -53,23 +56,24 @@ namespace Abacus
             quadMesh = new(world, quadModel);
 
             MeshRenderer quadRenderer = new(world, quadMesh, chunkMaterial);
-            quadRenderer.AsEntity().AddComponent(Color.White);
+            quadRenderer.AddComponent(Color.White);
             Transform ballTransform = quadRenderer.AsEntity().Become<Transform>();
             ballTransform.LocalPosition = new(0f, 4f, 0f);
 
-            int chunkRadius = 4;
+            int chunkRadius = 3;
             using List<Chunk> generatedChunks = new();
             for (int cx = -chunkRadius; cx < chunkRadius; cx++)
             {
                 for (int cz = -chunkRadius; cz < chunkRadius; cz++)
                 {
-                    generatedChunks.Add(GenerateChunk(world, cx, 0, cz));
+                    Chunk chunk = terrainGenerator.CreateChunk(world, cx, 0, cz, chunkMaterial);
+                    generatedChunks.Add(chunk);
                 }
             }
 
             foreach (Chunk chunk in generatedChunks)
             {
-                chunk.UpdateMeshToMatchBlocks(chunkAtlas);
+                chunk.UpdateMeshToMatchBlocks(chunkAtlas, terrainGenerator.meshRng);
             }
         }
 
@@ -78,6 +82,7 @@ namespace Abacus
             if (!window.IsDestroyed())
             {
                 window.Dispose();
+                terrainGenerator.Dispose();
             }
         }
 
@@ -91,6 +96,14 @@ namespace Abacus
             if (!AnyWindowOpen(world))
             {
                 return StatusCode.Success(1);
+            }
+
+            if (world.TryGetFirst(out Keyboard keyboard))
+            {
+                if (keyboard.WasPressed(Keyboard.Button.Escape))
+                {
+                    return StatusCode.Success(1);
+                }
             }
 
             Transform cameraTransform = camera.AsEntity().As<Transform>();
@@ -130,57 +143,6 @@ namespace Abacus
 
             AtlasTexture atlasTexture = new(world, sprites);
             return atlasTexture;
-        }
-
-        private readonly Chunk GenerateChunk(World world, int cx, int cy, int cz)
-        {
-            using RandomGenerator rng = new();
-            FastNoiseLite noise = new();
-            noise.SetNoiseType(FastNoiseLite.NoiseType.OpenSimplex2);
-            float frequency = 4f;
-            float amplitude = 6f;
-            byte chunkSize = 16;
-            Chunk chunk = new(world, cx, cy, cz, chunkSize, chunkMaterial);
-            for (byte x = 0; x < chunkSize; x++)
-            {
-                for (byte z = 0; z < chunkSize; z++)
-                {
-                    float wx = cx * chunkSize + x;
-                    float wz = cz * chunkSize + z;
-                    float e = (noise.GetNoise(wx * frequency, wz * frequency) + 1f) * 0.5f;
-                    int wy = (int)(e * amplitude);
-                    if (wy >= cy * chunkSize && wy < (cy + 1) * chunkSize)
-                    {
-                        byte y = (byte)(wy - cy * chunkSize);
-                        uint height = 0;
-                        for (; y != byte.MaxValue; y--)
-                        {
-                            if (height == 0)
-                            {
-                                chunk[x, y, z] = 2;
-                            }
-                            else if (height < 4)
-                            {
-                                float r = rng.NextFloat();
-                                for (int p = 1; p < height; p++)
-                                {
-                                    r *= r;
-                                }
-
-                                chunk[x, y, z] = r > 0.2f * height ? 1u : 4u;
-                            }
-                            else
-                            {
-                                chunk[x, y, z] = 4;
-                            }
-
-                            height++;
-                        }
-                    }
-                }
-            }
-
-            return chunk;
         }
 
         private static bool AnyWindowOpen(World world)
@@ -240,7 +202,7 @@ namespace Abacus
                 mesh.Dispose();
             }
 
-            public readonly void UpdateMeshToMatchBlocks(AtlasTexture chunkAtlas)
+            public readonly void UpdateMeshToMatchBlocks(AtlasTexture chunkAtlas, RandomGenerator meshRng)
             {
                 World world = mesh.GetWorld();
                 byte chunkSize = ChunkSize;
@@ -260,8 +222,7 @@ namespace Abacus
                 using Array<Vector2> uvs = new(capacity * VerticesPerFace * FacesPerBlock);
                 using Array<Vector4> colors = new(capacity * VerticesPerFace * FacesPerBlock);
                 using Array<uint> triangles = new(capacity * TrianglesPerFace * FacesPerBlock);
-                using RandomGenerator rng = new();
-                VoxelMeshGeneration generation = new(blocks, blocksLeft, blocksRight, blocksDown, blocksUp, blocksBackward, blocksForward, chunkSize, vertices, uvs, colors, triangles, rng, capacity, chunkAtlas);
+                VoxelMeshGeneration generation = new(blocks, blocksLeft, blocksRight, blocksDown, blocksUp, blocksBackward, blocksForward, chunkSize, vertices, uvs, colors, triangles, meshRng, capacity, chunkAtlas);
                 generation.Generate();
                 USpan<Vector3> meshPositions = mesh.ResizePositions(generation.verticeIndex);
                 USpan<Vector2> meshUVs = mesh.ResizeUVs(generation.verticeIndex);
@@ -293,6 +254,81 @@ namespace Abacus
                 }
 
                 return default;
+            }
+        }
+
+        public readonly struct VoxelTerrainGenerator : IDisposable
+        {
+            public readonly RandomGenerator meshRng;
+
+            private readonly GCHandle noise;
+            private readonly RandomGenerator terrainRng;
+
+            private readonly FastNoiseLite Noise => (FastNoiseLite)(noise.Target ?? throw new());
+
+            public VoxelTerrainGenerator(FixedString seed)
+            {
+                FastNoiseLite noise = new FastNoiseLite(seed.GetHashCode());
+                noise.SetNoiseType(FastNoiseLite.NoiseType.OpenSimplex2);
+                this.noise = GCHandle.Alloc(noise);
+                terrainRng = new(seed);
+                meshRng = new();
+            }
+
+            public readonly void Dispose()
+            {
+                meshRng.Dispose();
+                terrainRng.Dispose();
+                noise.Free();
+            }
+
+            public readonly Chunk CreateChunk(World world, int cx, int cy, int cz, Material chunkMaterial)
+            {
+                FastNoiseLite noise = Noise;
+                float frequency = 4f;
+                float amplitude = 6f;
+                byte chunkSize = 16;
+                Chunk chunk = new(world, cx, cy, cz, chunkSize, chunkMaterial);
+                for (byte x = 0; x < chunkSize; x++)
+                {
+                    for (byte z = 0; z < chunkSize; z++)
+                    {
+                        float wx = cx * chunkSize + x;
+                        float wz = cz * chunkSize + z;
+                        float e = (noise.GetNoise(wx * frequency, wz * frequency) + 1f) * 0.5f;
+                        int wy = (int)(e * amplitude);
+                        if (wy >= cy * chunkSize && wy < (cy + 1) * chunkSize)
+                        {
+                            byte y = (byte)(wy - cy * chunkSize);
+                            uint height = 0;
+                            for (; y != byte.MaxValue; y--)
+                            {
+                                if (height == 0)
+                                {
+                                    chunk[x, y, z] = 2;
+                                }
+                                else if (height < 4)
+                                {
+                                    float r = terrainRng.NextFloat();
+                                    for (int p = 1; p < height; p++)
+                                    {
+                                        r *= r;
+                                    }
+
+                                    chunk[x, y, z] = r > 0.2f * height ? 1u : 4u;
+                                }
+                                else
+                                {
+                                    chunk[x, y, z] = 4;
+                                }
+
+                                height++;
+                            }
+                        }
+                    }
+                }
+
+                return chunk;
             }
         }
 
