@@ -127,9 +127,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rendering.Tests", "..\rende
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Clipboard", "..\clipboard\Clipboard.csproj", "{E08BACE1-DA35-A7F7-66E2-F9BD41A87AD9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Meshes.NineSliced", "..\meshes-nice-sliced\source\Meshes.NineSliced.csproj", "{558383BA-AD5C-5DC5-23B4-A3ED5E35F59E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Meshes.NineSliced", "..\meshes-9s\source\Meshes.NineSliced.csproj", "{558383BA-AD5C-5DC5-23B4-A3ED5E35F59E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Meshes.NineSliced.Tests", "..\meshes-nice-sliced\tests\Meshes.NineSliced.Tests.csproj", "{EAFB42D7-48B5-CB2B-7499-6FBB8C4996C8}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Meshes.NineSliced.Tests", "..\meshes-9s\tests\Meshes.NineSliced.Tests.csproj", "{EAFB42D7-48B5-CB2B-7499-6FBB8C4996C8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

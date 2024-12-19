@@ -48,7 +48,7 @@
 		<ProjectReference Include="..\..\font-systems\source\Fonts.Systems.csproj" />
 		<ProjectReference Include="..\..\input-device-systems\source\InputDevices.Systems.csproj" />
 		<ProjectReference Include="..\..\interaction-kit\source\InteractionKit.csproj" />
-		<ProjectReference Include="..\..\meshes-nice-sliced\source\Meshes.NineSliced.csproj" />
+		<ProjectReference Include="..\..\meshes-9s\source\Meshes.NineSliced.csproj" />
 		<ProjectReference Include="..\..\model-systems\source\Models.Systems.csproj" />
 		<ProjectReference Include="..\..\physics-systems\source\Physics.Systems.csproj" />
 		<ProjectReference Include="..\..\shader-systems\source\Shaders.Systems.csproj" />
