@@ -1,11 +1,9 @@
 ﻿using Cameras;
 using Data;
-using InputDevices;
 using InteractionKit;
 using Simulation;
 using System;
 using System.Diagnostics;
-using System.Numerics;
 using System.Runtime.InteropServices;
 using Unmanaged;
 using Windows;
@@ -31,7 +29,7 @@ namespace Abacus
                 return StatusCode.Success(1);
             }
 
-            MakeFirstMouseAPointer(World);
+            SharedFunctions.UpdateUISettings(World);
             return StatusCode.Continue;
         }
 
@@ -77,42 +75,6 @@ namespace Abacus
         private static bool IsAnyWindowOpen(World world)
         {
             return world.CountEntities<Window>() > 0;
-        }
-
-        private static void MakeFirstMouseAPointer(World world)
-        {
-            if (world.TryGetFirst(out Mouse mouse))
-            {
-                if (!mouse.AsEntity().Is<Pointer>())
-                {
-                    mouse.AsEntity().Become<Pointer>();
-                }
-
-                Pointer pointer = mouse.AsEntity().As<Pointer>();
-                pointer.Position = mouse.Position;
-                pointer.HasPrimaryIntent = mouse.IsPressed(Mouse.Button.LeftButton);
-                pointer.HasSecondaryIntent = mouse.IsPressed(Mouse.Button.RightButton);
-                Vector2 scroll = mouse.Scroll;
-                if (scroll.X > 0)
-                {
-                    scroll.X = 1;
-                }
-                else if (scroll.X < 0)
-                {
-                    scroll.X = -1;
-                }
-
-                if (scroll.Y > 0)
-                {
-                    scroll.Y = 1;
-                }
-                else if (scroll.Y < 0)
-                {
-                    scroll.Y = -1;
-                }
-
-                pointer.Scroll = scroll * 0.1f;
-            }
         }
 
         [UnmanagedCallersOnly]

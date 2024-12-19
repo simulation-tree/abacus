@@ -1,7 +1,9 @@
 ﻿using InputDevices;
+using InteractionKit;
 using System;
 using System.Numerics;
 using Transforms;
+using Unmanaged;
 using Worlds;
 
 public static class SharedFunctions
@@ -134,5 +136,65 @@ public static class SharedFunctions
 
         cameraTransform.LocalPosition = currentPosition;
         cameraTransform.LocalRotation = rotation;
+    }
+
+    public static void UpdateUISettings(this World world)
+    {
+        CopyMouseIntoPointer(world);
+        SetPressedCharacters(world);
+    }
+
+    public static void CopyMouseIntoPointer(this World world)
+    {
+        if (world.TryGetFirst(out Mouse mouse))
+        {
+            if (!mouse.Is(Definition.Get<Pointer>()))
+            {
+                mouse.Become(Definition.Get<Pointer>());
+            }
+
+            Pointer pointer = mouse.AsEntity().As<Pointer>();
+            pointer.Position = mouse.Position;
+            pointer.HasPrimaryIntent = mouse.IsPressed(Mouse.Button.LeftButton);
+            pointer.HasSecondaryIntent = mouse.IsPressed(Mouse.Button.RightButton);
+            Vector2 scroll = mouse.Scroll;
+            if (scroll.X > 0)
+            {
+                scroll.X = 1;
+            }
+            else if (scroll.X < 0)
+            {
+                scroll.X = -1;
+            }
+
+            if (scroll.Y > 0)
+            {
+                scroll.Y = 1;
+            }
+            else if (scroll.Y < 0)
+            {
+                scroll.Y = -1;
+            }
+
+            pointer.Scroll = scroll * 0.15f;
+        }
+    }
+
+    public static void SetPressedCharacters(this World world)
+    {
+        if (world.TryGetFirst(out Keyboard keyboard))
+        {
+            Settings settings = world.GetFirst<Settings>();
+            USpan<Keyboard.Button> pressedBuffer = stackalloc Keyboard.Button[128];
+            uint pressedCount = keyboard.GetPressedControls(pressedBuffer);
+            USpan<char> pressed = stackalloc char[(int)pressedCount];
+            for (uint i = 0; i < pressedCount; i++)
+            {
+                Keyboard.Button pressedControl = pressedBuffer[i];
+                pressed[i] = pressedControl.GetCharacter();
+            }
+
+            settings.SetPressedCharacters(pressed);
+        }
     }
 }

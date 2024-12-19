@@ -91,9 +91,21 @@ namespace Abacus
                 return StatusCode.Success(2);
             }
 
-            MakeFirstMouseAPointer(World);
-            UpdateInteractiveContext(World);
+            ToggleRightClickMenu(World);
+            SharedFunctions.UpdateUISettings(World);
             return StatusCode.Continue;
+        }
+
+        private readonly void ToggleRightClickMenu(World world)
+        {
+            if (world.TryGetFirst(out Mouse mouse))
+            {
+                if (mouse.WasPressed(Mouse.Button.RightButton))
+                {
+                    rightClickMenu.Position = mouse.Position;
+                    rightClickMenu.IsExpanded = true;
+                }
+            }
         }
 
         void IProgram.Finish(in StatusCode statusCode)
@@ -113,67 +125,6 @@ namespace Abacus
         {
             return world.TryGetFirst(out Window _);
         }
-
-        private void MakeFirstMouseAPointer(World world)
-        {
-            if (world.TryGetFirst(out Mouse mouse))
-            {
-                if (!mouse.Is(Definition.Get<Pointer>()))
-                {
-                    mouse.Become(Definition.Get<Pointer>());
-                }
-
-                Pointer pointer = mouse.AsEntity().As<Pointer>();
-                pointer.Position = mouse.Position;
-                pointer.HasPrimaryIntent = mouse.IsPressed(Mouse.Button.LeftButton);
-                pointer.HasSecondaryIntent = mouse.IsPressed(Mouse.Button.RightButton);
-                Vector2 scroll = mouse.Scroll;
-                if (scroll.X > 0)
-                {
-                    scroll.X = 1;
-                }
-                else if (scroll.X < 0)
-                {
-                    scroll.X = -1;
-                }
-
-                if (scroll.Y > 0)
-                {
-                    scroll.Y = 1;
-                }
-                else if (scroll.Y < 0)
-                {
-                    scroll.Y = -1;
-                }
-
-                pointer.Scroll = scroll * 0.15f;
-
-                if (mouse.WasPressed(Mouse.Button.RightButton))
-                {
-                    rightClickMenu.Position = mouse.Position;
-                    rightClickMenu.IsExpanded = true;
-                }
-            }
-        }
-
-        private readonly void UpdateInteractiveContext(World world)
-        {
-            if (world.TryGetFirst(out Keyboard keyboard))
-            {
-                Settings settings = world.GetFirst<Settings>();
-                USpan<Keyboard.Button> pressedBuffer = stackalloc Keyboard.Button[128];
-                uint pressedCount = keyboard.GetPressedControls(pressedBuffer);
-                USpan<char> pressed = stackalloc char[(int)pressedCount];
-                for (uint i = 0; i < pressedCount; i++)
-                {
-                    Keyboard.Button pressedControl = pressedBuffer[i];
-                    pressed[i] = pressedControl.GetCharacter();
-                }
-
-                settings.SetPressedCharacters(pressed);
-            }
-        }
-
 
         [UnmanagedCallersOnly]
         private static void OnWindowClosed(Window window)
@@ -300,7 +251,7 @@ namespace Abacus
                 testControlField.Pivot = new(0f, 1f, 0f);
                 testControlField.Position = new(4f, y);
                 testControlField.Size = new(180f, singleLineHeight);
-                
+
                 y -= singleLineHeight + gap;
 
                 Tree testTree = new(canvas);
