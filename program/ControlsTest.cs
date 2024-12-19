@@ -38,6 +38,7 @@ namespace Abacus
             VirtualWindow box = VirtualWindow.Create<ControlsDemoWindow>(world, canvas);
             box.Size = new(300, 300);
             box.Position = new(40, 40);
+            box.Z += Settings.ZScale;
             //box.Anchor = new(new(2f, true), new(2f, true), new(0f, false), new(2f, true), new(2f, true), new(0f, false));
 
             Image image = new(canvas);
