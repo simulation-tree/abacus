@@ -4,7 +4,7 @@ git clone https://github.com/game-simulations/collections.git
 git clone https://github.com/game-simulations/simulation.git
 git clone https://github.com/game-simulations/data.git
 git clone https://github.com/game-simulations/meshes.git
-git clone https://github.com/game-simulations/meshes-nine-sliced.git
+git clone https://github.com/game-simulations/meshes-9s.git
 git clone https://github.com/game-simulations/clipboard.git
 git clone https://github.com/game-simulations/models.git
 git clone https://github.com/game-simulations/shaders.git
