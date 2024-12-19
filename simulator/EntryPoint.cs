@@ -1,6 +1,4 @@
-﻿//#define EDITOR
-
-using Abacus;
+﻿using Abacus;
 using Data;
 using Simulation;
 using System;
