@@ -20,7 +20,7 @@ git clone https://github.com/game-simulations/windows.git
 git clone https://github.com/game-simulations/input-devices.git
 git clone https://github.com/game-simulations/interaction-kit.git
 git clone https://github.com/game-simulations/physics.git
-git clone https://github.com/game-simulations/simulator.git
+git clone https://github.com/game-simulations/worlds.git
 git clone https://github.com/game-simulations/freetype.git
 git clone https://github.com/game-simulations/default-presentation-assets.git
 git clone https://github.com/game-simulations/expression-machine.git
