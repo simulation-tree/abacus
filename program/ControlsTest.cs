@@ -143,12 +143,13 @@ namespace Abacus
                 float singleLineHeight = canvas.GetSettings().SingleLineHeight;
                 float gap = 4f;
                 float y = -gap;
+                float indent = 0f;
 
                 Label testLabel = new(canvas, "Hello, World!");
                 testLabel.SetParent(window.Container);
                 testLabel.Anchor = Anchor.TopLeft;
                 testLabel.Color = Color.Black;
-                testLabel.Position = new(4f, y);
+                testLabel.Position = new(gap, y);
                 testLabel.Pivot = new(0f, 1f, 0f);
 
                 y -= singleLineHeight + gap;
@@ -159,19 +160,19 @@ namespace Abacus
                 testButton.Anchor = Anchor.TopLeft;
                 testButton.Pivot = new(0f, 1f, 0f);
                 testButton.Size = new(180f, singleLineHeight);
-                testButton.Position = new(4f, y);
+                testButton.Position = new(gap, y);
 
                 Label testButtonLabel = new(canvas, "Press count: 0");
                 testButtonLabel.SetParent(testButton);
                 testButtonLabel.Anchor = Anchor.TopLeft;
-                testButtonLabel.Position = new(4f, -4f);
+                testButtonLabel.Position = new(gap, -4f);
                 testButtonLabel.Pivot = new(0f, 1f, 0f);
 
                 y -= singleLineHeight + gap;
 
                 Toggle testToggle = new(canvas);
                 testToggle.SetParent(window.Container);
-                testToggle.Position = new(4f, y);
+                testToggle.Position = new(gap, y);
                 testToggle.Size = new(24, singleLineHeight);
                 testToggle.Anchor = Anchor.TopLeft;
                 testToggle.Pivot = new(0f, 1f, 0f);
@@ -182,7 +183,7 @@ namespace Abacus
 
                 ScrollBar horizontalScrollBar = new(canvas, Vector2.UnitX, 0.25f);
                 horizontalScrollBar.SetParent(window.Container);
-                horizontalScrollBar.Position = new(4f, y);
+                horizontalScrollBar.Position = new(gap, y);
                 horizontalScrollBar.Size = new(180f, singleLineHeight);
                 horizontalScrollBar.Anchor = Anchor.TopLeft;
                 horizontalScrollBar.Pivot = new(0f, 1f, 0f);
@@ -193,7 +194,7 @@ namespace Abacus
 
                 Dropdown testDropdown = new(canvas);
                 testDropdown.SetParent(window.Container);
-                testDropdown.Position = new(4f, y);
+                testDropdown.Position = new(gap, y);
                 testDropdown.Size = new(180f, singleLineHeight);
                 testDropdown.Anchor = Anchor.TopLeft;
                 testDropdown.Pivot = new(0f, 1f, 0f);
@@ -227,7 +228,7 @@ namespace Abacus
 
                 TextField testTextField = new(canvas);
                 testTextField.SetParent(window.Container);
-                testTextField.Position = new(4f, y);
+                testTextField.Position = new(gap, y);
                 testTextField.Size = new(180f, singleLineHeight);
                 testTextField.Anchor = Anchor.TopLeft;
                 testTextField.Pivot = new(0f, 1f, 0f);
@@ -236,28 +237,71 @@ namespace Abacus
 
                 y -= singleLineHeight + gap;
 
-                ComponentType.Register<bool>();
-                ComponentType.Register<float>();
-                ComponentType.Register<FixedString>();
+                Label headerLabel = new(canvas, "Fields");
+                headerLabel.SetParent(window.Container);
+                headerLabel.Anchor = Anchor.TopLeft;
+                headerLabel.Color = Color.Black;
+                headerLabel.Position = new(gap, y);
+                headerLabel.Pivot = new(0f, 1f, 0f);
 
-                Entity dataEntity = new(canvas.GetWorld());
-                dataEntity.AddComponent(true);
-                dataEntity.AddComponent(0f);
-                dataEntity.AddComponent(new FixedString("babash"));
+                y -= singleLineHeight + gap;
+                indent += 20f;
+                {
 
-                ControlField testControlField = ControlField.Create<float, NumberTextEditor>(canvas, "Field 1", dataEntity);
-                testControlField.LabelColor = Color.Black;
-                testControlField.SetParent(window.Container);
-                testControlField.Anchor = Anchor.TopLeft;
-                testControlField.Pivot = new(0f, 1f, 0f);
-                testControlField.Position = new(4f, y);
-                testControlField.Size = new(180f, singleLineHeight);
+                    ComponentType.Register<bool>();
+                    ComponentType.Register<float>();
+                    ComponentType.Register<FixedString>();
+
+                    Entity dataEntity = new(canvas.GetWorld());
+                    dataEntity.AddComponent(true);
+                    dataEntity.AddComponent(0f);
+                    dataEntity.AddComponent(new FixedString("babash"));
+
+                    ControlField numberField = ControlField.Create<float, NumberTextEditor>(canvas, "Number", dataEntity);
+                    numberField.LabelColor = Color.Black;
+                    numberField.SetParent(window.Container);
+                    numberField.Anchor = Anchor.TopLeft;
+                    numberField.Pivot = new(0f, 1f, 0f);
+                    numberField.Position = new(gap + indent, y);
+                    numberField.Size = new(180f, singleLineHeight);
+
+                    y -= singleLineHeight + gap;
+
+                    ControlField textField = ControlField.Create<FixedString, TextEditor>(canvas, "Text", dataEntity);
+                    textField.LabelColor = Color.Black;
+                    textField.SetParent(window.Container);
+                    textField.Anchor = Anchor.TopLeft;
+                    textField.Pivot = new(0f, 1f, 0f);
+                    textField.Position = new(gap + indent, y);
+                    textField.Size = new(180f, singleLineHeight);
+
+                    y -= singleLineHeight + gap;
+
+                    ControlField toggleField = ControlField.Create<bool, BooleanEditor>(canvas, "Toggle", dataEntity);
+                    toggleField.LabelColor = Color.Black;
+                    toggleField.SetParent(window.Container);
+                    toggleField.Anchor = Anchor.TopLeft;
+                    toggleField.Pivot = new(0f, 1f, 0f);
+                    toggleField.Position = new(gap + indent, y);
+                    toggleField.Size = new(180f, singleLineHeight);
+
+                    y -= singleLineHeight + gap;
+                }
+
+                indent -= 20f;
+
+                Label treeLabel = new(canvas, "Tree of objects");
+                treeLabel.SetParent(window.Container);
+                treeLabel.Anchor = Anchor.TopLeft;
+                treeLabel.Color = Color.Black;
+                treeLabel.Position = new(gap, y);
+                treeLabel.Pivot = new(0f, 1f, 0f);
 
                 y -= singleLineHeight + gap;
 
                 Tree testTree = new(canvas);
                 testTree.SetParent(window.Container);
-                testTree.Position = new(4f, y);
+                testTree.Position = new(gap, y);
                 testTree.Size = new(180f, singleLineHeight);
                 testTree.Anchor = Anchor.TopLeft;
                 testTree.Pivot = new(0f, 1f, 0f);
@@ -293,7 +337,7 @@ namespace Abacus
 
                 TextField multiLineTextField = new(canvas);
                 multiLineTextField.SetParent(window.Container);
-                multiLineTextField.Position = new(4f, y);
+                multiLineTextField.Position = new(gap, y);
                 multiLineTextField.Size = new(180f, singleLineHeight * 3);
                 multiLineTextField.Anchor = Anchor.TopLeft;
                 multiLineTextField.Pivot = new(0f, 1f, 0f);
