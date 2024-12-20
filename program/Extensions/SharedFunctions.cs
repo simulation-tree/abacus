@@ -140,44 +140,67 @@ public static class SharedFunctions
 
     public static void UpdateUISettings(this World world)
     {
-        CopyMouseIntoPointer(world);
+        if (world.TryGetFirst(out Mouse mouse))
+        {
+            CopyMouseIntoPointer(world, mouse);
+            UpdateCursorBasedOnPointerState(world, mouse);
+        }
+
         SetPressedCharacters(world);
     }
 
-    public static void CopyMouseIntoPointer(this World world)
+    public static void UpdateCursorBasedOnPointerState(this World world, Mouse mouse)
     {
-        if (world.TryGetFirst(out Mouse mouse))
+        Pointer pointer = mouse.AsEntity().As<Pointer>();
+        Entity hoveringOver = pointer.HoveringOver;
+        if (hoveringOver != default)
         {
-            if (!mouse.Is(Definition.Get<Pointer>()))
+            if (hoveringOver.Is<TextField>())
             {
-                mouse.Become(Definition.Get<Pointer>());
+                mouse.State.cursor = Mouse.Cursor.Text;
             }
-
-            Pointer pointer = mouse.AsEntity().As<Pointer>();
-            pointer.Position = mouse.Position;
-            pointer.HasPrimaryIntent = mouse.IsPressed(Mouse.Button.LeftButton);
-            pointer.HasSecondaryIntent = mouse.IsPressed(Mouse.Button.RightButton);
-            Vector2 scroll = mouse.Scroll;
-            if (scroll.X > 0)
+            else
             {
-                scroll.X = 1;
+                mouse.State.cursor = Mouse.Cursor.Hand;
             }
-            else if (scroll.X < 0)
-            {
-                scroll.X = -1;
-            }
-
-            if (scroll.Y > 0)
-            {
-                scroll.Y = 1;
-            }
-            else if (scroll.Y < 0)
-            {
-                scroll.Y = -1;
-            }
-
-            pointer.Scroll = scroll * 0.15f;
         }
+        else
+        {
+            mouse.State.cursor = Mouse.Cursor.Default;
+        }
+    }
+
+    public static void CopyMouseIntoPointer(this World world, Mouse mouse)
+    {
+        if (!mouse.Is(Definition.Get<Pointer>()))
+        {
+            mouse.Become(Definition.Get<Pointer>());
+        }
+
+        Pointer pointer = mouse.AsEntity().As<Pointer>();
+        pointer.Position = mouse.Position;
+        pointer.HasPrimaryIntent = mouse.IsPressed(Mouse.Button.LeftButton);
+        pointer.HasSecondaryIntent = mouse.IsPressed(Mouse.Button.RightButton);
+        Vector2 scroll = mouse.Scroll;
+        if (scroll.X > 0)
+        {
+            scroll.X = 1;
+        }
+        else if (scroll.X < 0)
+        {
+            scroll.X = -1;
+        }
+
+        if (scroll.Y > 0)
+        {
+            scroll.Y = 1;
+        }
+        else if (scroll.Y < 0)
+        {
+            scroll.Y = -1;
+        }
+
+        pointer.Scroll = scroll * 0.15f;
     }
 
     public static void SetPressedCharacters(this World world)

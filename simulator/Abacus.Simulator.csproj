@@ -33,7 +33,7 @@
 		<PackageReference Include="Vortice.ShaderCompiler" Version="1.8.0" />
 		<PackageReference Include="Vortice.SPIRV" Version="1.0.3" />
 		<PackageReference Include="Vortice.SpirvCross" Version="1.5.1" />
-		<PackageReference Include="Vortice.Vulkan" Version="1.9.9" />
+		<PackageReference Include="Vortice.Vulkan" Version="2.1.0" />
 	</ItemGroup>
 
 	<ItemGroup>
