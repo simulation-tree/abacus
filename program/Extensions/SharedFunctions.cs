@@ -1,5 +1,6 @@
 ﻿using InputDevices;
 using InteractionKit;
+using InteractionKit.Components;
 using System;
 using System.Numerics;
 using Transforms;
@@ -152,6 +153,32 @@ public static class SharedFunctions
     public static void UpdateCursorBasedOnPointerState(this World world, Mouse mouse)
     {
         Pointer pointer = mouse.AsEntity().As<Pointer>();
+
+        bool setCursor = false;
+        ComponentQuery<IsResizable> resizableQuery = new(world);
+        foreach (var r in resizableQuery)
+        {
+            Resizable resizable = new(world, r.entity);
+            IsResizable.Boundary boundary = resizable.GetBoundary(pointer.Position);
+            if (boundary != default)
+            {
+                mouse.State.cursor = boundary switch
+                {
+                    IsResizable.Boundary.Top => Mouse.Cursor.ResizeVertical,
+                    IsResizable.Boundary.Bottom => Mouse.Cursor.ResizeVertical,
+                    IsResizable.Boundary.Left => Mouse.Cursor.ResizeHorizontal,
+                    IsResizable.Boundary.Right => Mouse.Cursor.ResizeHorizontal,
+                    IsResizable.Boundary.TopLeft => Mouse.Cursor.ResizeNWSE,
+                    IsResizable.Boundary.TopRight => Mouse.Cursor.ResizeNESW,
+                    IsResizable.Boundary.BottomLeft => Mouse.Cursor.ResizeNESW,
+                    IsResizable.Boundary.BottomRight => Mouse.Cursor.ResizeNWSE,
+                    _ => Mouse.Cursor.Default,
+                };
+
+                setCursor = true;
+            }
+        }
+
         Entity hoveringOver = pointer.HoveringOver;
         if (hoveringOver != default)
         {
@@ -163,8 +190,11 @@ public static class SharedFunctions
             {
                 mouse.State.cursor = Mouse.Cursor.Hand;
             }
+
+            setCursor = true;
         }
-        else
+
+        if (!setCursor)
         {
             mouse.State.cursor = Mouse.Cursor.Default;
         }

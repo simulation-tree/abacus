@@ -44,6 +44,8 @@ namespace Abacus
             Image image = new(canvas);
             image.Size = new(200, 200);
             image.Position = new(100, 100);
+            Resizable resizable = image.AsEntity().Become<Resizable>();
+            resizable.Boundary = IsResizable.Boundary.All;
 
             Label anotherLabel = new(canvas, "Hello there\nWith another line\nNice");
             anotherLabel.Position = new(105, 150);
