@@ -77,9 +77,13 @@ namespace Abacus
                 chunk.UpdateMeshToMatchBlocks(chunkAtlas, terrainGenerator.meshRng);
             }
 
-            Canvas canvas = new(world, camera);
-            Label fpsLabel = new(canvas, "{{fps}}");
+            Settings settings = new(world);
+            Camera uiCamera = Camera.CreateOrthographic(world, window, 1f);
+            Canvas canvas = new(world, uiCamera);
+            Label fpsLabel = new(canvas, "{{fps}}"); //todo: implement handling of text tokens
             fpsLabel.Color = Color.White;
+            fpsLabel.Anchor = Anchor.TopLeft;
+            fpsLabel.Pivot = new(0f, 1f, 0f);
         }
 
         void IProgram.Finish(in StatusCode statusCode)
@@ -87,8 +91,9 @@ namespace Abacus
             if (!window.IsDestroyed())
             {
                 window.Dispose();
-                terrainGenerator.Dispose();
             }
+
+            terrainGenerator.Dispose();
         }
 
         readonly void IProgram.Start(in Simulator simulator, in Allocation allocation, in World world)
@@ -195,7 +200,7 @@ namespace Abacus
                 MeshRenderer chunkRenderer = mesh.AsEntity().Become<MeshRenderer>();
                 chunkRenderer.Mesh = mesh;
                 chunkRenderer.Material = unlitMaterial;
-                //chunkRenderer.Mask = 1;
+                chunkRenderer.Mask = 1;
 
                 chunkRenderer.AddComponent(Color.White);
                 Transform chunkTransform = chunkRenderer.AsEntity().Become<Transform>();
