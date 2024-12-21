@@ -30,7 +30,7 @@ namespace AbacusSimulator
                     Program editorProgram = Program.Create(world, new ControlsTest());
 #endif
 
-                    using (Program program = Program.Create(world, new ControlsTest()))
+                    using (Program program = Program.Create(world, new VoxelGame()))
                     {
                         bool finished = program.IsFinished(out statusCode);
 #if EDITOR

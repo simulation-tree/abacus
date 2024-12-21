@@ -4,6 +4,7 @@ using Collections;
 using Data;
 using DefaultPresentationAssets;
 using InputDevices;
+using InteractionKit;
 using Meshes;
 using Meshes.Components;
 using Models;
@@ -75,6 +76,10 @@ namespace Abacus
             {
                 chunk.UpdateMeshToMatchBlocks(chunkAtlas, terrainGenerator.meshRng);
             }
+
+            Canvas canvas = new(world, camera);
+            Label fpsLabel = new(canvas, "{{fps}}");
+            fpsLabel.Color = Color.White;
         }
 
         void IProgram.Finish(in StatusCode statusCode)
@@ -190,7 +195,7 @@ namespace Abacus
                 MeshRenderer chunkRenderer = mesh.AsEntity().Become<MeshRenderer>();
                 chunkRenderer.Mesh = mesh;
                 chunkRenderer.Material = unlitMaterial;
-                chunkRenderer.Mask = 1;
+                //chunkRenderer.Mask = 1;
 
                 chunkRenderer.AddComponent(Color.White);
                 Transform chunkTransform = chunkRenderer.AsEntity().Become<Transform>();
