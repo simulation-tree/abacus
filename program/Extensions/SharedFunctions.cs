@@ -1,8 +1,11 @@
-﻿using InputDevices;
+﻿using Collections;
+using InputDevices;
 using InteractionKit;
 using InteractionKit.Components;
+using InteractionKit.Functions;
 using System;
 using System.Numerics;
+using System.Runtime.InteropServices;
 using Transforms;
 using Unmanaged;
 using Worlds;
@@ -12,6 +15,8 @@ public static class SharedFunctions
     private static bool invertY;
     private static Vector2 lastPointerPosition;
     private static bool hasLastPointerPosition;
+    private static readonly System.Collections.Generic.List<double> frameTimes = new();
+    private static double averageFps;
 
     public static void DestroyTemporaryEntities(this World world, TimeSpan deltaSpan)
     {
@@ -62,7 +67,8 @@ public static class SharedFunctions
             moveUp |= up.IsPressed;
             moveDown |= down.IsPressed;
 
-            if (keyboard.WasPressed(Keyboard.Button.Y))
+            //invert mouse with this key
+            if (keyboard.WasPressed(Keyboard.Button.F3))
             {
                 invertY = !invertY;
             }
@@ -137,6 +143,25 @@ public static class SharedFunctions
 
         cameraTransform.LocalPosition = currentPosition;
         cameraTransform.LocalRotation = rotation;
+    }
+
+    public static void TrackFramesPerSecond()
+    {
+        DateTime now = DateTime.UtcNow;
+        frameTimes.Add(now.TimeOfDay.TotalSeconds);
+        if (frameTimes.Count > 20)
+        {
+            frameTimes.RemoveAt(0);
+        }
+
+        averageFps = 0f;
+        if (frameTimes.Count > 1)
+        {
+            double first = frameTimes[0];
+            double last = frameTimes[^1];
+            double total = last - first;
+            averageFps = frameTimes.Count / total;
+        }
     }
 
     public static void UpdateUISettings(this World world)
@@ -249,5 +274,27 @@ public static class SharedFunctions
                 pressed.Press(character);
             }
         }
+    }
+
+    public unsafe static void Initialize(this World world)
+    {
+        new LabelProcessor(world, new(&TryHandleFPS));
+    }
+
+    [UnmanagedCallersOnly]
+    private static InteractionKit.Boolean TryHandleFPS(TryProcessLabel.Input input)
+    {
+        const string Token = "{{fps}}";
+        if (input.OriginalText.Contains(Token.AsUSpan()))
+        {
+            USpan<char> replacement = stackalloc char[128];
+            uint replacementLength = averageFps.ToString(replacement);
+            uint newLength = input.OriginalText.Length - (uint)Token.Length + 64;
+            USpan<char> destination = stackalloc char[(int)newLength];
+            newLength = Text.Replace(input.OriginalText, Token.AsUSpan(), replacement.Slice(0, replacementLength), destination);
+            input.SetResult(destination.Slice(0, newLength));
+        }
+
+        return false;
     }
 }

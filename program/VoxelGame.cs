@@ -80,10 +80,21 @@ namespace Abacus
             Settings settings = new(world);
             Camera uiCamera = Camera.CreateOrthographic(world, window, 1f);
             Canvas canvas = new(world, uiCamera);
-            Label fpsLabel = new(canvas, "{{fps}}"); //todo: implement handling of text tokens
-            fpsLabel.Color = Color.White;
+
+            Label fpsLabel = new(canvas, "{{fps}}");
             fpsLabel.Anchor = Anchor.TopLeft;
             fpsLabel.Pivot = new(0f, 1f, 0f);
+
+            using List<char> stringBuilder = new();
+            stringBuilder.AddRange("F3 = Invert mouse".AsUSpan());
+            stringBuilder.Add('\n');
+            stringBuilder.AddRange("WASD = Move".AsUSpan());
+            Label controlsLabel = new(canvas, stringBuilder.AsSpan());
+            controlsLabel.Anchor = Anchor.TopLeft;
+            controlsLabel.Pivot = new(0f, 1f, 0f);
+            controlsLabel.Position = new(0f, -20f);
+
+            SharedFunctions.Initialize(world);
         }
 
         void IProgram.Finish(in StatusCode statusCode)
@@ -117,6 +128,7 @@ namespace Abacus
             }
 
             Transform cameraTransform = camera.AsEntity().As<Transform>();
+            SharedFunctions.TrackFramesPerSecond();
             SharedFunctions.MoveCameraAround(world, cameraTransform, delta, ref cameraPosition, ref cameraPitchYaw, new(1f, 1f));
             return StatusCode.Continue;
         }
