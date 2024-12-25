@@ -389,7 +389,7 @@ namespace Abacus
 
                         uint countTextLength = countValue.ToString(countText);
                         FixedString textValue = new(text);
-                        textValue.Length = startIndex + 1;
+                        textValue.Length = (byte)(startIndex + 1);
                         textValue.Append(countText.Slice(0, countTextLength));
                         label.SetText(textValue);
                         break;
