@@ -249,10 +249,10 @@ namespace Abacus
                 y -= singleLineHeight + gap;
                 indent += 20f;
                 {
-
-                    ComponentType.Register<bool>();
-                    ComponentType.Register<float>();
-                    ComponentType.Register<FixedString>();
+                    World world = canvas.GetWorld();
+                    world.Schema.RegisterComponent<bool>();
+                    world.Schema.RegisterComponent<float>();
+                    world.Schema.RegisterComponent<FixedString>();
 
                     Entity dataEntity = new(canvas.GetWorld());
                     dataEntity.AddComponent(true);

@@ -196,7 +196,11 @@ namespace Abacus
 
             readonly uint IEntity.Value => mesh.GetEntityValue();
             readonly World IEntity.World => mesh.GetWorld();
-            readonly Definition IEntity.Definition => new Definition().AddComponentTypes<IsMesh, IsChunk>().AddArrayTypes<uint, BlockID>();
+
+            readonly Definition IEntity.GetDefinition(Schema schema)
+            {
+                return new Definition().AddComponentTypes<IsMesh, IsChunk>(schema).AddArrayTypes<uint, BlockID>(schema);
+            }
 
             public Chunk(World world, int cx, int cy, int cz, byte chunkSize, Material unlitMaterial)
             {

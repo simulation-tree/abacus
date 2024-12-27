@@ -57,7 +57,7 @@
 			<ReferenceOutputAssembly>false</ReferenceOutputAssembly>
 		</ProjectReference>
 		<ProjectReference Include="..\..\text-rendering-systems\source\TextRendering.Systems.csproj" />
-		<ProjectReference Include="..\..\texture-systems\source\Texture.Systems.csproj" />
+		<ProjectReference Include="..\..\texture-systems\source\Textures.Systems.csproj" />
 		<ProjectReference Include="..\..\transform-systems\source\Transforms.Systems.csproj" />
 		<ProjectReference Include="..\..\vulkan-renderer\source\VulkanRenderer.csproj" />
 		<ProjectReference Include="..\..\window-systems\source\Windows.Systems.csproj" />

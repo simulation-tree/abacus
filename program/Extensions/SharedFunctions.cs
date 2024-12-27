@@ -227,9 +227,10 @@ public static class SharedFunctions
 
     public static void CopyMouseIntoPointer(this World world, Mouse mouse)
     {
-        if (!mouse.Is(Definition.Get<Pointer>()))
+        Schema schema = world.Schema;
+        if (!mouse.Is(Definition.Get<Pointer>(schema)))
         {
-            mouse.Become(Definition.Get<Pointer>());
+            mouse.Become(Definition.Get<Pointer>(schema));
         }
 
         Pointer pointer = mouse.AsEntity().As<Pointer>();

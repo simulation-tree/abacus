@@ -37,9 +37,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Shaders.Systems.Tests", "..
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Textures", "..\textures\source\Textures.csproj", "{840FA434-5A83-42BF-93CE-5A1BE940BF93}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Texture.Systems", "..\texture-systems\source\Texture.Systems.csproj", "{EBB2C2FC-A07D-4121-8553-BE0631B51A31}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Textures.Systems", "..\texture-systems\source\Textures.Systems.csproj", "{EBB2C2FC-A07D-4121-8553-BE0631B51A31}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Texture.Systems.Tests", "..\texture-systems\tests\Texture.Systems.Tests.csproj", "{E7F75F83-5801-461E-BC73-E56E77E7CBD9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Textures.Systems.Tests", "..\texture-systems\tests\Textures.Systems.Tests.csproj", "{E7F75F83-5801-461E-BC73-E56E77E7CBD9}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Meshes", "..\meshes\source\Meshes.csproj", "{B6629824-D756-4F63-B4E0-1FA9FF328F8F}"
 EndProject

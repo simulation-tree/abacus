@@ -13,7 +13,7 @@ namespace AbacusSimulator
     {
         private static int Main(string[] args)
         {
-            RuntimeHelpers.RunClassConstructor(typeof(TypeTable).TypeHandle);
+            TypeLayoutRegistry.RegisterAll();
             RuntimeHelpers.RunClassConstructor(typeof(EmbeddedAddressTable).TypeHandle);
 
             Trace.Listeners.Add(new TextWriterTraceListener($"{DateTime.Now:yyyy-dd-M--HH-mm-ss}.log", "listener"));
@@ -24,13 +24,14 @@ namespace AbacusSimulator
             StatusCode statusCode;
             using (World world = new())
             {
+                SchemaRegistry.Load(world.Schema);
                 using (AbacusSimulator simulator = new(world))
                 {
 #if EDITOR
                     Program editorProgram = Program.Create(world, new ControlsTest());
 #endif
 
-                    using (Program program = Program.Create(world, new VoxelGame()))
+                    using (Program program = Program.Create(world, new ControlsTest()))
                     {
                         bool finished = program.IsFinished(out statusCode);
 #if EDITOR
