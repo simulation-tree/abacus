@@ -22,9 +22,9 @@ namespace AbacusSimulator
             Trace.WriteLine("Starting simulator program");
 
             StatusCode statusCode;
-            using (World world = new())
+            Schema schema = SchemaRegistry.Get();
+            using (World world = new(schema))
             {
-                SchemaRegistry.Load(world.Schema);
                 using (AbacusSimulator simulator = new(world))
                 {
 #if EDITOR
