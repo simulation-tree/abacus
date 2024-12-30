@@ -52,7 +52,18 @@ namespace Abacus
             anotherLabel.Color = Color.Black;
             anotherLabel.Z = Settings.ZScale;
 
-            rightClickMenu = new(canvas, new(&ChoseMenuOption));
+            Dropdown anotherDropdown = new Dropdown<DropdownOptions>(canvas, new(180f, settings.SingleLineHeight));
+            anotherDropdown.Position = new(5, -5);
+            anotherDropdown.Size = new(180f, settings.SingleLineHeight);
+            anotherDropdown.Anchor = Anchor.TopLeft;
+            anotherDropdown.Pivot = new(0f, 1f, 0f);
+            anotherDropdown.BackgroundColor = new(0.2f, 0.2f, 0.2f);
+            anotherDropdown.LabelColor = Color.White;
+            anotherDropdown.TriangleColor = Color.White;
+            anotherDropdown.Z = Settings.ZScale;
+
+            Vector2 optionSize = new(100, settings.SingleLineHeight);
+            rightClickMenu = new(canvas, optionSize, new(&ChoseMenuOption));
             rightClickMenu.AddOption("Stop");
             rightClickMenu.AddOption("And Listen");
             rightClickMenu.AddOption("OoOoh");
@@ -62,7 +73,6 @@ namespace Abacus
             rightClickMenu.AddOption("Deep.../Apple");
             rightClickMenu.AddOption("Deep.../Banana");
             rightClickMenu.AddOption("Deep.../Car");
-            rightClickMenu.Size = new(100, settings.SingleLineHeight);
             rightClickMenu.Position = new(200, 300);
             rightClickMenu.Pivot = new(0, 1f, 0f);
             rightClickMenu.IsExpanded = false;
@@ -194,7 +204,7 @@ namespace Abacus
 
                 y -= singleLineHeight + gap;
 
-                Dropdown testDropdown = new(canvas);
+                Dropdown testDropdown = new(canvas, new(180f, singleLineHeight));
                 testDropdown.SetParent(window.Container);
                 testDropdown.Position = new(gap, y);
                 testDropdown.Size = new(180f, singleLineHeight);
@@ -215,7 +225,6 @@ namespace Abacus
                 testDropdownMenu.AddOption("Option D/More.../Honda");
                 testDropdownMenu.AddOption("Option D/More.../Hyndai");
                 testDropdownMenu.AddOption("Option D/More.../Mitsubishi");
-
                 testDropdown.SelectedOption = lastOption;
                 testDropdown.Callback = new(&DropdownOptionChanged);
 
@@ -402,6 +411,17 @@ namespace Abacus
             {
                 virtualWindow.Dispose();
             }
+        }
+
+        public enum DropdownOptions
+        {
+            First,
+            Second,
+            Third,
+            Yo,
+            What,
+            Is,
+            Up
         }
     }
 }
