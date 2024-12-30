@@ -199,7 +199,7 @@ namespace Abacus
 
             readonly Definition IEntity.GetDefinition(Schema schema)
             {
-                return new Definition().AddComponentTypes<IsMesh, IsChunk>(schema).AddArrayTypes<uint, BlockID>(schema);
+                return new Definition().AddComponentTypes<IsMesh, IsChunk>(schema).AddArrayElementTypes<uint, BlockID>(schema);
             }
 
             public Chunk(World world, int cx, int cy, int cz, byte chunkSize, Material unlitMaterial)
@@ -695,7 +695,7 @@ namespace Abacus
             }
         }
 
-        [Array]
+        [ArrayElement]
         public readonly struct BlockID
         {
             private readonly uint value;
