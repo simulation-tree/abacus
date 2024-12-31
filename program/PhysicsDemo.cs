@@ -109,8 +109,9 @@ namespace Abacus
                 {
                     ballBody.LinearVelocity = Vector3.Zero;
                     ballBody.AngularVelocity = Vector3.Zero;
+
                     Transform ballTransform = ballBody;
-                    ballTransform.WorldPosition = new Vector3(0f, 4f, 0f) + floorTransform.WorldPosition;
+                    ballTransform.LocalPosition = new Vector3(0f, 4f, 0f) + floorTransform.LocalPosition;
                 }
 
                 //reset floor tilt
@@ -272,7 +273,7 @@ namespace Abacus
                     if (mouse.IsPressed(Mouse.Button.LeftButton))
                     {
                         Transform transform = new(world, hit.entity);
-                        transform.WorldPosition -= hit.normal * (float)delta.TotalSeconds * 4f;
+                        transform.LocalPosition -= hit.normal * (float)delta.TotalSeconds * 4f;
                     }
                 }
             }

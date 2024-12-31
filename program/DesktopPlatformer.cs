@@ -53,7 +53,7 @@ namespace Abacus
 
             UpdateCollidersToMatchDisplay(World);
             (Vector2 direction, bool jump) = ReadInput(World);
-            MovePlayer(World, direction, jump, delta);
+            MovePlayer(World, direction, jump, (float)delta.TotalSeconds);
             AnimatePlayerParameters(World);
             CheckIfPlayersAreGrounded(simulator, World);
             MakeCameraFollowPlayer(World);
@@ -138,7 +138,7 @@ namespace Abacus
             playerBody.AddComponent(new GroundedState());
             playerBody.AddComponent(new AnimatedSprite());
             playerBody.AddComponent(new IsPlayer(true));
-            playerBody.AddComponent(new Jetpack());
+            playerBody.AddComponent(new Jetpack(3f));
 
             StateMachine playerAnimationStateMachine = new(world);
             playerAnimationStateMachine.AddState("Idle");
@@ -191,8 +191,7 @@ namespace Abacus
             //rightWallBody.AsEntity().AddComponent(Color.Blue);
 
             //create directional gravity
-            DirectionalGravity downGravity = new(world, -Vector3.UnitY, Gravity);
-
+            new DirectionalGravity(world, -Vector3.UnitY, Gravity);
             new GlobalKeyboard(world);
             new GlobalMouse(world);
 
@@ -255,7 +254,8 @@ namespace Abacus
                     if (player != default)
                     {
                         Transform playerTransform = player.As<Transform>();
-                        playerTransform.WorldPosition = new Vector3(mousePosition.X, height - mousePosition.Y, 0) * DisplayScale;
+                        Vector3 worldPosition = new Vector3(mousePosition.X, height - mousePosition.Y, 0) * DisplayScale;
+                        playerTransform.LocalPosition = worldPosition;
 
                         Body playerBody = player.As<Body>();
                         playerBody.LinearVelocity = Vector3.Zero;
@@ -316,7 +316,7 @@ namespace Abacus
             return default;
         }
 
-        private readonly void MovePlayer(World world, Vector2 direction, bool jump, TimeSpan delta)
+        private readonly void MovePlayer(World world, Vector2 direction, bool jump, float delta)
         {
             Entity player = GetMainPlayer(world);
             if (player == default)
@@ -327,28 +327,53 @@ namespace Abacus
             Body playerBody = player.As<Body>();
             Vector3 playerVelocity = playerBody.LinearVelocity;
             float acceleration = 1f;
-            float moveSpeed = 4f;
+            float moveSpeed = 7f;
+            bool changeVelocity = false;
             bool isGrounded = player.GetComponent<GroundedState>().value;
             if (isGrounded)
             {
                 if (jump)
                 {
-                    float jumpHeight = 2f;
+                    float jumpHeight = 3f;
                     playerVelocity.Y = MathF.Sqrt(2f * jumpHeight * Gravity);
-                    player.SetComponent(new Jetpack(2.3f));
+
+                    ref Jetpack jetpack = ref player.GetComponent<Jetpack>();
+                    jetpack.availableTime = jetpack.capacityTime;
+                    jetpack.cooldownTime = 0.8f;
                 }
 
-                acceleration = 16f;
+                acceleration = 6f;
+                changeVelocity = true;
+            }
+            else
+            {
+                if (direction.X != 0)
+                {
+                    changeVelocity = true;
+                }
+
+                if (jump)
+                {
+                    ref Jetpack jetpack = ref player.GetComponent<Jetpack>();
+                    jetpack.cooldownTime -= delta;
+                    if (jetpack.availableTime > 0 && jetpack.cooldownTime < 0)
+                    {
+                        playerVelocity.Y += delta * 30f;
+                        jetpack.availableTime -= delta;
+                    }
+                }
             }
 
-            playerVelocity.X = Lerp(playerVelocity.X, direction.X * moveSpeed, acceleration * (float)delta.TotalSeconds);
+            if (changeVelocity)
+            {
+                playerVelocity.X = Lerp(playerVelocity.X, direction.X * moveSpeed, acceleration * delta);
+            }
+
             playerBody.LinearVelocity = playerVelocity;
             playerBody.AngularVelocity = Vector3.Zero;
 
             Transform playerTransform = playerBody;
-            Vector3 playerPosition = playerTransform.WorldPosition;
-            playerPosition.Z = 0;
-            playerTransform.WorldPosition = playerPosition;
+            playerTransform.LocalPosition.Z = 0f;
         }
 
         private unsafe readonly void CheckIfPlayersAreGrounded(Simulator simulator, World world)
@@ -357,8 +382,8 @@ namespace Abacus
             {
                 Entity player = new(world, playerEntity);
                 Transform playerTransform = player.As<Transform>();
-                simulator.TryHandleMessage(new RaycastRequest(world, playerTransform.WorldPosition, -Vector3.UnitY, new(&GroundHitCallback), 0.5f, player.GetEntityValue()));
                 player.SetComponent(new GroundedState(false));
+                simulator.TryHandleMessage(new RaycastRequest(world, playerTransform.WorldPosition, -Vector3.UnitY, new(&GroundHitCallback), 0.5f, player.GetEntityValue()));
             }
 
             [UnmanagedCallersOnly]
@@ -389,7 +414,7 @@ namespace Abacus
             Transform cameraTransform = camera.AsEntity().Become<Transform>();
             Vector3 playerPosition = playerTransform.WorldPosition;
             Vector3 cameraPosition = cameraTransform.WorldPosition;
-            cameraTransform.WorldPosition = new(playerPosition.X, playerPosition.Y, cameraPosition.Z);
+            cameraTransform.LocalPosition = new(playerPosition.X, playerPosition.Y, cameraPosition.Z);
         }
 
         private readonly void MakeWindowFollowCamera(World world)
@@ -519,10 +544,13 @@ namespace Abacus
         public struct Jetpack
         {
             public float availableTime;
+            public float capacityTime;
+            public float cooldownTime;
 
             public Jetpack(float availableTime)
             {
                 this.availableTime = availableTime;
+                this.capacityTime = availableTime;
             }
         }
     }
