@@ -157,7 +157,7 @@ namespace Abacus
             anotherBox.Position = new(0, 0);
             anotherBox.Anchor = Anchor.Centered;
             anotherBox.Pivot = new(0.5f, 0.5f, 0f);
-            anotherBox.Color = Color.SkyBlue;
+            anotherBox.Color = new(0, 0.5f, 1, 1);
 
             TextMesh textMesh = new(world, "abacus 123 hiii", robotoFont);
             TextRenderer textRenderer = new(world, textMesh, textMaterial, uiCamera.GetMask());

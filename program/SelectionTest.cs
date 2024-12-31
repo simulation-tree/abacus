@@ -1,9 +1,9 @@
 ﻿using Cameras;
-using Data;
 using InteractionKit;
 using Simulation;
 using System;
 using System.Diagnostics;
+using System.Numerics;
 using System.Runtime.InteropServices;
 using Unmanaged;
 using Windows;
@@ -45,17 +45,17 @@ namespace Abacus
             Button buttonA = new(new(&Pressed), canvas);
             buttonA.Position = new(100, 60);
             buttonA.Size = new(32, 32);
-            buttonA.Color = Color.Red;
+            buttonA.Color = new(1, 0, 0, 1);
 
             Button buttonB = new(new(&Pressed), canvas);
             buttonB.Position = new(200, 60);
             buttonB.Size = new(32, 32);
-            buttonB.Color = Color.Green;
+            buttonB.Color = new(0, 1, 0, 1);
 
             Button buttonC = new(new(&Pressed), canvas);
             buttonC.Position = new(200 + 16, 60 + 16);
             buttonC.Size = new(32, 32);
-            buttonC.Color = Color.Blue * new Color(1f, 1f, 1f, 0.5f);
+            buttonC.Color = new Vector4(0, 0, 1, 0.5f);
 
             [UnmanagedCallersOnly]
             static void Pressed(Entity buttonEntity)

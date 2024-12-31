@@ -131,6 +131,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Meshes.NineSliced", "..\mes
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Meshes.NineSliced.Tests", "..\meshes-9s\tests\Meshes.NineSliced.Tests.csproj", "{EAFB42D7-48B5-CB2B-7499-6FBB8C4996C8}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Textures.Tests", "..\textures\tests\Textures.Tests.csproj", "{FEA45724-1ECA-9814-9A94-0A7969F75EA2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -393,6 +395,10 @@ Global
 		{EAFB42D7-48B5-CB2B-7499-6FBB8C4996C8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EAFB42D7-48B5-CB2B-7499-6FBB8C4996C8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EAFB42D7-48B5-CB2B-7499-6FBB8C4996C8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FEA45724-1ECA-9814-9A94-0A7969F75EA2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FEA45724-1ECA-9814-9A94-0A7969F75EA2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FEA45724-1ECA-9814-9A94-0A7969F75EA2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FEA45724-1ECA-9814-9A94-0A7969F75EA2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

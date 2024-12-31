@@ -571,37 +571,37 @@ namespace Abacus
                 Vector4 rect = sprite.region;
                 if (rotation == 1)
                 {
-                    uvs[startIndex + 1] = new Vector2(rect.X, rect.Y);
-                    uvs[startIndex + 2] = new Vector2(rect.Z, rect.Y);
-                    uvs[startIndex + 3] = new Vector2(rect.Z, rect.W);
-                    uvs[startIndex + 0] = new Vector2(rect.X, rect.W);
+                    uvs[startIndex + 1] = new(rect.X, rect.Y);
+                    uvs[startIndex + 2] = new(rect.Z, rect.Y);
+                    uvs[startIndex + 3] = new(rect.Z, rect.W);
+                    uvs[startIndex + 0] = new(rect.X, rect.W);
                 }
                 else if (rotation == 2)
                 {
-                    uvs[startIndex + 2] = new Vector2(rect.X, rect.Y);
-                    uvs[startIndex + 3] = new Vector2(rect.Z, rect.Y);
-                    uvs[startIndex + 0] = new Vector2(rect.Z, rect.W);
-                    uvs[startIndex + 1] = new Vector2(rect.X, rect.W);
+                    uvs[startIndex + 2] = new(rect.X, rect.Y);
+                    uvs[startIndex + 3] = new(rect.Z, rect.Y);
+                    uvs[startIndex + 0] = new(rect.Z, rect.W);
+                    uvs[startIndex + 1] = new(rect.X, rect.W);
                 }
                 else if (rotation == 3)
                 {
-                    uvs[startIndex + 3] = new Vector2(rect.X, rect.Y);
-                    uvs[startIndex + 0] = new Vector2(rect.Z, rect.Y);
-                    uvs[startIndex + 1] = new Vector2(rect.Z, rect.W);
-                    uvs[startIndex + 2] = new Vector2(rect.X, rect.W);
+                    uvs[startIndex + 3] = new(rect.X, rect.Y);
+                    uvs[startIndex + 0] = new(rect.Z, rect.Y);
+                    uvs[startIndex + 1] = new(rect.Z, rect.W);
+                    uvs[startIndex + 2] = new(rect.X, rect.W);
                 }
                 else
                 {
-                    uvs[startIndex + 0] = new Vector2(rect.X, rect.Y);
-                    uvs[startIndex + 1] = new Vector2(rect.Z, rect.Y);
-                    uvs[startIndex + 2] = new Vector2(rect.Z, rect.W);
-                    uvs[startIndex + 3] = new Vector2(rect.X, rect.W);
+                    uvs[startIndex + 0] = new(rect.X, rect.Y);
+                    uvs[startIndex + 1] = new(rect.Z, rect.Y);
+                    uvs[startIndex + 2] = new(rect.Z, rect.W);
+                    uvs[startIndex + 3] = new(rect.X, rect.W);
                 }
 
-                colors[startIndex + 0] = Color.White;
-                colors[startIndex + 1] = Color.White;
-                colors[startIndex + 2] = Color.White;
-                colors[startIndex + 3] = Color.White;
+                colors[startIndex + 0] = new(1, 1, 1, 1);
+                colors[startIndex + 1] = new(1, 1, 1, 1);
+                colors[startIndex + 2] = new(1, 1, 1, 1);
+                colors[startIndex + 3] = new(1, 1, 1, 1);
             }
 
             public void Generate()

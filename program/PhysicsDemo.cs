@@ -257,14 +257,14 @@ namespace Abacus
                 ref Color color = ref world.TryGetComponent<Color>(entityHit, out bool contains);
                 if (contains)
                 {
-                    float hue = color.H;
+                    float hue = color.value.GetHue();
                     hue += 0.3f * (float)delta.TotalSeconds;
                     while (hue > 1f)
                     {
                         hue -= 1f;
                     }
 
-                    color.H = hue;
+                    color.value.SetHue(hue);
                 }
 
                 if (world.TryGetFirst(out Mouse mouse))

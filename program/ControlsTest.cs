@@ -1,5 +1,4 @@
 ﻿using Cameras;
-using Data;
 using InputDevices;
 using InteractionKit;
 using InteractionKit.Components;
@@ -11,6 +10,7 @@ using System;
 using System.Diagnostics;
 using System.Numerics;
 using System.Runtime.InteropServices;
+using Textures;
 using Transforms.Components;
 using Unmanaged;
 using Windows;
@@ -28,7 +28,7 @@ namespace Abacus
         private unsafe ControlsTest(World world)
         {
             window = new(world, "Editor", new(200, 200), new(900, 720), "vulkan", new(&OnWindowClosed));
-            window.GetClearColor() = Color.Grey;
+            window.GetClearColor() = new(0.5f, 0.5f, 0.5f, 1);
             window.IsResizable = true;
 
             Settings settings = new(world);
@@ -49,7 +49,7 @@ namespace Abacus
 
             Label anotherLabel = new(canvas, "Hello there\nWith another line\nNice");
             anotherLabel.Position = new(105, 150);
-            anotherLabel.Color = Color.Black;
+            anotherLabel.Color = new(0, 0, 0, 1);
             anotherLabel.Z = Settings.ZScale;
 
             Dropdown anotherDropdown = new Dropdown<DropdownOptions>(canvas, new(180f, settings.SingleLineHeight));
@@ -57,9 +57,9 @@ namespace Abacus
             anotherDropdown.Size = new(180f, settings.SingleLineHeight);
             anotherDropdown.Anchor = Anchor.TopLeft;
             anotherDropdown.Pivot = new(0f, 1f, 0f);
-            anotherDropdown.BackgroundColor = new(0.2f, 0.2f, 0.2f);
-            anotherDropdown.LabelColor = Color.White;
-            anotherDropdown.TriangleColor = Color.White;
+            anotherDropdown.BackgroundColor = new(0.2f, 0.2f, 0.2f, 1);
+            anotherDropdown.LabelColor = new(1, 1, 1, 1);
+            anotherDropdown.TriangleColor = new(1, 1, 1, 1);
             anotherDropdown.Z = Settings.ZScale;
 
             Vector2 optionSize = new(100, settings.SingleLineHeight);
@@ -160,7 +160,7 @@ namespace Abacus
                 Label testLabel = new(canvas, "Hello, World!");
                 testLabel.SetParent(window.Container);
                 testLabel.Anchor = Anchor.TopLeft;
-                testLabel.Color = Color.Black;
+                testLabel.Color = new(0, 0, 0, 1);
                 testLabel.Position = new(gap, y);
                 testLabel.Pivot = new(0f, 1f, 0f);
 
@@ -168,7 +168,7 @@ namespace Abacus
 
                 Button testButton = new(new(&PressedTestButton), canvas);
                 testButton.SetParent(window.Container);
-                testButton.Color = new Color(0.2f, 0.2f, 0.2f);
+                testButton.Color = new(0.2f, 0.2f, 0.2f, 1);
                 testButton.Anchor = Anchor.TopLeft;
                 testButton.Pivot = new(0f, 1f, 0f);
                 testButton.Size = new(180f, singleLineHeight);
@@ -188,8 +188,8 @@ namespace Abacus
                 testToggle.Size = new(24, singleLineHeight);
                 testToggle.Anchor = Anchor.TopLeft;
                 testToggle.Pivot = new(0f, 1f, 0f);
-                testToggle.BackgroundColor = new(0.2f, 0.2f, 0.2f);
-                testToggle.CheckmarkColor = Color.White;
+                testToggle.BackgroundColor = new(0.2f, 0.2f, 0.2f, 1);
+                testToggle.CheckmarkColor = new(1, 1, 1, 1);
 
                 y -= singleLineHeight + gap;
 
@@ -199,8 +199,8 @@ namespace Abacus
                 horizontalScrollBar.Size = new(180f, singleLineHeight);
                 horizontalScrollBar.Anchor = Anchor.TopLeft;
                 horizontalScrollBar.Pivot = new(0f, 1f, 0f);
-                horizontalScrollBar.BackgroundColor = new(0.2f, 0.2f, 0.2f);
-                horizontalScrollBar.ScrollHandleColor = Color.White;
+                horizontalScrollBar.BackgroundColor = new(0.2f, 0.2f, 0.2f, 1);
+                horizontalScrollBar.ScrollHandleColor = new(1, 1, 1, 1);
 
                 y -= singleLineHeight + gap;
 
@@ -210,9 +210,9 @@ namespace Abacus
                 testDropdown.Size = new(180f, singleLineHeight);
                 testDropdown.Anchor = Anchor.TopLeft;
                 testDropdown.Pivot = new(0f, 1f, 0f);
-                testDropdown.BackgroundColor = new(0.2f, 0.2f, 0.2f);
-                testDropdown.LabelColor = Color.White;
-                testDropdown.TriangleColor = Color.White;
+                testDropdown.BackgroundColor = new(0.2f, 0.2f, 0.2f, 1);
+                testDropdown.LabelColor = new(1, 1, 1, 1);
+                testDropdown.TriangleColor = new(1, 1, 1, 1);
 
                 Menu testDropdownMenu = testDropdown.Menu;
                 testDropdownMenu.AddOption("Option A");
@@ -243,15 +243,15 @@ namespace Abacus
                 testTextField.Size = new(180f, singleLineHeight);
                 testTextField.Anchor = Anchor.TopLeft;
                 testTextField.Pivot = new(0f, 1f, 0f);
-                testTextField.BackgroundColor = new(0.2f, 0.2f, 0.2f);
-                testTextField.TextColor = Color.White;
+                testTextField.BackgroundColor = new(0.2f, 0.2f, 0.2f, 1f);
+                testTextField.TextColor = new(1, 1, 1, 1);
 
                 y -= singleLineHeight + gap;
 
                 Label headerLabel = new(canvas, "Fields");
                 headerLabel.SetParent(window.Container);
                 headerLabel.Anchor = Anchor.TopLeft;
-                headerLabel.Color = Color.Black;
+                headerLabel.Color = new(0, 0, 0, 1);
                 headerLabel.Position = new(gap, y);
                 headerLabel.Pivot = new(0f, 1f, 0f);
 
@@ -269,7 +269,7 @@ namespace Abacus
                     dataEntity.AddComponent(new FixedString("babash"));
 
                     ControlField numberField = ControlField.Create<float, NumberTextEditor>(canvas, "Number", dataEntity);
-                    numberField.LabelColor = Color.Black;
+                    numberField.LabelColor = new(0, 0, 0, 1);
                     numberField.SetParent(window.Container);
                     numberField.Anchor = Anchor.TopLeft;
                     numberField.Pivot = new(0f, 1f, 0f);
@@ -279,7 +279,7 @@ namespace Abacus
                     y -= singleLineHeight + gap;
 
                     ControlField textField = ControlField.Create<FixedString, TextEditor>(canvas, "Text", dataEntity);
-                    textField.LabelColor = Color.Black;
+                    textField.LabelColor = new(0, 0, 0, 1);
                     textField.SetParent(window.Container);
                     textField.Anchor = Anchor.TopLeft;
                     textField.Pivot = new(0f, 1f, 0f);
@@ -289,7 +289,7 @@ namespace Abacus
                     y -= singleLineHeight + gap;
 
                     ControlField toggleField = ControlField.Create<bool, BooleanEditor>(canvas, "Toggle", dataEntity);
-                    toggleField.LabelColor = Color.Black;
+                    toggleField.LabelColor = new(0, 0, 0, 1);
                     toggleField.SetParent(window.Container);
                     toggleField.Anchor = Anchor.TopLeft;
                     toggleField.Pivot = new(0f, 1f, 0f);
@@ -304,7 +304,7 @@ namespace Abacus
                 Label treeLabel = new(canvas, "Tree of objects");
                 treeLabel.SetParent(window.Container);
                 treeLabel.Anchor = Anchor.TopLeft;
-                treeLabel.Color = Color.Black;
+                treeLabel.Color = new(0, 0, 0, 1);
                 treeLabel.Position = new(gap, y);
                 treeLabel.Pivot = new(0f, 1f, 0f);
 
@@ -343,7 +343,7 @@ namespace Abacus
                     box.SetParent(window.Container);
                     box.Size = new(60f, 20f);
                     box.Position = new(200f, i * 26f);
-                    box.Color = Color.FromHSV((i * 0.1f) % 1, 1, 1);
+                    box.Color = new Vector4((i * 0.1f) % 1, 1, 1, 1).FromHSV();
                 }
 
                 TextField multiLineTextField = new(canvas);
@@ -352,8 +352,8 @@ namespace Abacus
                 multiLineTextField.Size = new(180f, singleLineHeight * 3);
                 multiLineTextField.Anchor = Anchor.TopLeft;
                 multiLineTextField.Pivot = new(0f, 1f, 0f);
-                multiLineTextField.BackgroundColor = new(0.2f, 0.2f, 0.2f);
-                multiLineTextField.TextColor = Color.White;
+                multiLineTextField.BackgroundColor = new(0.2f, 0.2f, 0.2f, 1f);
+                multiLineTextField.TextColor = new(1, 1, 1, 1);
             }
 
             [UnmanagedCallersOnly]

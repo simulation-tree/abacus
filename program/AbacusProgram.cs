@@ -345,14 +345,14 @@ namespace Abacus
             }
 
             ref Color color = ref dummyRenderer.AsEntity().GetComponent<Color>();
-            float hue = color.H;
+            float hue = color.value.GetHue();
             hue += delta * 0.2f;
             while (hue > 1f)
             {
                 hue -= 1f;
             }
 
-            color.H = hue;
+            color.value.SetHue(hue);
         }
 
         private readonly bool TestWindowEntity(World world, float delta)
