@@ -1,65 +1,58 @@
 ﻿using Abacus;
 using Data;
+using Editor;
 using Simulation;
 using System;
 using System.Diagnostics;
-using System.Runtime.CompilerServices;
 using Unmanaged;
 using Worlds;
+using SimulationProgram = Simulation.Program;
+using Simulator = AbacusSimulator.AbacusSimulator;
 
-namespace AbacusSimulator
+TypeLayoutRegistry.RegisterAll();
+EmbeddedAddressTable.RegisterAll();
+
+Trace.Listeners.Add(new TextWriterTraceListener($"{DateTime.Now:yyyy-dd-M--HH-mm-ss}.log", "listener"));
+Trace.Listeners.Add(new TextWriterTraceListener("latest.log", "listener"));
+Trace.AutoFlush = true;
+Trace.WriteLine("Starting simulator program");
+
+StatusCode statusCode;
+Schema schema = SchemaRegistry.Get();
+using (World world = new(schema))
 {
-    public static class EntryPoint
+    using (Simulator simulator = new(world))
     {
-        private static int Main(string[] args)
+#if EDITOR
+        SimulationProgram editorProgram = SimulationProgram.Create(world, new ControlsTest());
+#endif
+
+        using (SimulationProgram program = SimulationProgram.Create(world, new EditorProgram(args)))
         {
-            TypeLayoutRegistry.RegisterAll();
-            RuntimeHelpers.RunClassConstructor(typeof(EmbeddedAddressTable).TypeHandle);
-
-            Trace.Listeners.Add(new TextWriterTraceListener($"{DateTime.Now:yyyy-dd-M--HH-mm-ss}.log", "listener"));
-            Trace.Listeners.Add(new TextWriterTraceListener("latest.log", "listener"));
-            Trace.AutoFlush = true;
-            Trace.WriteLine("Starting simulator program");
-
-            StatusCode statusCode;
-            Schema schema = SchemaRegistry.Get();
-            using (World world = new(schema))
-            {
-                using (AbacusSimulator simulator = new(world))
-                {
+            bool finished = program.IsFinished(out statusCode);
 #if EDITOR
-                    Program editorProgram = Program.Create(world, new ControlsTest());
+            finished |= editorProgram.IsFinished(out statusCode);
 #endif
-
-                    using (Program program = Program.Create(world, new DesktopPlatformer()))
-                    {
-                        bool finished = program.IsFinished(out statusCode);
-#if EDITOR
-                        finished |= editorProgram.IsFinished(out statusCode);
-#endif
-                        while (!program.IsFinished(out statusCode))
-                        {
-                            simulator.Update();
-                        }
-                    }
-
-#if EDITOR
-                    editorProgram.Dispose();
-#endif
-                }
-            }
-
-            Allocations.ThrowIfAny();
-            if (statusCode.IsSuccess)
+            while (!program.IsFinished(out statusCode))
             {
-                Trace.WriteLine($"Program finished successfully with status code {statusCode.Code}");
-                return 0;
-            }
-            else
-            {
-                Trace.WriteLine($"Program failed with status code {statusCode.Code}");
-                return statusCode.Code;
+                simulator.Update();
             }
         }
+
+#if EDITOR
+        editorProgram.Dispose();
+#endif
     }
+}
+
+Allocations.ThrowIfAny();
+if (statusCode.IsSuccess)
+{
+    Trace.WriteLine($"Program finished successfully with status code {statusCode.Code}");
+    return 0;
+}
+else
+{
+    Trace.WriteLine($"Program failed with status code {statusCode.Code}");
+    return statusCode.Code;
 }

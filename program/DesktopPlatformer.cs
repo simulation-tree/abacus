@@ -212,7 +212,7 @@ namespace Abacus
             Texture walk = new(world, "Assets/Textures/Spaceman/Walk.png");
             Texture walk2 = new(world, "Assets/Textures/Spaceman/Walk2.png");
 
-            simulator.UpdateSystems(TimeSpan.MinValue);
+            simulator.UpdateSystems(TimeSpan.MinValue, world);
 
             USpan<AtlasTexture.InputSprite> sprites = stackalloc AtlasTexture.InputSprite[]
             {

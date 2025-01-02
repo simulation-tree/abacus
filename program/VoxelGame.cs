@@ -152,7 +152,7 @@ namespace Abacus
             Texture grassSide = new(world, "Assets/Textures/Blocks/GrassSide.png");
             Texture cobblestone = new(world, "Assets/Textures/Blocks/Cobblestone.png");
 
-            simulator.UpdateSystems(TimeSpan.MinValue);
+            simulator.UpdateSystems(TimeSpan.MinValue, world);
 
             USpan<AtlasTexture.InputSprite> sprites = stackalloc AtlasTexture.InputSprite[]
             {
