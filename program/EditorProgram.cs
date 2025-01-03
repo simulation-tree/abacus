@@ -93,7 +93,7 @@ namespace Editor
             program = new(simulator, world, program.args);
         }
 
-        StatusCode IProgram.Update(in TimeSpan delta)
+        readonly StatusCode IProgram.Update(in TimeSpan delta)
         {
             ref EditorState editorState = ref settings.GetEditorState();
             bool updateSystems = false;
@@ -279,6 +279,8 @@ namespace Editor
             window.IsResizable = true;
 
             Camera camera = Camera.CreateOrthographic(world, window, 1f);
+            camera.SetParent(window);
+
             Canvas canvas = new(world, camera);
 
             Transform container = new(world);
