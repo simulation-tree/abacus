@@ -93,7 +93,7 @@ namespace Editor
             program = new(simulator, world, program.args);
         }
 
-        readonly StatusCode IProgram.Update(in TimeSpan delta)
+        StatusCode IProgram.Update(in TimeSpan delta)
         {
             ref EditorState editorState = ref settings.GetEditorState();
             bool updateSystems = false;

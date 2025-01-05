@@ -113,7 +113,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Worlds", "..\worlds\source\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Worlds.Tests", "..\worlds\tests\Worlds.Tests.csproj", "{2C7614C0-2DDE-1864-B8B9-95AE2BDEC1DE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Worlds.TypeTableGenerator", "..\worlds\generator\Worlds.TypeTableGenerator.csproj", "{357A1888-0960-752D-8D10-4F52F43F8DEF}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Worlds.Generator", "..\worlds\generator\Worlds.Generator.csproj", "{357A1888-0960-752D-8D10-4F52F43F8DEF}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Data", "..\data\source\Data.csproj", "{F2DEC065-03F9-68FA-9C00-C095D268E1C5}"
 EndProject
@@ -132,6 +132,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Meshes.NineSliced.Tests", "..\meshes-9s\tests\Meshes.NineSliced.Tests.csproj", "{EAFB42D7-48B5-CB2B-7499-6FBB8C4996C8}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Textures.Tests", "..\textures\tests\Textures.Tests.csproj", "{FEA45724-1ECA-9814-9A94-0A7969F75EA2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rendering.Generator", "..\rendering\generator\Rendering.Generator.csproj", "{75727179-EEB9-9650-4529-07FB41CB89B5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -399,6 +401,10 @@ Global
 		{FEA45724-1ECA-9814-9A94-0A7969F75EA2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FEA45724-1ECA-9814-9A94-0A7969F75EA2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FEA45724-1ECA-9814-9A94-0A7969F75EA2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{75727179-EEB9-9650-4529-07FB41CB89B5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{75727179-EEB9-9650-4529-07FB41CB89B5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{75727179-EEB9-9650-4529-07FB41CB89B5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{75727179-EEB9-9650-4529-07FB41CB89B5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
