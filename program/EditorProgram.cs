@@ -164,9 +164,10 @@ namespace Editor
         private static void UpdatePointer(World world, Mouse mouse)
         {
             Schema schema = world.Schema;
-            if (!mouse.Is(Definition.Get<Pointer>(schema)))
+            Definition pointerDefinition = Archetype.Get<Pointer>(schema).definition;
+            if (!mouse.Is(pointerDefinition))
             {
-                mouse.Become(Definition.Get<Pointer>(schema));
+                mouse.Become(pointerDefinition);
             }
 
             Pointer pointer = mouse.AsEntity().As<Pointer>();
@@ -266,9 +267,10 @@ namespace Editor
         readonly World IEntity.World => entity.GetWorld();
         readonly uint IEntity.Value => entity.GetEntityValue();
 
-        readonly Definition IEntity.GetDefinition(Schema schema)
+        readonly void IEntity.Describe(ref Archetype archetype)
         {
-            return Definition.Get<Window>(schema).AddComponentType<IsEditorWindow>(schema);
+            archetype.AddComponentType<IsEditorWindow>();
+            archetype.Add<Window>();
         }
 
         public unsafe EditorWindow(World world, Vector2 position, Vector2 size)
