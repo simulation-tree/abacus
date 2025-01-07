@@ -28,6 +28,15 @@ namespace Editor
         private EditorWindow<LaunchWindow> launcherWindow;
         private EditorWindow<WorldWindow> worldWindow;
         private EditorWindow<EntityWindow> entityWindow;
+        private bool? loaded;
+        private State state;
+
+        public enum State
+        {
+            Idle,
+            DestroyingWindows,
+            CreatingWindows
+        }
 
         private EditorProgram(Simulator simulator, World world, Array<Text> args)
         {
@@ -96,55 +105,69 @@ namespace Editor
         StatusCode IProgram.Update(in TimeSpan delta)
         {
             ref EditorState editorState = ref settings.GetEditorState();
-            bool updateSystems = false;
-            if (!editorState.loaded)
+            if (state == State.DestroyingWindows)
             {
-                if (launcherWindow == default)
+                if (!editorState.loaded)
                 {
-                    launcherWindow = new(world, new(200, 200), new(200, 200));
-                    updateSystems = true;
+                    if (worldWindow != default)
+                    {
+                        worldWindow.Dispose();
+                        worldWindow = default;
+                    }
+
+                    if (entityWindow != default)
+                    {
+                        entityWindow.Dispose();
+                        entityWindow = default;
+                    }
+                }
+                else
+                {
+                    if (launcherWindow != default)
+                    {
+                        launcherWindow.Dispose();
+                        launcherWindow = default;
+                    }
                 }
 
-                if (worldWindow != default)
-                {
-                    worldWindow.Dispose();
-                    worldWindow = default;
-                }
-
-                if (entityWindow != default)
-                {
-                    entityWindow.Dispose();
-                    entityWindow = default;
-                }
+                state = State.CreatingWindows;
             }
-            else
+            else if (state == State.CreatingWindows)
             {
-                if (launcherWindow != default)
+                if (!editorState.loaded)
                 {
-                    launcherWindow.Dispose();
-                    launcherWindow = default;
-                    updateSystems = true;
+                    if (launcherWindow == default)
+                    {
+                        launcherWindow = new(world, new(200, 200), new(200, 200));
+                    }
+                }
+                else
+                {
+                    if (worldWindow == default)
+                    {
+                        worldWindow = new(world, new(0, 200), new(200, 200));
+                    }
+
+                    if (entityWindow == default)
+                    {
+                        entityWindow = new(world, new(400, 200), new(200, 200));
+                    }
                 }
 
-                if (worldWindow == default)
-                {
-                    worldWindow = new(world, new(0, 200), new(200, 200));
-                }
-
-                if (entityWindow == default)
-                {
-                    entityWindow = new(world, new(400, 200), new(200, 200));
-                }
+                state = State.Idle;
             }
 
-            if (updateSystems)
+            if (loaded != editorState.loaded)
             {
-                simulator.UpdateSystems(delta);
+                loaded = editorState.loaded;
+                state = State.DestroyingWindows;
             }
-
-            if (!IsAnyWindowOpen(world))
+            else if (state == State.Idle)
             {
-                return StatusCode.Success(0);
+                if (!IsAnyWindowOpen(world))
+                {
+                    return StatusCode.Success(0);
+                }
             }
 
             if (world.TryGetFirst(out Mouse mouse))
@@ -221,7 +244,7 @@ namespace Editor
             }
 
             Entity hoveringOver = pointer.HoveringOver;
-            if (hoveringOver != default)
+            if (hoveringOver != default && world.ContainsEntity(hoveringOver))
             {
                 if (hoveringOver.Is<TextField>())
                 {
@@ -284,6 +307,7 @@ namespace Editor
             camera.SetParent(window);
 
             Canvas canvas = new(world, camera);
+            canvas.SetParent(window);
 
             Transform container = new(world);
             container.SetParent(canvas);
@@ -376,8 +400,31 @@ namespace Editor
         FixedString IVirtualWindow.Title => "Entity";
         VirtualWindowClose IVirtualWindow.CloseCallback => default;
 
-        void IVirtualWindow.OnCreated(Transform container, Canvas canvas)
+        unsafe void IVirtualWindow.OnCreated(Transform container, Canvas canvas)
         {
+            Settings settings = canvas.GetSettings();
+
+            Button newButton = new(new(&PressedReturn), canvas);
+            newButton.SetParent(container);
+            newButton.Color = new(0.2f, 0.2f, 0.2f, 1);
+            newButton.Anchor = Anchor.TopLeft;
+            newButton.Pivot = new(0f, 1f, 0f);
+            newButton.Size = new(180f, settings.SingleLineHeight);
+            newButton.Position = new(4f, -4f);
+
+            Label newButtonLabel = new(canvas, "Return");
+            newButtonLabel.SetParent(newButton);
+            newButtonLabel.Anchor = Anchor.TopLeft;
+            newButtonLabel.Position = new(4f, -4f);
+            newButtonLabel.Pivot = new(0f, 1f, 0f);
+
+            [UnmanagedCallersOnly]
+            static void PressedReturn(Entity button)
+            {
+                Trace.WriteLine("Pressed Return");
+                ref EditorState editorState = ref button.GetEditorState();
+                editorState.Reset();
+            }
         }
     }
 
@@ -434,6 +481,12 @@ namespace Editor
             editingWorld.Schema.CopyFrom(loadedWorld.Schema);
             editingWorld.Append(loadedWorld);
             loaded = true;
+        }
+
+        public void Reset()
+        {
+            editingWorld.Clear();
+            loaded = false;
         }
     }
 }

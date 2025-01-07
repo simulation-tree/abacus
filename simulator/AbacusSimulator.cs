@@ -46,7 +46,7 @@ namespace AbacusSimulator
             simulator.AddSystem<CameraSystem>();
 
             ref RenderingSystems renderingSystems = ref simulator.AddSystem<RenderingSystems>().Value;
-            renderingSystems.RegisterRenderingBackend<VulkanRenderer>();
+            renderingSystems.RegisterRenderingBackend<VulkanBackend>();
         }
 
         public readonly void Dispose()
