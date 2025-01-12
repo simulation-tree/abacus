@@ -55,7 +55,7 @@ namespace Abacus
             {
                 if (!mouse.AsEntity().ContainsComponent<IsPointer>())
                 {
-                    mouse.AddComponent(new IsPointer(mouse.Position, default));
+                    mouse.AddComponent(new IsPointer(mouse.Position));
                 }
 
                 ref IsPointer pointer = ref mouse.AsEntity().GetComponent<IsPointer>();

@@ -27,7 +27,7 @@ using (World world = new(schema))
         SimulationProgram editorProgram = SimulationProgram.Create(world, new ControlsTest());
 #endif
 
-        using (SimulationProgram program = SimulationProgram.Create(world, new EditorProgram(args)))
+        using (SimulationProgram program = SimulationProgram.Create(world, new MultipleWindows()))
         {
             bool finished = program.IsFinished(out statusCode);
 #if EDITOR

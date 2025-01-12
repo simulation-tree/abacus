@@ -166,23 +166,40 @@ public static class SharedFunctions
 
     public static void UpdateUISettings(this World world)
     {
-        if (world.TryGetFirst(out Mouse mouse))
+        foreach (Mouse mouse in world.GetAll<Mouse>())
         {
-            CopyMouseIntoPointer(world, mouse);
-            UpdateCursorBasedOnPointerState(world, mouse);
+            Entity window = mouse.Window;
+            uint mask = 0;
+            foreach (Canvas canvas in world.GetAll<Canvas>())
+            {
+                if (canvas.Camera.Destination == window)
+                {
+                    mask |= canvas.SelectionMask;
+                }
+            }
+
+            CopyMouseIntoPointer(world, mouse, mask);
+            UpdateCursorIconBasedOnPointerState(world, mouse);
         }
 
         SetPressedCharacters(world);
     }
 
-    public static void UpdateCursorBasedOnPointerState(this World world, Mouse mouse)
+    public static void UpdateCursorIconBasedOnPointerState(this World world, Mouse mouse)
     {
         Pointer pointer = mouse.AsEntity().As<Pointer>();
+        uint selectionMask = pointer.Mask;
 
         bool setCursor = false;
         ComponentQuery<IsResizable> resizableQuery = new(world);
         foreach (var r in resizableQuery)
         {
+            uint mask = r.component1.mask;
+            if ((mask & selectionMask) == 0)
+            {
+                continue;
+            }
+
             Resizable resizable = new(world, r.entity);
             IsResizable.Boundary boundary = resizable.GetBoundary(pointer.Position);
             if (boundary != default)
@@ -225,7 +242,7 @@ public static class SharedFunctions
         }
     }
 
-    public static void CopyMouseIntoPointer(this World world, Mouse mouse)
+    public static void CopyMouseIntoPointer(this World world, Mouse mouse, uint mask = uint.MaxValue)
     {
         Schema schema = world.Schema;
         Definition pointerDefinition = Archetype.Get<Pointer>(schema).definition;
@@ -235,6 +252,7 @@ public static class SharedFunctions
         }
 
         Pointer pointer = mouse.AsEntity().As<Pointer>();
+        pointer.Mask = mask;
         pointer.Position = mouse.Position;
         pointer.HasPrimaryIntent = mouse.IsPressed(Mouse.Button.LeftButton);
         pointer.HasSecondaryIntent = mouse.IsPressed(Mouse.Button.RightButton);
@@ -262,10 +280,10 @@ public static class SharedFunctions
 
     public static void SetPressedCharacters(this World world)
     {
-        if (world.TryGetFirst(out Keyboard keyboard))
+        USpan<Keyboard.Button> pressedBuffer = stackalloc Keyboard.Button[128];
+        foreach (Keyboard keyboard in world.GetAll<Keyboard>())
         {
             Settings settings = world.GetFirst<Settings>();
-            USpan<Keyboard.Button> pressedBuffer = stackalloc Keyboard.Button[128];
             uint pressedCount = keyboard.GetPressedControls(pressedBuffer);
             ref PressedCharacters pressed = ref settings.PressedCharacters;
             pressed = default;
