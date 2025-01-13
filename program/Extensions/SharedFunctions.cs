@@ -281,12 +281,12 @@ public static class SharedFunctions
     public static void SetPressedCharacters(this World world)
     {
         USpan<Keyboard.Button> pressedBuffer = stackalloc Keyboard.Button[128];
+        Settings settings = world.GetFirst<Settings>();
+        ref PressedCharacters pressed = ref settings.PressedCharacters;
+        pressed.Clear();
         foreach (Keyboard keyboard in world.GetAll<Keyboard>())
         {
-            Settings settings = world.GetFirst<Settings>();
             uint pressedCount = keyboard.GetPressedControls(pressedBuffer);
-            ref PressedCharacters pressed = ref settings.PressedCharacters;
-            pressed = default;
             for (uint i = 0; i < pressedCount; i++)
             {
                 Keyboard.Button pressedControl = pressedBuffer[i];

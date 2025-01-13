@@ -15,13 +15,14 @@ namespace Abacus
     public unsafe partial struct WindowCreationTest : IProgram
     {
         private readonly World world;
+        private readonly Settings settings;
         private TimeSpan time;
         private byte state;
 
         private WindowCreationTest(World world)
         {
             this.world = world;
-            new Settings(world);
+            settings = new(world);
         }
 
         void IProgram.Finish(in StatusCode statusCode)
@@ -82,7 +83,7 @@ namespace Abacus
             Camera camera = Camera.CreateOrthographic(world, window, 1f);
             camera.Mask = state;
 
-            Canvas canvas = new(world, camera, state, state);
+            Canvas canvas = new(world, settings, camera, state, state);
 
             Image square = new(canvas);
             square.Size = new(100, 100);

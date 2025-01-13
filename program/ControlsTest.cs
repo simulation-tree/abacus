@@ -23,6 +23,7 @@ namespace Abacus
     {
         private readonly Window window;
         private readonly Menu rightClickMenu;
+        private readonly Dropdown enumDropdown;
 
         private readonly World World => window.GetWorld();
 
@@ -34,34 +35,35 @@ namespace Abacus
 
             Settings settings = new(world);
             Camera camera = Camera.CreateOrthographic(world, window, 1f);
-            Canvas canvas = new(world, camera);
+            Canvas canvas = new(world, settings, camera);
 
             VirtualWindow box = VirtualWindow.Create<ControlsDemoWindow>(world, canvas);
             box.Size = new(300, 300);
             box.Position = new(40, 40);
             box.Z += Settings.ZScale;
             //box.Anchor = new(new(2f, true), new(2f, true), new(0f, false), new(2f, true), new(2f, true), new(0f, false));
-
+            
             Image image = new(canvas);
             image.Size = new(200, 200);
             image.Position = new(100, 100);
             Resizable resizable = image.AsEntity().Become<Resizable>();
             resizable.Boundary = IsResizable.Boundary.All;
-
+            DropShadow dropShadow = new(canvas, image);
+            
             Label anotherLabel = new(canvas, "Hello there\nWith another line\nNice");
             anotherLabel.Position = new(105, 150);
             anotherLabel.Color = new(0, 0, 0, 1);
             anotherLabel.Z = Settings.ZScale;
 
-            Dropdown anotherDropdown = new Dropdown<DropdownOptions>(canvas, new(180f, settings.SingleLineHeight));
-            anotherDropdown.Position = new(5, -5);
-            anotherDropdown.Size = new(180f, settings.SingleLineHeight);
-            anotherDropdown.Anchor = Anchor.TopLeft;
-            anotherDropdown.Pivot = new(0f, 1f, 0f);
-            anotherDropdown.BackgroundColor = new(0.2f, 0.2f, 0.2f, 1);
-            anotherDropdown.LabelColor = new(1, 1, 1, 1);
-            anotherDropdown.TriangleColor = new(1, 1, 1, 1);
-            anotherDropdown.Z = Settings.ZScale;
+            enumDropdown = new Dropdown<DropdownOptions>(canvas, new(180f, settings.SingleLineHeight));
+            enumDropdown.Position = new(5, -5);
+            enumDropdown.Size = new(180f, settings.SingleLineHeight);
+            enumDropdown.Anchor = Anchor.TopLeft;
+            enumDropdown.Pivot = new(0f, 1f, 0f);
+            enumDropdown.BackgroundColor = new(0.2f, 0.2f, 0.2f, 1);
+            enumDropdown.LabelColor = new(1, 1, 1, 1);
+            enumDropdown.TriangleColor = new(1, 1, 1, 1);
+            enumDropdown.Z = Settings.ZScale;
 
             Vector2 optionSize = new(100, settings.SingleLineHeight);
             rightClickMenu = new(canvas, optionSize, new(&ChoseMenuOption));
@@ -77,8 +79,6 @@ namespace Abacus
             rightClickMenu.Position = new(200, 300);
             rightClickMenu.Pivot = new(0, 1f, 0f);
             rightClickMenu.IsExpanded = false;
-
-            DropShadow dropShadow = new(canvas, image);
         }
 
         [UnmanagedCallersOnly]
@@ -153,7 +153,7 @@ namespace Abacus
 
             readonly unsafe void IVirtualWindow.OnCreated(Transform container, Canvas canvas)
             {
-                float singleLineHeight = canvas.GetSettings().SingleLineHeight;
+                float singleLineHeight = canvas.Settings.SingleLineHeight;
                 float gap = 4f;
                 float y = -gap;
                 float indent = 0f;

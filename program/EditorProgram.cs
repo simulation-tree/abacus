@@ -138,19 +138,19 @@ namespace Editor
                 {
                     if (launcherWindow == default)
                     {
-                        launcherWindow = new(world, new(200, 200), new(200, 200));
+                        launcherWindow = new(world, settings, new(200, 200), new(200, 200));
                     }
                 }
                 else
                 {
                     if (worldWindow == default)
                     {
-                        worldWindow = new(world, new(0, 200), new(200, 200));
+                        worldWindow = new(world, settings, new(0, 200), new(200, 200));
                     }
 
                     if (entityWindow == default)
                     {
-                        entityWindow = new(world, new(400, 200), new(200, 200));
+                        entityWindow = new(world, settings, new(400, 200), new(200, 200));
                     }
                 }
 
@@ -264,11 +264,10 @@ namespace Editor
             }
         }
 
-        private static void SetPressedCharacters(World world)
+        private void SetPressedCharacters(World world)
         {
             if (world.TryGetFirst(out Keyboard keyboard))
             {
-                Settings settings = world.GetFirst<Settings>();
                 USpan<Keyboard.Button> pressedBuffer = stackalloc Keyboard.Button[128];
                 uint pressedCount = keyboard.GetPressedControls(pressedBuffer);
                 ref PressedCharacters pressed = ref settings.PressedCharacters;
@@ -296,7 +295,7 @@ namespace Editor
             archetype.Add<Window>();
         }
 
-        public unsafe EditorWindow(World world, Vector2 position, Vector2 size)
+        public unsafe EditorWindow(World world, Settings settings, Vector2 position, Vector2 size)
         {
             FixedString title = default(T).Title;
             Window window = new(world, title, position, size, "vulkan", new(&CloseFunction.OnWindowClosed));
@@ -306,7 +305,7 @@ namespace Editor
             Camera camera = Camera.CreateOrthographic(world, window, 1f);
             camera.SetParent(window);
 
-            Canvas canvas = new(world, camera);
+            Canvas canvas = new(world, settings, camera);
             canvas.SetParent(window);
 
             Transform container = new(world);
@@ -358,7 +357,7 @@ namespace Editor
 
         unsafe void IVirtualWindow.OnCreated(Transform container, Canvas canvas)
         {
-            Settings settings = canvas.GetSettings();
+            Settings settings = canvas.Settings;
 
             Button newButton = new(new(&PressedNew), canvas);
             newButton.SetParent(container);
@@ -402,7 +401,7 @@ namespace Editor
 
         unsafe void IVirtualWindow.OnCreated(Transform container, Canvas canvas)
         {
-            Settings settings = canvas.GetSettings();
+            Settings settings = canvas.Settings;
 
             Button newButton = new(new(&PressedReturn), canvas);
             newButton.SetParent(container);
@@ -442,7 +441,7 @@ namespace Editor
         public static ref EditorState GetEditorState<T>(this T entity) where T : unmanaged, IEntity
         {
             World world = entity.GetWorld();
-            if (world.TryGetFirstEntityContainingComponent<EditorState>(out uint editorStateEntity))
+            if (world.TryGetFirstComponent<EditorState>(out uint editorStateEntity))
             {
                 return ref world.GetComponent<EditorState>(editorStateEntity);
             }

@@ -79,7 +79,7 @@ namespace Abacus
 
             Settings settings = new(world);
             Camera uiCamera = Camera.CreateOrthographic(world, window, 1f);
-            Canvas canvas = new(world, uiCamera);
+            Canvas canvas = new(world, settings, uiCamera);
 
             Label fpsLabel = new(canvas, "{{fps}}");
             fpsLabel.Anchor = Anchor.TopLeft;

@@ -36,8 +36,8 @@ namespace Abacus
             Camera secondCamera = Camera.CreateOrthographic(world, secondWindow, 1f);
             secondCamera.Mask = 2;
 
-            Canvas firstCanvas = new(world, firstCamera, firstCamera.Mask, firstCamera.Mask);
-            Canvas secondCanvas = new(world, secondCamera, secondCamera.Mask, secondCamera.Mask);
+            Canvas firstCanvas = new(world, settings, firstCamera, firstCamera.Mask, firstCamera.Mask);
+            Canvas secondCanvas = new(world, settings, secondCamera, secondCamera.Mask, secondCamera.Mask);
 
             Image firstSquare = new(firstCanvas);
             firstSquare.Size = new(100, 100);
