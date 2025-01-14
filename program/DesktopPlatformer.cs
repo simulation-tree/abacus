@@ -48,7 +48,7 @@ namespace Abacus
         {
             if (window.IsDestroyed())
             {
-                return StatusCode.Success(1);
+                return StatusCode.Success(0);
             }
 
             UpdateCollidersToMatchDisplay(World);
@@ -81,7 +81,7 @@ namespace Abacus
             window.IsTransparent = true;
             window.IsBorderless = true;
             window.AlwaysOnTop = true;
-            window.GetClearColor() = new(0, 0, 0, 0);
+            window.SetClearColor(new(0, 0, 0, 0));
 
             Settings settings = new(world);
             camera = new(world, window, CameraFieldOfView.FromDegrees(60));
@@ -132,7 +132,7 @@ namespace Abacus
             MeshRenderer playerRenderer = playerBody.AsEntity().Become<MeshRenderer>();
             playerRenderer.Mesh = quadMesh;
             playerRenderer.Material = playerMaterial;
-            playerRenderer.Mask = 1;
+            playerRenderer.RenderMask = new LayerMask().Set(1);
 
             playerBody.AddComponent(Color.White);
             playerBody.AddComponent(new GroundedState());

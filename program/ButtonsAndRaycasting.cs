@@ -45,7 +45,7 @@ namespace Abacus
         {
             if (window.IsDestroyed())
             {
-                return StatusCode.Success(1);
+                return StatusCode.Success(0);
             }
 
             Transform cameraTransform = worldCamera.AsEntity().Become<Transform>();
@@ -142,7 +142,7 @@ namespace Abacus
             textMaterial.AddPushBinding<LocalToWorld>();
 
             //crate test cube
-            MeshRenderer waveRenderer = new(world, cubeMesh, unlitWorldMaterial, worldCamera.GetMask());
+            MeshRenderer waveRenderer = new(world, cubeMesh, unlitWorldMaterial, worldCamera.RenderMask);
             Transform waveTransform = waveRenderer.AsEntity().Become<Transform>();
             waveRenderer.AddComponent(Color.Red);
             waveRenderer.AddComponent(new IsBody(new CubeShape(0.5f), IsBody.Type.Static));
@@ -160,7 +160,7 @@ namespace Abacus
             anotherBox.Color = new(0, 0.5f, 1, 1);
 
             TextMesh textMesh = new(world, "abacus 123 hiii", robotoFont);
-            TextRenderer textRenderer = new(world, textMesh, textMaterial, uiCamera.GetMask());
+            TextRenderer textRenderer = new(world, textMesh, textMaterial, uiCamera.RenderMask);
             textRenderer.SetParent(anotherBox);
             Transform textTransform = textRenderer.AsEntity().Become<Transform>();
             textTransform.LocalPosition = new(4f, -4f, 0.1f);

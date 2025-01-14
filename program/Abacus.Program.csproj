@@ -110,6 +110,7 @@
 		<ProjectReference Include="..\..\simulation\generator\Simulation.ImplementationGenerators.csproj">
 			<OutputItemType>Analyzer</OutputItemType>
 			<ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+			<Visible>false</Visible>
 		</ProjectReference>
     </ItemGroup>
 

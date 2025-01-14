@@ -18,7 +18,7 @@ namespace Abacus
             time += delta;
             if (time >= TimeSpan.FromSeconds(5f))
             {
-                return StatusCode.Success(1);
+                return StatusCode.Success(0);
             }
 
             return StatusCode.Continue;

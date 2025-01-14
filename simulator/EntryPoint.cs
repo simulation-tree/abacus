@@ -27,7 +27,7 @@ using (World world = new(schema))
         SimulationProgram editorProgram = SimulationProgram.Create(world, new ControlsTest());
 #endif
 
-        using (SimulationProgram program = SimulationProgram.Create(world, new ControlsTest()))
+        using (SimulationProgram program = SimulationProgram.Create(world, new VoxelGame.VoxelGameProgram()))
         {
             bool finished = program.IsFinished(out statusCode);
 #if EDITOR

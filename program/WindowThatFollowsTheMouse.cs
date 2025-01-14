@@ -39,7 +39,7 @@ namespace Abacus
         {
             if (followerWindow.IsDestroyed())
             {
-                return StatusCode.Success(1);
+                return StatusCode.Success(0);
             }
 
             bool holdingShift = false;

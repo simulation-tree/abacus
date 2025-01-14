@@ -48,7 +48,7 @@ namespace Abacus
         {
             if (window.IsDestroyed())
             {
-                return StatusCode.Success(1);
+                return StatusCode.Success(0);
             }
 
             if (World.TryGetFirst(out Keyboard keyboard))
@@ -155,7 +155,7 @@ namespace Abacus
                     MeshRenderer projectileRenderer = projectileEntity.Become<MeshRenderer>();
                     projectileRenderer.Mesh = sphereMesh;
                     projectileRenderer.Material = unlitMaterial;
-                    projectileRenderer.Mask = 1;
+                    projectileRenderer.RenderMask = new LayerMask().Set(1);
 
                     projectileEntity.AddComponent(Color.White);
                     projectileEntity.AddComponent(new DestroyAfterTime(5f));
@@ -208,7 +208,7 @@ namespace Abacus
             MeshRenderer ballRenderer = ballEntity.Become<MeshRenderer>();
             ballRenderer.Mesh = sphereMesh;
             ballRenderer.Material = unlitMaterial;
-            ballRenderer.Mask = 1;
+            ballRenderer.RenderMask = new LayerMask().Set(1);
 
             ballEntity.AddComponent(Color.Red);
             Transform ballTransform = ballEntity.Become<Transform>();
@@ -220,7 +220,7 @@ namespace Abacus
             MeshRenderer floorRenderer = floorEntity.Become<MeshRenderer>();
             floorRenderer.Mesh = cubeMesh;
             floorRenderer.Material = unlitMaterial;
-            floorRenderer.Mask = 1;
+            floorRenderer.RenderMask = new LayerMask().Set(1);
 
             floorEntity.AddComponent(Color.Green);
 
@@ -234,7 +234,7 @@ namespace Abacus
             MeshRenderer quadRenderer = quadEntity.Become<MeshRenderer>();
             quadRenderer.Mesh = quadMesh;
             quadRenderer.Material = unlitMaterial;
-            quadRenderer.Mask = 1;
+            quadRenderer.RenderMask = new LayerMask().Set(1);
 
             quadEntity.AddComponent(Color.Blue);
             Transform quadTransform = quadEntity.Become<Transform>();

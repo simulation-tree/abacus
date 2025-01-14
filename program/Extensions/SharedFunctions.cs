@@ -3,6 +3,7 @@ using InputDevices;
 using InteractionKit;
 using InteractionKit.Components;
 using InteractionKit.Functions;
+using Rendering;
 using System;
 using System.Numerics;
 using System.Runtime.InteropServices;
@@ -17,6 +18,7 @@ public static class SharedFunctions
     private static bool hasLastPointerPosition;
     private static readonly System.Collections.Generic.List<double> frameTimes = new();
     private static double averageFps;
+    private static DateTime nextFpsUpdateTime;
 
     public static void DestroyTemporaryEntities(this World world, TimeSpan deltaSpan)
     {
@@ -149,18 +151,19 @@ public static class SharedFunctions
     {
         DateTime now = DateTime.UtcNow;
         frameTimes.Add(now.TimeOfDay.TotalSeconds);
-        if (frameTimes.Count > 20)
-        {
-            frameTimes.RemoveAt(0);
-        }
 
-        averageFps = 0f;
-        if (frameTimes.Count > 1)
+        if (now >= nextFpsUpdateTime)
         {
-            double first = frameTimes[0];
-            double last = frameTimes[^1];
-            double total = last - first;
-            averageFps = frameTimes.Count / total;
+            nextFpsUpdateTime = now + TimeSpan.FromSeconds(0.5f);
+            averageFps = 0f;
+            if (frameTimes.Count > 1)
+            {
+                double first = frameTimes[0];
+                double last = frameTimes[^1];
+                double total = last - first;
+                averageFps = frameTimes.Count / total;
+                frameTimes.Clear();
+            }
         }
     }
 
@@ -169,16 +172,16 @@ public static class SharedFunctions
         foreach (Mouse mouse in world.GetAll<Mouse>())
         {
             Entity window = mouse.Window;
-            uint mask = 0;
+            LayerMask selectionMask = new();
             foreach (Canvas canvas in world.GetAll<Canvas>())
             {
                 if (canvas.Camera.Destination == window)
                 {
-                    mask |= canvas.SelectionMask;
+                    selectionMask |= canvas.SelectionMask;
                 }
             }
 
-            CopyMouseIntoPointer(world, mouse, mask);
+            CopyMouseIntoPointer(world, mouse, selectionMask);
             UpdateCursorIconBasedOnPointerState(world, mouse);
         }
 
@@ -188,41 +191,39 @@ public static class SharedFunctions
     public static void UpdateCursorIconBasedOnPointerState(this World world, Mouse mouse)
     {
         Pointer pointer = mouse.AsEntity().As<Pointer>();
-        uint selectionMask = pointer.Mask;
+        LayerMask pointerSelectionMask = pointer.SelectionMask;
 
-        bool setCursor = false;
+        bool nonDefaultCursor = false;
         ComponentQuery<IsResizable> resizableQuery = new(world);
         foreach (var r in resizableQuery)
         {
-            uint mask = r.component1.mask;
-            if ((mask & selectionMask) == 0)
+            LayerMask resizableMask = r.component1.selectionMask;
+            if (pointerSelectionMask.ContainsAny(resizableMask))
             {
-                continue;
-            }
-
-            Resizable resizable = new(world, r.entity);
-            IsResizable.Boundary boundary = resizable.GetBoundary(pointer.Position);
-            if (boundary != default)
-            {
-                mouse.State.cursor = boundary switch
+                Resizable resizable = new(world, r.entity);
+                IsResizable.Boundary boundary = resizable.GetBoundary(pointer.Position);
+                if (boundary != default)
                 {
-                    IsResizable.Boundary.Top => Mouse.Cursor.ResizeVertical,
-                    IsResizable.Boundary.Bottom => Mouse.Cursor.ResizeVertical,
-                    IsResizable.Boundary.Left => Mouse.Cursor.ResizeHorizontal,
-                    IsResizable.Boundary.Right => Mouse.Cursor.ResizeHorizontal,
-                    IsResizable.Boundary.TopLeft => Mouse.Cursor.ResizeNWSE,
-                    IsResizable.Boundary.TopRight => Mouse.Cursor.ResizeNESW,
-                    IsResizable.Boundary.BottomLeft => Mouse.Cursor.ResizeNESW,
-                    IsResizable.Boundary.BottomRight => Mouse.Cursor.ResizeNWSE,
-                    _ => Mouse.Cursor.Default,
-                };
+                    mouse.State.cursor = boundary switch
+                    {
+                        IsResizable.Boundary.Top => Mouse.Cursor.ResizeVertical,
+                        IsResizable.Boundary.Bottom => Mouse.Cursor.ResizeVertical,
+                        IsResizable.Boundary.Left => Mouse.Cursor.ResizeHorizontal,
+                        IsResizable.Boundary.Right => Mouse.Cursor.ResizeHorizontal,
+                        IsResizable.Boundary.TopLeft => Mouse.Cursor.ResizeNWSE,
+                        IsResizable.Boundary.TopRight => Mouse.Cursor.ResizeNESW,
+                        IsResizable.Boundary.BottomLeft => Mouse.Cursor.ResizeNESW,
+                        IsResizable.Boundary.BottomRight => Mouse.Cursor.ResizeNWSE,
+                        _ => Mouse.Cursor.Default,
+                    };
 
-                setCursor = true;
+                    nonDefaultCursor = true;
+                }
             }
         }
 
         Entity hoveringOver = pointer.HoveringOver;
-        if (hoveringOver != default)
+        if (hoveringOver != default && !hoveringOver.IsDestroyed())
         {
             if (hoveringOver.Is<TextField>())
             {
@@ -233,16 +234,16 @@ public static class SharedFunctions
                 mouse.State.cursor = Mouse.Cursor.Hand;
             }
 
-            setCursor = true;
+            nonDefaultCursor = true;
         }
 
-        if (!setCursor)
+        if (!nonDefaultCursor)
         {
             mouse.State.cursor = Mouse.Cursor.Default;
         }
     }
 
-    public static void CopyMouseIntoPointer(this World world, Mouse mouse, uint mask = uint.MaxValue)
+    public static void CopyMouseIntoPointer(this World world, Mouse mouse, LayerMask selectionMask)
     {
         Schema schema = world.Schema;
         Definition pointerDefinition = Archetype.Get<Pointer>(schema).definition;
@@ -252,7 +253,7 @@ public static class SharedFunctions
         }
 
         Pointer pointer = mouse.AsEntity().As<Pointer>();
-        pointer.Mask = mask;
+        pointer.SelectionMask = selectionMask;
         pointer.Position = mouse.Position;
         pointer.HasPrimaryIntent = mouse.IsPressed(Mouse.Button.LeftButton);
         pointer.HasSecondaryIntent = mouse.IsPressed(Mouse.Button.RightButton);

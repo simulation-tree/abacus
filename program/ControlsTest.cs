@@ -30,7 +30,7 @@ namespace Abacus
         private unsafe ControlsTest(World world)
         {
             window = new(world, "Editor", new(200, 200), new(900, 720), "vulkan", new(&OnWindowClosed));
-            window.GetClearColor() = new(0.5f, 0.5f, 0.5f, 1);
+            window.SetClearColor(new(0.5f, 0.5f, 0.5f, 1));
             window.IsResizable = true;
 
             Settings settings = new(world);
@@ -97,12 +97,12 @@ namespace Abacus
         {
             if (!IsAnyVirtualWindowOpen(World))
             {
-                return StatusCode.Success(1);
+                return StatusCode.Success(0);
             }
 
             if (!IsAnyWindowOpen(World))
             {
-                return StatusCode.Success(2);
+                return StatusCode.Success(1);
             }
 
             ToggleRightClickMenu(World);

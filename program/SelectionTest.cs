@@ -26,7 +26,7 @@ namespace Abacus
         {
             if (!IsAnyWindowOpen(World))
             {
-                return StatusCode.Success(1);
+                return StatusCode.Success(0);
             }
 
             SharedFunctions.UpdateUISettings(World);

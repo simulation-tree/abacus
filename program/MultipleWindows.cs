@@ -21,23 +21,26 @@ namespace Abacus
         {
             this.world = world;
 
+            LayerMask firstLayer = new LayerMask().Set(1);
+            LayerMask secondLayer = new LayerMask().Set(2);
+
             firstWindow = new(world, "First Window", new(200, 200), new(300, 300), "vulkan", new(&OnWindowClosed));
-            firstWindow.GetClearColor() = new(0.2f, 0.2f, 0.4f, 1.0f);
+            firstWindow.SetClearColor(new(0.2f, 0.2f, 0.4f, 1.0f));
             firstWindow.IsResizable = true;
 
             secondWindow = new(world, "Second Window", new(500, 200), new(300, 300), "vulkan", new(&OnWindowClosed));
-            secondWindow.GetClearColor() = new(0.4f, 0.2f, 0.2f, 1.0f);
+            secondWindow.SetClearColor(new(0.4f, 0.2f, 0.2f, 1.0f));
             secondWindow.IsResizable = true;
 
             Settings settings = new(world);
             Camera firstCamera = Camera.CreateOrthographic(world, firstWindow, 1f);
-            firstCamera.Mask = 1;
+            firstCamera.RenderMask = firstLayer;
 
             Camera secondCamera = Camera.CreateOrthographic(world, secondWindow, 1f);
-            secondCamera.Mask = 2;
+            secondCamera.RenderMask = secondLayer;
 
-            Canvas firstCanvas = new(world, settings, firstCamera, firstCamera.Mask, firstCamera.Mask);
-            Canvas secondCanvas = new(world, settings, secondCamera, secondCamera.Mask, secondCamera.Mask);
+            Canvas firstCanvas = new(world, settings, firstCamera, firstLayer, firstLayer);
+            Canvas secondCanvas = new(world, settings, secondCamera, secondLayer, secondLayer);
 
             Image firstSquare = new(firstCanvas);
             firstSquare.Size = new(100, 100);
@@ -45,7 +48,7 @@ namespace Abacus
             firstSquare.Color = new(1, 0.5f, 0.5f, 1.0f);
             Resizable resizable = firstSquare.AsEntity().Become<Resizable>();
             resizable.Boundary = IsResizable.Boundary.All;
-            resizable.Mask = 1;
+            resizable.SelectionMask = firstLayer;
 
             Image secondSquare = new(secondCanvas);
             secondSquare.Size = new(100, 100);
@@ -53,7 +56,7 @@ namespace Abacus
             secondSquare.Color = new(0.5f, 0.5f, 1, 1.0f);
             resizable = secondSquare.AsEntity().Become<Resizable>();
             resizable.Boundary = IsResizable.Boundary.All;
-            resizable.Mask = 2;
+            resizable.SelectionMask = secondLayer;
         }
 
         void IProgram.Finish(in StatusCode statusCode)
@@ -69,7 +72,7 @@ namespace Abacus
         {
             if (firstWindow.IsDestroyed() && secondWindow.IsDestroyed())
             {
-                return StatusCode.Success(1);
+                return StatusCode.Success(0);
             }
 
             SharedFunctions.UpdateUISettings(world);

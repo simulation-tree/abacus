@@ -4,6 +4,7 @@ using InteractionKit.Components;
 using Rendering;
 using Simulation;
 using System;
+using System.Diagnostics;
 using System.Numerics;
 using System.Runtime.InteropServices;
 using Unmanaged;
@@ -23,6 +24,7 @@ namespace Abacus
         {
             this.world = world;
             settings = new(world);
+            time = TimeSpan.FromSeconds(0.5f);
         }
 
         void IProgram.Finish(in StatusCode statusCode)
@@ -42,7 +44,7 @@ namespace Abacus
                 state++;
                 if (state == 1)
                 {
-                    CreateWindow("First Window", new(100, 100), new(1f, 0f, 0f, 1f));
+                    CreateWindow("First Window", new(300, 300), new(50, 50), new(1f, 0f, 0f, 1f), 0);
                     time = TimeSpan.FromSeconds(2f);
                 }
                 else if (state == 2)
@@ -52,13 +54,23 @@ namespace Abacus
                 }
                 else if (state == 3)
                 {
-                    CreateWindow("Second Window", new(200, 200), new(0f, 1f, 0f, 1f));
-                    CreateWindow("Third Window", new(400, 200), new(0f, 0f, 1f, 1f));
-                    time = TimeSpan.FromSeconds(15f);
+                    CreateWindow("Second Window", new(200, 300), new(0, 0), new(0f, 1f, 0f, 1f), 1);
+                    CreateWindow("Third Window", new(400, 300), new(100, 100), new(0f, 0f, 1f, 1f), 2);
+                    time = TimeSpan.FromSeconds(2f);
                 }
                 else if (state == 4)
                 {
-                    return StatusCode.Success(1);
+                    DestroyAllWindows();
+                    time = TimeSpan.FromSeconds(0.5f);
+                }
+                else if (state == 5)
+                {
+                    CreateWindow("Fourth Window", new(300, 300), new(50, 50), new(1f, 1f, 0f, 1f), 1);
+                    time = TimeSpan.FromSeconds(2f);
+                }
+                else if (state == 6)
+                {
+                    return StatusCode.Success(0);
                 }
             }
 
@@ -66,7 +78,7 @@ namespace Abacus
             {
                 if (world.CountEntities<Window>() == 0)
                 {
-                    return StatusCode.Success(2);
+                    return StatusCode.Success(1);
                 }
             }
 
@@ -74,25 +86,30 @@ namespace Abacus
             return StatusCode.Continue;
         }
 
-        private readonly void CreateWindow(FixedString title, Vector2 position, Vector4 color)
+        private readonly void CreateWindow(FixedString title, Vector2 windowPosition, Vector2 squarePosition, Vector4 color, Layer layer)
         {
-            Window window = new(world, title, position, new(200, 200), "vulkan", new(&OnWindowClosed));
-            window.GetClearColor() = Vector4.Lerp(new(0f, 0f, 0f, 1f), color, 0.4f);
+            LayerMask layerMask = new LayerMask().Set(layer);
+
+            Window window = new(world, title, windowPosition, new(200, 200), "vulkan", new(&OnWindowClosed));
+            window.SetClearColor(Vector4.Lerp(new(0f, 0f, 0f, 1f), color, 0.3f));
             window.IsResizable = true;
 
-            Camera camera = Camera.CreateOrthographic(world, window, 1f);
-            camera.Mask = state;
+            Camera camera = Camera.CreateOrthographic(world, window, 1f, layerMask);
+            camera.SetParent(window);
 
-            Canvas canvas = new(world, settings, camera, state, state);
+            Canvas canvas = new(world, settings, camera, layerMask, layerMask);
+            canvas.SetParent(window);
 
             Image square = new(canvas);
             square.Size = new(100, 100);
-            square.Position = new(50, 50);
+            square.Position = squarePosition;
             square.Color = color;
+
+            Trace.WriteLine(square.GetRenderMask());
 
             Resizable resizable = square.AsEntity().Become<Resizable>();
             resizable.Boundary = IsResizable.Boundary.All;
-            resizable.Mask = state;
+            resizable.SelectionMask = layerMask;
         }
 
         private readonly void DestroyAllWindows()

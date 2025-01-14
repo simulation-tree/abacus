@@ -54,7 +54,7 @@ namespace Abacus
             if (time.TotalSeconds > 120f || window.IsDestroyed())
             {
                 Trace.WriteLine("Conditions reached for finishing the demo");
-                return StatusCode.Success(1); //source of "shutdown" event
+                return StatusCode.Success(0); //source of "shutdown" event
             }
 
             float deltaSeconds = (float)delta.TotalSeconds;
@@ -67,7 +67,7 @@ namespace Abacus
             if (TestWindowEntity(World, deltaSeconds))
             {
                 //propagating upwards
-                return StatusCode.Success(2);
+                return StatusCode.Success(1);
             }
 
             return StatusCode.Continue;
