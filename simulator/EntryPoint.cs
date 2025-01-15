@@ -6,6 +6,7 @@ using System;
 using System.Diagnostics;
 using Unmanaged;
 using Worlds;
+using Types;
 using SimulationProgram = Simulation.Program;
 using Simulator = AbacusSimulator.AbacusSimulator;
 
