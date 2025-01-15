@@ -7,7 +7,6 @@ using System.Diagnostics;
 using Unmanaged;
 using Worlds;
 using Types;
-using SimulationProgram = Simulation.Program;
 using Simulator = AbacusSimulator.AbacusSimulator;
 
 TypeLayoutRegistry.RegisterAll();
@@ -25,10 +24,10 @@ using (World world = new(schema))
     using (Simulator simulator = new(world))
     {
 #if EDITOR
-        SimulationProgram editorProgram = SimulationProgram.Create(world, new ControlsTest());
+        var editorProgram = new Program<ControlsTest>(world);
 #endif
 
-        using (SimulationProgram program = SimulationProgram.Create(world, new VoxelGame.VoxelGameProgram()))
+        using (var program = new Program<ControlsTest>(world))
         {
             bool finished = program.IsFinished(out statusCode);
 #if EDITOR
