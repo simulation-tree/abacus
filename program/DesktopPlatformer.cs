@@ -389,7 +389,7 @@ namespace Abacus
             [UnmanagedCallersOnly]
             static void GroundHitCallback(World world, RaycastRequest raycast, RaycastHit* hits, uint hitCount)
             {
-                uint playerEntity = (uint)raycast.identifier;
+                uint playerEntity = (uint)raycast.userData;
                 for (uint i = 0; i < hitCount; i++)
                 {
                     RaycastHit hit = hits[i];

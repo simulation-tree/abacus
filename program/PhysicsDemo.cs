@@ -250,7 +250,7 @@ namespace Abacus
         [UnmanagedCallersOnly]
         private unsafe static void RaycastHitCallback(World world, RaycastRequest raycast, RaycastHit* hitsPointer, uint hitCount)
         {
-            TimeSpan delta = new((long)raycast.identifier);
+            TimeSpan delta = new((long)raycast.userData);
             USpan<RaycastHit> hits = new(hitsPointer, hitCount);
             foreach (RaycastHit hit in hits)
             {
