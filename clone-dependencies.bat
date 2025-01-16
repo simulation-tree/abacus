@@ -37,3 +37,4 @@ git clone https://github.com/game-simulations/physics-systems.git
 git clone https://github.com/game-simulations/input-device-systems.git
 git clone https://github.com/game-simulations/text-rendering-systems.git
 git clone https://github.com/game-simulations/vulkan-renderer.git
+git clone https://github.com/game-simulations/file-dialog.git

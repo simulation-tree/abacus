@@ -105,8 +105,6 @@ namespace Abacus
             square.Position = squarePosition;
             square.Color = color;
 
-            Trace.WriteLine(square.GetRenderMask());
-
             Resizable resizable = square.AsEntity().Become<Resizable>();
             resizable.Boundary = IsResizable.Boundary.All;
             resizable.SelectionMask = layerMask;

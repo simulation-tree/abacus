@@ -34,6 +34,7 @@
 		<PackageReference Include="Vortice.SPIRV" Version="1.0.3" />
 		<PackageReference Include="Vortice.SpirvCross" Version="1.5.1" />
 		<PackageReference Include="Vortice.Vulkan" Version="2.1.0" />
+		<PackageReference Include="NativeFileDialogSharp" Version="0.6.0-alpha" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -45,6 +46,7 @@
 			<OutputItemType>Analyzer</OutputItemType>
 			<ReferenceOutputAssembly>false</ReferenceOutputAssembly>
 		</ProjectReference>
+		<ProjectReference Include="..\..\file-dialog\source\FileDialog.csproj" />
 		<ProjectReference Include="..\..\font-systems\source\Fonts.Systems.csproj" />
 		<ProjectReference Include="..\..\input-device-systems\source\InputDevices.Systems.csproj" />
 		<ProjectReference Include="..\..\interaction-kit\source\InteractionKit.csproj" />

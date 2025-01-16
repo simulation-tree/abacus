@@ -1,6 +1,7 @@
 ﻿using Automations.Systems;
 using Cameras.Systems;
 using Data.Systems;
+using FileDialog.Systems;
 using Fonts.Systems;
 using InputDevices.Systems;
 using InteractionKit.Systems;
@@ -44,6 +45,7 @@ namespace AbacusSimulator
             simulator.AddSystem<TextRasterizationSystem>();
             simulator.AddSystem<PhysicsSystem>();
             simulator.AddSystem<CameraSystem>();
+            simulator.AddSystem<FileDialogSystem>();
 
             ref RenderingSystems renderingSystems = ref simulator.AddSystem<RenderingSystems>().Value;
             renderingSystems.RegisterRenderingBackend<VulkanBackend>();
@@ -51,6 +53,7 @@ namespace AbacusSimulator
 
         public readonly void Dispose()
         {
+            simulator.RemoveSystem<FileDialogSystem>();
             simulator.RemoveSystem<RenderingSystems>();
             simulator.RemoveSystem<CameraSystem>();
             simulator.RemoveSystem<PhysicsSystem>();

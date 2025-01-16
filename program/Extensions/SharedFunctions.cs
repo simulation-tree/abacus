@@ -1,5 +1,4 @@
-﻿using Collections;
-using InputDevices;
+﻿using InputDevices;
 using InteractionKit;
 using InteractionKit.Components;
 using InteractionKit.Functions;
@@ -175,7 +174,8 @@ public static class SharedFunctions
             LayerMask selectionMask = new();
             foreach (Canvas canvas in world.GetAll<Canvas>())
             {
-                if (canvas.Camera.Destination == window)
+                Cameras.Camera camera = canvas.Camera;
+                if (!camera.IsDestroyed() && camera.Destination == window)
                 {
                     selectionMask |= canvas.SelectionMask;
                 }

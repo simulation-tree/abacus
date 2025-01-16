@@ -93,6 +93,7 @@
     </ItemGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\..\file-dialog\source\FileDialog.csproj" />
         <ProjectReference Include="..\..\meshes-9s\source\Meshes.NineSliced.csproj" />
         <ProjectReference Include="..\..\worlds\source\Worlds.csproj" />
         <ProjectReference Include="..\..\automations\source\Automations.csproj" />

@@ -70,7 +70,7 @@ namespace Editor
             this.args = new((uint)args.Length);
             for (uint i = 0; i < args.Length; i++)
             {
-                this.args[i] = args[i];
+                this.args[i] = new(args[i]);
             }
         }
 

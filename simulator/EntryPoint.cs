@@ -1,12 +1,11 @@
 ﻿using Abacus;
 using Data;
-using Editor;
 using Simulation;
 using System;
 using System.Diagnostics;
+using Types;
 using Unmanaged;
 using Worlds;
-using Types;
 using Simulator = AbacusSimulator.AbacusSimulator;
 
 TypeLayoutRegistry.RegisterAll();
@@ -27,7 +26,7 @@ using (World world = new(schema))
         var editorProgram = new Program<ControlsTest>(world);
 #endif
 
-        using (var program = new Program<ControlsTest>(world))
+        using (var program = new Program<MultipleWindowsAndFileDialog>(world))
         {
             bool finished = program.IsFinished(out statusCode);
 #if EDITOR
