@@ -114,12 +114,12 @@ namespace Abacus
             window.IsResizable = true;
             window.BecomeMaximized();
 
-            worldCamera = new(world, window, CameraFieldOfView.FromDegrees(90));
+            worldCamera = new(world, window, CameraSettings.PerspectiveFromDegrees(90));
             Transform cameraTransform = worldCamera.AsEntity().Become<Transform>();
             cameraTransform.LocalPosition = new(0, 0, -10);
             cameraPosition = cameraTransform.LocalPosition;
 
-            Camera uiCamera = new(world, window, new CameraOrthographicSize(1f));
+            Camera uiCamera = new(world, window, CameraSettings.Orthographic(1f));
 
             //global references
             Texture squareTexture = new(world, Address.Get<SquareTexture>());

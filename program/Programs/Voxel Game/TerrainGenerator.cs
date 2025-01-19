@@ -36,7 +36,7 @@ namespace VoxelGame
             FastNoiseLite noise = Noise;
             float frequency = 4f;
             float amplitude = 6f;
-            byte chunkSize = 16;
+            byte chunkSize = world.GetFirstComponent<VoxelSettings>().chunkSize;
             Chunk chunk = new(world, cx, cy, cz, chunkSize, chunkMaterial);
             for (byte x = 0; x < chunkSize; x++)
             {

@@ -32,7 +32,7 @@ namespace VoxelGame
         public readonly uint Capacity => mesh.AsEntity().GetArrayLength<BlockID>();
         public readonly ref uint this[uint index] => ref Blocks[index];
         public readonly ref uint this[byte x, byte y, byte z] => ref this[MeshGenerator.GetIndex(x, y, z, ChunkSize)];
-        public readonly byte ChunkSize => mesh.AsEntity().GetComponent<IsChunk>().chunkSize;
+        public readonly byte ChunkSize => mesh.GetWorld().GetFirstComponent<VoxelSettings>().chunkSize;
 
         readonly uint IEntity.Value => mesh.GetEntityValue();
         readonly World IEntity.World => mesh.GetWorld();
@@ -40,16 +40,16 @@ namespace VoxelGame
         readonly void IEntity.Describe(ref Archetype archetype)
         {
             archetype.AddComponentType<IsMesh>();
-            archetype.AddComponentType<IsChunk>();
             archetype.AddArrayElementType<uint>();
             archetype.AddArrayElementType<BlockID>();
+            archetype.AddTagType<IsChunk>();
         }
 
         public Chunk(World world, int cx, int cy, int cz, byte chunkSize, Material unlitMaterial)
         {
             uint capacity = (uint)(chunkSize * chunkSize * chunkSize);
             mesh = new(world);
-            mesh.AddComponent(new IsChunk(chunkSize));
+            mesh.AsEntity().AddTag<IsChunk>();
             mesh.CreatePositions(0);
             mesh.CreateColors(0);
             mesh.CreateUVs(0);
@@ -106,12 +106,12 @@ namespace VoxelGame
 
         public static USpan<uint> GetBlocks(World world, int cx, int cy, int cz)
         {
-            ComponentQuery<IsChunk, Position> query = new(world);
+            ComponentQuery<Position> query = new(world);
+            query.RequireTag<IsChunk>();
+            byte chunkSize = world.GetFirstComponent<VoxelSettings>().chunkSize;
             foreach (var r in query)
             {
-                ref IsChunk chunk = ref r.component1;
-                ref Position position = ref r.component2;
-                uint chunkSize = chunk.chunkSize;
+                ref Position position = ref r.component1;
                 Vector3 worldPosition = position.value;
                 int chunkX = (int)MathF.Floor(worldPosition.X / chunkSize);
                 int chunkY = (int)MathF.Floor(worldPosition.Y / chunkSize);

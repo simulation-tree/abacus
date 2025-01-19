@@ -33,13 +33,19 @@ namespace VoxelGame
         private Vector3 cameraPosition;
         private Vector2 cameraPitchYaw;
 
-        private VoxelGameProgram(Simulator simulator, World world)
+        private unsafe VoxelGameProgram(Simulator simulator, World world)
         {
             this.world = world;
             terrainGenerator = new("goomba");
-            window = CreateWindow(world);
+            window = new(world, "Voxel Game", new Vector2(400, 200), new(900, 720), "vulkan", new(&WindowClosed));
 
-            camera = new(world, window, CameraFieldOfView.FromDegrees(90f));
+            [UnmanagedCallersOnly]
+            static void WindowClosed(Window window)
+            {
+                window.Dispose();
+            }
+
+            camera = new(world, window, CameraSettings.PerspectiveFromDegrees(90f));
             Transform cameraTransform = camera.AsEntity().Become<Transform>();
             cameraTransform.LocalPosition = new(0f, 1f, -10f);
             cameraPosition = cameraTransform.LocalPosition;
@@ -59,6 +65,8 @@ namespace VoxelGame
             quadRenderer.AddComponent(Color.White);
             Transform ballTransform = quadRenderer.AsEntity().Become<Transform>();
             ballTransform.LocalPosition = new(0f, 4f, 0f);
+
+            world.CreateEntity(new VoxelSettings(16));
 
             int chunkRadius = 3;
             using List<Chunk> generatedChunks = new();
@@ -84,26 +92,16 @@ namespace VoxelGame
             fpsLabel.Anchor = Anchor.TopLeft;
             fpsLabel.Pivot = new(0f, 1f, 0f);
 
-            using List<char> stringBuilder = new();
-            stringBuilder.AddRange("F3 = Invert mouse".AsUSpan());
-            stringBuilder.Add('\n');
-            stringBuilder.AddRange("WASD = Move".AsUSpan());
-            Label controlsLabel = new(canvas, stringBuilder.AsSpan());
+            USpan<char> stringBuilder = stackalloc char[512];
+            uint length = 0;
+            length = "F3 = Invert mouse\nWASD, Space, Control = Move".AsUSpan().CopyTo(stringBuilder);
+
+            Label controlsLabel = new(canvas, stringBuilder.Slice(0, length));
             controlsLabel.Anchor = Anchor.TopLeft;
             controlsLabel.Pivot = new(0f, 1f, 0f);
             controlsLabel.Position = new(0f, -20f);
 
-            SharedFunctions.Initialize(world);
-        }
-
-        void IProgram.Finish(in StatusCode statusCode)
-        {
-            if (!window.IsDestroyed())
-            {
-                window.Dispose();
-            }
-
-            terrainGenerator.Dispose();
+            SharedFunctions.AddLabelProcessors(world);
         }
 
         readonly void IProgram.Start(in Simulator simulator, in Allocation allocation, in World world)
@@ -132,15 +130,14 @@ namespace VoxelGame
             return StatusCode.Continue;
         }
 
-        private static unsafe Window CreateWindow(World world)
+        readonly void IProgram.Finish(in StatusCode statusCode)
         {
-            return new(world, "Voxel Game", new Vector2(400, 200), new(900, 720), "vulkan", new(&WindowClosed));
-
-            [UnmanagedCallersOnly]
-            static void WindowClosed(Window window)
+            if (!window.IsDestroyed())
             {
                 window.Dispose();
             }
+
+            terrainGenerator.Dispose();
         }
 
         private readonly AtlasTexture GetChunkAtlas(Simulator simulator, World world)

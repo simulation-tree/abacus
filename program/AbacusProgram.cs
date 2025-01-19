@@ -103,7 +103,7 @@ namespace Abacus
             //find existing camera or create new one
             if (!world.TryGetFirst(out camera))
             {
-                camera = new(world, window, CameraFieldOfView.FromDegrees(90f));
+                camera = new(world, window, CameraSettings.PerspectiveFromDegrees(90f));
             }
             else
             {

@@ -26,7 +26,7 @@ using (World world = new(schema))
         var editorProgram = new Program<ControlsTest>(world);
 #endif
 
-        using (var program = new Program<MultipleWindowsAndFileDialog>(world))
+        using (var program = new Program<VoxelGame.VoxelGameProgram>(world))
         {
             bool finished = program.IsFinished(out statusCode);
 #if EDITOR

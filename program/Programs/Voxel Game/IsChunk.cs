@@ -2,14 +2,8 @@
 
 namespace VoxelGame
 {
-    [Component]
+    [Tag]
     public readonly struct IsChunk
     {
-        public readonly byte chunkSize;
-
-        public IsChunk(byte chunkSize)
-        {
-            this.chunkSize = chunkSize;
-        }
     }
 }

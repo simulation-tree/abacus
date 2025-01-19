@@ -84,7 +84,7 @@ namespace Abacus
             window.SetClearColor(new(0, 0, 0, 0));
 
             Settings settings = new(world);
-            camera = new(world, window, CameraFieldOfView.FromDegrees(60));
+            camera = new(world, window, CameraSettings.PerspectiveFromDegrees(60));
             Transform cameraTransform = camera.AsEntity().Become<Transform>();
             cameraTransform.LocalPosition = new(0, 0, -1);
 

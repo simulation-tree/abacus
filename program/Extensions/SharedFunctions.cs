@@ -297,7 +297,7 @@ public static class SharedFunctions
         }
     }
 
-    public unsafe static void Initialize(this World world)
+    public unsafe static void AddLabelProcessors(this World world)
     {
         new LabelProcessor(world, new(&TryHandleFPS));
     }
