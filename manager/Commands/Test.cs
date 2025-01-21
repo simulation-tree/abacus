@@ -6,7 +6,7 @@ using static Functions;
 public readonly struct Test : ICommand
 {
     ReadOnlySpan<char> ICommand.Name => "test";
-    ReadOnlySpan<char> ICommand.Description => "Tests all projects (--release, --coverage-xplat --coverage-coverlet, --no-build --generate-reports)";
+    ReadOnlySpan<char> ICommand.Description => "Tests all projects (--release, --coverage-xplat --coverage-coverlet, --generate-reports)";
 
     void ICommand.Execute(ReadOnlySpan<char> workingDirectory, ReadOnlySpan<char> arguments)
     {
@@ -26,12 +26,6 @@ public readonly struct Test : ICommand
         if (arguments.IndexOf("--coverage-coverlet") != -1)
         {
             coverletCoverage = true;
-        }
-
-        bool noBuild = false;
-        if (arguments.IndexOf("--no-build") != -1)
-        {
-            noBuild = true;
         }
 
         bool generateReports = false;
@@ -55,11 +49,6 @@ public readonly struct Test : ICommand
                     command += " -c Debug";
                 }
 
-                if (noBuild)
-                {
-                    command += " --no-build";
-                }
-
                 if (coverletCoverage)
                 {
                     command += " /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura";
@@ -70,7 +59,31 @@ public readonly struct Test : ICommand
                     command += " --collect:\"XPlat Code Coverage;Format=cobertura\"";
                 }
 
-                Call(command);
+                if (releaseMode)
+                {
+                    Call($"dotnet build \"{project.Path.ToString()}\" -c Release");
+                }
+                else
+                {
+                    Call($"dotnet build \"{project.Path.ToString()}\" -c Debug");
+                }
+
+                string? result = Call($"{command} --no-build");
+                if (result is not null)
+                {
+                    int index = result.IndexOf("Starting test execution");
+                    if (index != -1)
+                    {
+                        Console.WriteLine(result.Substring(index));
+                    }
+                    else
+                    {
+                        var color = Console.ForegroundColor;
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.WriteLine(result);
+                        Console.ForegroundColor = color;
+                    }
+                }
 
                 if (generateReports)
                 {

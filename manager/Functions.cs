@@ -83,7 +83,7 @@ public static class Functions
         }
     }
 
-    public static void Call(ReadOnlySpan<char> command)
+    public static string? Call(ReadOnlySpan<char> command)
     {
         ProcessStartInfo startInfo = new();
         if (OperatingSystem.IsWindows())
@@ -156,17 +156,21 @@ public static class Functions
             {
                 if (!string.IsNullOrEmpty(error.ToString()))
                 {
-                    Console.WriteLine(error);
+                    return error.ToString();
                 }
                 else
                 {
-                    Console.WriteLine(output);
+                    return output.ToString();
                 }
             }
             else
             {
                 throw new Exception("Program timed out");
             }
+        }
+        else
+        {
+            return null;
         }
     }
 
