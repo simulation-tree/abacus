@@ -121,7 +121,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Collections.Tests", "..\col
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Data.EmbeddedResourcesGenerator", "..\data\generator\Data.EmbeddedResourcesGenerator.csproj", "{CCA2DEC7-502D-DBE6-CD04-F3C59270CC41}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Simulation.ImplementationGenerators", "..\simulation\generator\Simulation.ImplementationGenerators.csproj", "{F070A77B-8E83-5648-5235-515B624CBA9B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Simulation.Generator", "..\simulation\generator\Simulation.Generator.csproj", "{F070A77B-8E83-5648-5235-515B624CBA9B}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rendering.Tests", "..\rendering\tests\Rendering.Tests.csproj", "{8CD55406-C8F5-88B1-F5AD-4FE34E2122B9}"
 EndProject

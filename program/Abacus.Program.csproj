@@ -108,7 +108,7 @@
         <ProjectReference Include="..\..\text-rendering\source\TextRendering.csproj" />
         <ProjectReference Include="..\..\transforms\source\Transforms.csproj" />
         <ProjectReference Include="..\..\windows\source\Windows.csproj" />
-		<ProjectReference Include="..\..\simulation\generator\Simulation.ImplementationGenerators.csproj">
+		<ProjectReference Include="..\..\simulation\generator\Simulation.Generator.csproj">
 			<OutputItemType>Analyzer</OutputItemType>
 			<ReferenceOutputAssembly>false</ReferenceOutputAssembly>
 			<Visible>false</Visible>
