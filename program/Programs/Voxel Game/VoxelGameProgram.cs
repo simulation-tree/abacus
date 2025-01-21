@@ -69,7 +69,7 @@ namespace VoxelGame
 
             world.CreateEntity(new VoxelSettings(16));
 
-            int chunkRadius = 3;
+            int chunkRadius = 5;
             using List<Chunk> generatedChunks = new();
             for (int cx = -chunkRadius; cx < chunkRadius; cx++)
             {

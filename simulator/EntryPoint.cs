@@ -11,8 +11,8 @@ using Simulator = AbacusSimulator.AbacusSimulator;
 TypeLayoutRegistry.RegisterAll();
 EmbeddedAddressTable.RegisterAll();
 
-Trace.Listeners.Add(new TextWriterTraceListener($"{DateTime.Now:yyyy-dd-M--HH-mm-ss}.log", "listener"));
-Trace.Listeners.Add(new TextWriterTraceListener("latest.log", "listener"));
+Trace.Listeners.Add(new CustomTraceListener($"{DateTime.Now:yyyy-dd-M--HH-mm-ss}.log"));
+Trace.Listeners.Add(new CustomTraceListener("latest.log"));
 Trace.AutoFlush = true;
 Trace.WriteLine("Starting simulator program");
 
@@ -54,4 +54,21 @@ else
 {
     Trace.WriteLine($"Program failed with status code {statusCode.Code}");
     return statusCode.Code;
+}
+
+public class CustomTraceListener : TextWriterTraceListener
+{
+    public CustomTraceListener(string? fileName) : base(fileName, "listener")
+    {
+    }
+
+    public override void WriteLine(string? message)
+    {
+        base.WriteLine(AppendTimestamp(message));
+    }
+
+    private string AppendTimestamp(string? message)
+    {
+        return $"{DateTime.Now:yyyy-dd-M--HH-mm-ss} {message}";
+    }
 }
