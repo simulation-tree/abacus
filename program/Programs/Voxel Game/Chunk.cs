@@ -71,7 +71,7 @@ namespace VoxelGame
             mesh.Dispose();
         }
 
-        public readonly void UpdateMeshToMatchBlocks(AtlasTexture chunkAtlas, RandomGenerator meshRng)
+        public readonly void UpdateMeshToMatchBlocks(AtlasTexture chunkAtlas, Dictionary<BlockTextureKey, BlockTexture> blockTextures, RandomGenerator meshRng)
         {
             World world = mesh.GetWorld();
             byte chunkSize = ChunkSize;
@@ -91,7 +91,7 @@ namespace VoxelGame
             using Array<Vector2> uvs = new(capacity * VerticesPerFace * FacesPerBlock);
             using Array<Vector4> colors = new(capacity * VerticesPerFace * FacesPerBlock);
             using Array<uint> triangles = new(capacity * TrianglesPerFace * FacesPerBlock);
-            MeshGenerator generation = new(blocks, blocksLeft, blocksRight, blocksDown, blocksUp, blocksBackward, blocksForward, chunkSize, vertices, uvs, colors, triangles, meshRng, capacity, chunkAtlas);
+            MeshGenerator generation = new(blocks, blocksLeft, blocksRight, blocksDown, blocksUp, blocksBackward, blocksForward, chunkSize, vertices, uvs, colors, triangles, meshRng, capacity, chunkAtlas, blockTextures);
             generation.Generate();
             USpan<Vector3> meshPositions = mesh.ResizePositions(generation.verticeIndex);
             USpan<Vector2> meshUVs = mesh.ResizeUVs(generation.verticeIndex);

@@ -23,11 +23,12 @@ namespace VoxelGame
         private readonly RandomGenerator rng;
         private readonly uint capacity;
         private readonly AtlasTexture chunkAtlas;
+        private readonly Dictionary<BlockTextureKey, BlockTexture> blockTextures;
 
         public uint verticeIndex;
         public uint triangleIndex;
 
-        public MeshGenerator(USpan<uint> blocks, USpan<uint> blocksLeft, USpan<uint> blocksRight, USpan<uint> blocksDown, USpan<uint> blocksUp, USpan<uint> blocksBackward, USpan<uint> blocksForward, byte chunkSize, Array<Vector3> vertices, Array<Vector2> uvs, Array<Vector4> colors, Array<uint> triangles, RandomGenerator rng, uint capacity, AtlasTexture chunkAtlas)
+        public MeshGenerator(USpan<uint> blocks, USpan<uint> blocksLeft, USpan<uint> blocksRight, USpan<uint> blocksDown, USpan<uint> blocksUp, USpan<uint> blocksBackward, USpan<uint> blocksForward, byte chunkSize, Array<Vector3> vertices, Array<Vector2> uvs, Array<Vector4> colors, Array<uint> triangles, RandomGenerator rng, uint capacity, AtlasTexture chunkAtlas, Dictionary<BlockTextureKey, BlockTexture> blockTextures)
         {
             this.blocks = blocks;
             this.blocksLeft = blocksLeft;
@@ -44,6 +45,7 @@ namespace VoxelGame
             this.rng = rng;
             this.capacity = capacity;
             this.chunkAtlas = chunkAtlas;
+            this.blockTextures = blockTextures;
         }
 
         private readonly bool ShouldGenerateFace(uint index, Direction direction)
@@ -170,50 +172,24 @@ namespace VoxelGame
         private readonly void AddUVs(uint blockId, Direction direction, RandomGenerator rng)
         {
             uint startIndex = verticeIndex - 4;
-            int rotation = 0;
+            int rotation;
             AtlasSprite sprite;
-            if (blockId == 1)
+
+            if (blockTextures.TryGetValue(new(blockId, direction), out BlockTexture blockTexture))
             {
-                sprite = chunkAtlas["Dirt"];
-                rotation = rng.NextInt(4);
-            }
-            else if (blockId == 2)
-            {
-                if (direction == Direction.Up)
+                sprite = chunkAtlas[blockTexture.name];
+                if (blockTexture.rotation == BlockTexture.Rotation.Random)
                 {
-                    sprite = chunkAtlas["Grass"];
                     rotation = rng.NextInt(4);
-                }
-                else if (direction == Direction.Down)
-                {
-                    sprite = chunkAtlas["Dirt"];
                 }
                 else
                 {
-                    sprite = chunkAtlas["GrassSide"];
-                    if (direction == Direction.Forward)
-                    {
-                        rotation = 0;
-                    }
-                    else
-                    {
-                        rotation = 3;
-                    }
+                    rotation = (byte)blockTexture.rotation;
                 }
-            }
-            else if (blockId == 3)
-            {
-                sprite = chunkAtlas["Cobblestone"];
-                rotation = rng.NextInt(4);
-            }
-            else if (blockId == 4)
-            {
-                sprite = chunkAtlas["Stone"];
-                rotation = rng.NextInt(4);
             }
             else
             {
-                throw new InvalidOperationException($"Unknown block {blockId}");
+                throw new InvalidOperationException($"No texture mapping for `{blockId}` with direction `{direction}`");
             }
 
             Vector4 rect = sprite.region;

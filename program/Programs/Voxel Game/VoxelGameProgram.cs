@@ -30,6 +30,7 @@ namespace VoxelGame
         private readonly AtlasTexture chunkAtlas;
         private readonly World world;
         private readonly TerrainGenerator terrainGenerator;
+        private readonly Dictionary<BlockTextureKey, BlockTexture> blockTextures;
         private Vector3 cameraPosition;
         private Vector2 cameraPitchYaw;
 
@@ -50,7 +51,7 @@ namespace VoxelGame
             cameraTransform.LocalPosition = new(0f, 1f, -10f);
             cameraPosition = cameraTransform.LocalPosition;
 
-            chunkAtlas = GetChunkAtlas(simulator, world);
+            (chunkAtlas, blockTextures) = GetChunkAtlas(simulator, world);
 
             chunkMaterial = new(world, Address.Get<UnlitTexturedMaterial>());
             chunkMaterial.AddPushBinding<Color>();
@@ -81,7 +82,7 @@ namespace VoxelGame
 
             foreach (Chunk chunk in generatedChunks)
             {
-                chunk.UpdateMeshToMatchBlocks(chunkAtlas, terrainGenerator.meshRng);
+                chunk.UpdateMeshToMatchBlocks(chunkAtlas, blockTextures, terrainGenerator.meshRng);
             }
 
             Settings settings = new(world);
@@ -138,9 +139,10 @@ namespace VoxelGame
             }
 
             terrainGenerator.Dispose();
+            blockTextures.Dispose();
         }
 
-        private readonly AtlasTexture GetChunkAtlas(Simulator simulator, World world)
+        private readonly (AtlasTexture, Dictionary<BlockTextureKey, BlockTexture>) GetChunkAtlas(Simulator simulator, World world)
         {
             Texture dirt = new(world, "Assets/Textures/Blocks/Dirt.png");
             Texture grass = new(world, "Assets/Textures/Blocks/Grass.png");
@@ -159,8 +161,37 @@ namespace VoxelGame
                 new("Cobblestone", cobblestone),
             };
 
+            Dictionary<BlockTextureKey, BlockTexture> blockTextures = new();
+            blockTextures.Add(new(1, Direction.Right), new("Dirt"));
+            blockTextures.Add(new(1, Direction.Left), new("Dirt"));
+            blockTextures.Add(new(1, Direction.Up), new("Dirt"));
+            blockTextures.Add(new(1, Direction.Down), new("Dirt"));
+            blockTextures.Add(new(1, Direction.Forward), new("Dirt"));
+            blockTextures.Add(new(1, Direction.Backward), new("Dirt"));
+
+            blockTextures.Add(new(2, Direction.Right), new("GrassSide", BlockTexture.Rotation.Clockwise270));
+            blockTextures.Add(new(2, Direction.Left), new("GrassSide", BlockTexture.Rotation.Clockwise270));
+            blockTextures.Add(new(2, Direction.Up), new("Grass"));
+            blockTextures.Add(new(2, Direction.Down), new("Dirt"));
+            blockTextures.Add(new(2, Direction.Forward), new("GrassSide", BlockTexture.Rotation.Default));
+            blockTextures.Add(new(2, Direction.Backward), new("GrassSide", BlockTexture.Rotation.Clockwise270));
+
+            blockTextures.Add(new(3, Direction.Right), new("Cobblestone"));
+            blockTextures.Add(new(3, Direction.Left), new("Cobblestone"));
+            blockTextures.Add(new(3, Direction.Up), new("Cobblestone"));
+            blockTextures.Add(new(3, Direction.Down), new("Cobblestone"));
+            blockTextures.Add(new(3, Direction.Forward), new("Cobblestone"));
+            blockTextures.Add(new(3, Direction.Backward), new("Cobblestone"));
+
+            blockTextures.Add(new(4, Direction.Right), new("Stone"));
+            blockTextures.Add(new(4, Direction.Left), new("Stone"));
+            blockTextures.Add(new(4, Direction.Up), new("Stone"));
+            blockTextures.Add(new(4, Direction.Down), new("Stone"));
+            blockTextures.Add(new(4, Direction.Forward), new("Stone"));
+            blockTextures.Add(new(4, Direction.Backward), new("Stone"));
+
             AtlasTexture atlasTexture = new(world, sprites);
-            return atlasTexture;
+            return (atlasTexture, blockTextures);
         }
 
         private static bool AnyWindowOpen(World world)
