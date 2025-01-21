@@ -67,7 +67,7 @@ public class CustomTraceListener : TextWriterTraceListener
         base.WriteLine(AppendTimestamp(message));
     }
 
-    private string AppendTimestamp(string? message)
+    private static string AppendTimestamp(string? message)
     {
         return $"{DateTime.Now:yyyy-dd-M--HH-mm-ss} {message}";
     }

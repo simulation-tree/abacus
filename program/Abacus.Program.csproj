@@ -98,13 +98,13 @@
         <ProjectReference Include="..\..\worlds\core\Worlds.Core.csproj" />
         <ProjectReference Include="..\..\automations\source\Automations.csproj" />
         <ProjectReference Include="..\..\cameras\source\Cameras.csproj" />
-        <ProjectReference Include="..\..\data\source\Data.csproj" />
+        <ProjectReference Include="..\..\data\core\Data.Core.csproj" />
         <ProjectReference Include="..\..\default-presentation-assets\source\DefaultPresentationAssets.csproj" />
         <ProjectReference Include="..\..\input-devices\source\InputDevices.csproj" />
         <ProjectReference Include="..\..\interaction-kit\source\InteractionKit.csproj" />
         <ProjectReference Include="..\..\models\source\Models.csproj" />
         <ProjectReference Include="..\..\physics\source\Physics.csproj" />
-        <ProjectReference Include="..\..\rendering\source\Rendering.csproj" />
+        <ProjectReference Include="..\..\rendering\core\Rendering.Core.csproj" />
         <ProjectReference Include="..\..\text-rendering\source\TextRendering.csproj" />
         <ProjectReference Include="..\..\transforms\source\Transforms.csproj" />
         <ProjectReference Include="..\..\windows\source\Windows.csproj" />
