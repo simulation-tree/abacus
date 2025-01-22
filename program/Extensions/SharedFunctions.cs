@@ -306,13 +306,13 @@ public static class SharedFunctions
     private static InteractionKit.Boolean TryHandleFPS(TryProcessLabel.Input input)
     {
         const string Token = "{{fps}}";
-        if (input.OriginalText.Contains(Token.AsUSpan()))
+        if (input.OriginalText.Contains(Token.AsSpan()))
         {
             USpan<char> replacement = stackalloc char[128];
             uint replacementLength = averageFps.ToString(replacement);
             uint newLength = input.OriginalText.Length - (uint)Token.Length + 64;
             USpan<char> destination = stackalloc char[(int)newLength];
-            newLength = Text.Replace(input.OriginalText, Token.AsUSpan(), replacement.Slice(0, replacementLength), destination);
+            newLength = Text.Replace(input.OriginalText, Token.AsSpan(), replacement.Slice(0, replacementLength), destination);
             input.SetResult(destination.Slice(0, newLength));
         }
 

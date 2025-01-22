@@ -93,11 +93,8 @@ namespace VoxelGame
             fpsLabel.Anchor = Anchor.TopLeft;
             fpsLabel.Pivot = new(0f, 1f, 0f);
 
-            USpan<char> stringBuilder = stackalloc char[512];
-            uint length = 0;
-            length = "F3 = Invert mouse\nWASD, Space, Control = Move".AsUSpan().CopyTo(stringBuilder);
-
-            Label controlsLabel = new(canvas, stringBuilder.Slice(0, length));
+            USpan<char> infoLabel = "F3 = Invert mouse\nWASD, Space, Control = Move".AsSpan();
+            Label controlsLabel = new(canvas, infoLabel);
             controlsLabel.Anchor = Anchor.TopLeft;
             controlsLabel.Pivot = new(0f, 1f, 0f);
             controlsLabel.Position = new(0f, -20f);

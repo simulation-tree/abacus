@@ -385,7 +385,7 @@ namespace Abacus
                         Label label = new(world, child);
                         USpan<char> text = label.Text;
                         uint startIndex = text.IndexOf(':') + 1;
-                        int countValue = int.Parse(text.Slice(startIndex).AsSystemSpan());
+                        int countValue = int.Parse(text.Slice(startIndex));
                         USpan<char> countText = stackalloc char[10];
 
                         if (!toggleValue)
