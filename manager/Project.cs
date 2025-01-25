@@ -1,7 +1,7 @@
-﻿using System;
+﻿using Serialization.XML;
+using System;
 using System.Collections.Generic;
 using Unmanaged;
-using Unmanaged.XML;
 
 public class Project
 {
@@ -37,14 +37,14 @@ public class Project
             {
                 if (node.TryGetAttribute("Include", out USpan<char> referencedProjectPath))
                 {
-                    projectReferences.Add(new(referencedProjectPath.AsSystemSpan()));
+                    projectReferences.Add(new(referencedProjectPath));
                 }
             }
             else if (node.Name.SequenceEqual("PackageReference".AsSpan()))
             {
                 if (node.TryGetAttribute("Include", out USpan<char> referencedProjectPath) && node.TryGetAttribute("Version", out USpan<char> version))
                 {
-                    packageReferences.Add(new(referencedProjectPath.AsSystemSpan(), version.AsSystemSpan()));
+                    packageReferences.Add(new(referencedProjectPath, version));
                 }
             }
             else

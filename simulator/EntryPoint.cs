@@ -1,23 +1,23 @@
-﻿using Abacus;
+﻿using Abacus.Simulator;
 using Data;
 using Simulation;
 using System;
 using System.Diagnostics;
-using Types;
 using Unmanaged;
 using Worlds;
 using Simulator = AbacusSimulator.AbacusSimulator;
 
-TypeLayoutRegistry.RegisterAll();
-EmbeddedAddressTable.RegisterAll();
-
 Trace.Listeners.Add(new CustomTraceListener($"{DateTime.Now:yyyy-dd-M--HH-mm-ss}.log"));
 Trace.Listeners.Add(new CustomTraceListener("latest.log"));
 Trace.AutoFlush = true;
+
+TypeRegistryLoader.Load();
+EmbeddedAddressTable.RegisterAll();
+
 Trace.WriteLine("Starting simulator program");
 
 StatusCode statusCode;
-Schema schema = SchemaRegistry.Get();
+Schema schema = SchemaLoader.Get();
 using (World world = new(schema))
 {
     using (Simulator simulator = new(world))

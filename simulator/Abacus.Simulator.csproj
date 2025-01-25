@@ -58,16 +58,16 @@
 			<OutputItemType>Analyzer</OutputItemType>
 			<ReferenceOutputAssembly>false</ReferenceOutputAssembly>
 		</ProjectReference>
-		<ProjectReference Include="..\..\types\generator\Types.Generator.csproj">
-			<OutputItemType>Analyzer</OutputItemType>
-			<ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-		</ProjectReference>
 		<ProjectReference Include="..\..\text-rendering-systems\source\TextRendering.Systems.csproj" />
 		<ProjectReference Include="..\..\texture-systems\source\Textures.Systems.csproj" />
 		<ProjectReference Include="..\..\transform-systems\source\Transforms.Systems.csproj" />
 		<ProjectReference Include="..\..\vulkan-renderer\source\VulkanRenderer.csproj" />
 		<ProjectReference Include="..\..\window-systems\source\Windows.Systems.csproj" />
 		<ProjectReference Include="..\program\Abacus.Program.csproj" />
+		<ProjectReference Include="..\..\types\generator\Types.Generator.csproj">
+			<OutputItemType>Analyzer</OutputItemType>
+			<ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+		</ProjectReference>
 	</ItemGroup>
 
 </Project>
