@@ -4,7 +4,6 @@ using Data;
 using DefaultPresentationAssets;
 using Fonts;
 using InputDevices;
-using InputDevices.Components;
 using Meshes;
 using Meshes.NineSliced;
 using Models;
@@ -303,9 +302,8 @@ namespace Abacus
 
         private readonly void AnimateTestRenderer(World world, float delta)
         {
-            foreach (uint keyboardEntity in world.GetAllContaining<IsKeyboard>())
+            foreach (Keyboard keyboard in world.GetAll<Keyboard>())
             {
-                Keyboard keyboard = new(world, keyboardEntity);
                 if (keyboard.WasPressed(Keyboard.Button.J))
                 {
                     dummyRenderer.SetEnabled(!dummyRenderer.IsEnabled());
@@ -358,9 +356,8 @@ namespace Abacus
         {
             Vector2 windowPosition = window.Position;
             Vector2 windowSize = window.Size;
-            foreach (uint keyboardEntity in world.GetAllContaining<IsKeyboard>())
+            foreach (Keyboard keyboard in world.GetAll<Keyboard>())
             {
-                Keyboard keyboard = new(world, keyboardEntity);
                 if (keyboard.WasPressed(Keyboard.Button.Escape))
                 {
                     return true; //source of "shutdown" event
@@ -503,9 +500,8 @@ namespace Abacus
 
         private readonly void TestMouseInputs(World world)
         {
-            foreach (uint mouseEntity in world.GetAllContaining<IsMouse>())
+            foreach (Mouse mouse in world.GetAll<Mouse>())
             {
-                Mouse mouse = new(world, mouseEntity);
                 Vector2 position = mouse.Position;
                 ButtonState left = mouse.GetButtonState(Mouse.Button.LeftButton);
                 if (left.WasPressed)

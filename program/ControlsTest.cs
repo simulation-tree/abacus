@@ -382,7 +382,7 @@ namespace Abacus
                     uint child = children[i];
                     if (world.ContainsComponent<IsLabel>(child))
                     {
-                        Label label = new(world, child);
+                        Label label = new Entity(world, child).As<Label>();
                         USpan<char> text = label.Text;
                         uint startIndex = text.IndexOf(':') + 1;
                         int countValue = int.Parse(text.Slice(startIndex));
