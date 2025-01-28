@@ -16,6 +16,9 @@ public static class CommandsRegistry
         Register<List>();
         Register<Build>();
         Register<Clean>();
+        Register<Commit>();
+        Register<Fetch>();
+        Register<Tag>();
     }
 
     public static void Register<T>() where T : unmanaged, ICommand

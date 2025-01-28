@@ -1,6 +1,10 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using static Functions;
+
+Trace.Listeners.Add(new ConsoleTraceListener());
+Trace.AutoFlush = true;
 
 CommandsRegistry.RegisterAll();
 string commandInput;
@@ -46,15 +50,14 @@ do
         }
         else
         {
-            Console.WriteLine($"Command `{commandName}` not found");
+            Trace.TraceError($"Command `{commandName}` not found");
             ICommand helpCommand = new Help();
             helpCommand.Execute(default, default);
         }
     }
     catch (Exception ex)
     {
-        Console.WriteLine(ex.Message);
-        Console.WriteLine(ex.StackTrace);
+        Trace.Fail(ex.Message, ex.StackTrace);
     }
 
     Console.Write("> ");

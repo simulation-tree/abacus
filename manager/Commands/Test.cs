@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using static Functions;
@@ -74,20 +75,17 @@ public readonly struct Test : ICommand
                     int index = result.IndexOf("Starting test execution");
                     if (index != -1)
                     {
-                        Console.WriteLine(result.Substring(index));
+                        Trace.WriteLine(result.Substring(index));
                     }
                     else
                     {
-                        var color = Console.ForegroundColor;
-                        Console.ForegroundColor = ConsoleColor.Red;
-                        Console.WriteLine(result);
-                        Console.ForegroundColor = color;
+                        Trace.TraceError(result);
                     }
                 }
 
                 if (generateReports)
                 {
-                    string projectFolder = Path.GetDirectoryName(project.Path.ToString()) ?? throw new();
+                    string projectFolder = project.WorkingDirectory.ToString();
                     if (Directory.Exists(projectFolder))
                     {
                         string testResultsFolder = Path.Combine(projectFolder, "TestResults");

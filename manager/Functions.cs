@@ -85,6 +85,11 @@ public static class Functions
 
     public static string? Call(ReadOnlySpan<char> command)
     {
+        return Call(default, command);
+    }
+
+    public static string? Call(ReadOnlySpan<char> workingDirectory, ReadOnlySpan<char> command)
+    {
         ProcessStartInfo startInfo = new();
         if (OperatingSystem.IsWindows())
         {
@@ -101,10 +106,18 @@ public static class Functions
             throw new Exception($"Unsupported operating system `{Environment.OSVersion}`");
         }
 
+        if (!workingDirectory.IsEmpty)
+        {
+            Trace.WriteLine($"cd {workingDirectory.ToString()}");
+        }
+
+        Trace.WriteLine(command.ToString());
+
         startInfo.RedirectStandardOutput = true;
         startInfo.RedirectStandardError = true;
         startInfo.UseShellExecute = false;
         startInfo.CreateNoWindow = true;
+        startInfo.WorkingDirectory = workingDirectory.ToString();
 
         StringBuilder output = new();
         StringBuilder error = new();
@@ -113,7 +126,6 @@ public static class Functions
         using Process? process = Process.Start(startInfo);
         if (process is not null)
         {
-            Console.WriteLine($"{startInfo.FileName} {startInfo.Arguments}");
             process.OutputDataReceived += (sender, e) =>
             {
                 if (e.Data is null)

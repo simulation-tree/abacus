@@ -12,8 +12,46 @@ public class Project
     private readonly List<ProjectReference> projectReferences;
     private readonly List<PackageReference> packageReferences;
 
+    /// <summary>
+    /// Name of the project based on the file name.
+    /// </summary>
     public ReadOnlySpan<char> Name => name;
+
+    /// <summary>
+    /// Path to the .csproj file.
+    /// </summary>
     public ReadOnlySpan<char> Path => path;
+    
+    /// <summary>
+    /// The directory that the project is in.
+    /// </summary>
+    public ReadOnlySpan<char> WorkingDirectory
+    {
+        get
+        {
+            Span<char> buffer = stackalloc char[path.Length];
+            path.CopyTo(buffer);
+            for (int i = 0; i < buffer.Length; i++)
+            {
+                ref char c = ref buffer[i];
+                if (c == '\\')
+                {
+                    c = '/';
+                }
+            }
+
+            int index = buffer.LastIndexOf('/');
+            if (index != -1)
+            {
+                return path.AsSpan(0, index);
+            }
+            else
+            {
+                return path;
+            }
+        }
+    }
+
     public IReadOnlyCollection<ProjectReference> ProjectReferences => projectReferences;
     public IReadOnlyCollection<PackageReference> PackageReferences => packageReferences;
 

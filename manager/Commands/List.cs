@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using static Functions;
 
 public readonly struct List : ICommand
@@ -13,11 +14,11 @@ public readonly struct List : ICommand
         string nameTitle = "Name".PadRight(titlePadding);
         string isTestProjectTitle = "Is Test?".PadRight(isTestPadding);
         string header = $"{nameTitle} | {isTestProjectTitle}";
-        Console.WriteLine(header);
-        Console.WriteLine(new string('-', header.Length));
+        Trace.WriteLine(header);
+        Trace.WriteLine(new string('-', header.Length));
         foreach (Project project in GetProjects(workingDirectory))
         {
-            Console.WriteLine($"{project.Name.ToString().PadRight(titlePadding)} | {project.isTestProject.ToString().PadRight(isTestPadding)}");
+            Trace.WriteLine($"{project.Name.ToString().PadRight(titlePadding)} | {project.isTestProject.ToString().PadRight(isTestPadding)}");
         }
     }
 }

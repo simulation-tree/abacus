@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using static Functions;
 
@@ -36,15 +37,14 @@ public readonly struct Clean : ICommand
 
         if (!sourceControlArtifacts && !ideArtifacts && !testResults && !builds)
         {
-            Console.WriteLine("At least one clean filter is requried: --source-control, --ide, --test-results, --builds");
+            Trace.TraceError("At least one clean filter is requried: --source-control, --ide, --test-results, --builds");
             return;
         }
 
         foreach (Project project in GetProjects(workingDirectory))
         {
             Stack<string> stack = new();
-            string folder = Path.GetDirectoryName(project.Path.ToString()) ?? throw new();
-            stack.Push(folder);
+            stack.Push(project.WorkingDirectory.ToString());
 
             while (stack.Count > 0)
             {
@@ -102,7 +102,7 @@ public readonly struct Clean : ICommand
         try
         {
             Directory.Delete(path, true);
-            Console.WriteLine($"Deleted directory `{path}`");
+            Trace.WriteLine($"Deleted directory `{path}`");
         }
         catch { }
     }
@@ -112,7 +112,7 @@ public readonly struct Clean : ICommand
         try
         {
             File.Delete(path);
-            Console.WriteLine($"Deleted file `{path}`");
+            Trace.WriteLine($"Deleted file `{path}`");
         }
         catch { }
     }

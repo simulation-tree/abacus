@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 
 public readonly struct Help : ICommand
 {
@@ -12,11 +13,11 @@ public readonly struct Help : ICommand
         string nameTitle = "Name".PadRight(namePadding);
         string isTestProjectTitle = "Description".PadRight(descriptionPadding);
         string header = $"{nameTitle} | {isTestProjectTitle}";
-        Console.WriteLine(header);
-        Console.WriteLine(new string('-', header.Length));
+        Trace.WriteLine(header);
+        Trace.WriteLine(new string('-', header.Length));
         foreach (ICommand command in CommandsRegistry.Commands)
         {
-            Console.WriteLine($"{command.Name.ToString().PadRight(namePadding)} | {command.Description.ToString().PadRight(descriptionPadding)}");
+            Trace.WriteLine($"{command.Name.ToString().PadRight(namePadding)} | {command.Description.ToString().PadRight(descriptionPadding)}");
         }
     }
 }
