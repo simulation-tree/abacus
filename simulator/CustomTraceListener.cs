@@ -24,8 +24,8 @@ public class CustomTraceListener : TextWriterTraceListener
 
     private static string BuildMessage(string category, string? message)
     {
-        DateTime now = DateTime.Now;
-        const string Format = "{0:yyyy-dd-M--HH-mm-ss} [{1}] {2}";
+        DateTime now = DateTime.UtcNow;
+        const string Format = "[{0:yyyy-MM-dd HH:mm:ss.ffff}] [{1}] {2}";
         return string.Format(Format, now, category, message);
     }
 }
