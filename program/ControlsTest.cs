@@ -45,8 +45,10 @@ namespace Abacus
             Image image = new(canvas);
             image.Size = new(200, 200);
             image.Position = new(100, 100);
+
             Resizable resizable = image.Become<Resizable>();
             resizable.Boundary = IsResizable.Boundary.All;
+
             DropShadow dropShadow = new(canvas, image);
 
             Label anotherLabel = new(canvas, "Hello there\nWith another line\nNice");
