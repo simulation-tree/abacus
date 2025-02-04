@@ -1,4 +1,5 @@
 ﻿using Collections;
+using Materials;
 using Meshes;
 using Meshes.Components;
 using Rendering;
@@ -12,47 +13,30 @@ using Worlds;
 
 namespace VoxelGame
 {
-    public readonly struct Chunk : IEntity
+    public readonly partial struct Chunk : IEntity
     {
         private const uint VerticesPerFace = 4;
         private const uint TrianglesPerFace = 6;
         private const uint FacesPerBlock = 6;
 
-        private readonly Mesh mesh;
-
-        public unsafe readonly USpan<uint> Blocks
-        {
-            get
-            {
-                USpan<BlockID> blocks = mesh.AsEntity().GetArray<BlockID>();
-                return blocks.As<uint>();
-            }
-        }
-
-        public readonly uint Capacity => mesh.AsEntity().GetArrayLength<BlockID>();
+        public unsafe readonly USpan<uint> Blocks => GetArray<BlockID>().As<uint>();
+        public readonly uint Capacity => GetArrayLength<BlockID>();
         public readonly ref uint this[uint index] => ref Blocks[index];
         public readonly ref uint this[byte x, byte y, byte z] => ref this[MeshGenerator.GetIndex(x, y, z, ChunkSize)];
-        public readonly byte ChunkSize => mesh.GetWorld().GetFirstComponent<VoxelSettings>().chunkSize;
-
-        readonly uint IEntity.Value => mesh.GetEntityValue();
-        readonly World IEntity.World => mesh.GetWorld();
-
-        readonly void IEntity.Describe(ref Archetype archetype)
-        {
-            archetype.AddComponentType<IsMesh>();
-            archetype.AddArrayElementType<uint>();
-            archetype.AddArrayElementType<BlockID>();
-            archetype.AddTagType<IsChunk>();
-        }
+        public readonly byte ChunkSize => world.GetFirstComponent<VoxelSettings>().chunkSize;
 
         public Chunk(World world, int cx, int cy, int cz, byte chunkSize, Material unlitMaterial)
         {
             uint capacity = (uint)(chunkSize * chunkSize * chunkSize);
-            mesh = new(world);
+            this.world = world;
+            Mesh mesh = new(world);
+            value = mesh.value;
+
             mesh.AsEntity().AddTag<IsChunk>();
             mesh.CreatePositions(0);
             mesh.CreateColors(0);
             mesh.CreateUVs(0);
+
             USpan<BlockID> blocks = mesh.AsEntity().CreateArray<BlockID>(capacity);
             blocks.Clear();
 
@@ -66,16 +50,19 @@ namespace VoxelGame
             chunkTransform.LocalPosition = new Vector3(cx, cy, cz) * chunkSize;
         }
 
-        public readonly void Dispose()
+        readonly void IEntity.Describe(ref Archetype archetype)
         {
-            mesh.Dispose();
+            archetype.AddComponentType<IsMesh>();
+            archetype.AddArrayType<uint>();
+            archetype.AddArrayType<BlockID>();
+            archetype.AddTagType<IsChunk>();
         }
 
         public readonly void UpdateMeshToMatchBlocks(AtlasTexture chunkAtlas, Dictionary<BlockTextureKey, BlockTexture> blockTextures, RandomGenerator meshRng)
         {
-            World world = mesh.GetWorld();
+            Mesh mesh = As<Mesh>();
             byte chunkSize = ChunkSize;
-            Vector3 chunkPosition = mesh.AsEntity().As<Transform>().WorldPosition;
+            Vector3 chunkPosition = As<Transform>().WorldPosition;
             int cx = (int)MathF.Floor(chunkPosition.X / chunkSize);
             int cy = (int)MathF.Floor(chunkPosition.Y / chunkSize);
             int cz = (int)MathF.Floor(chunkPosition.Z / chunkSize);
@@ -123,6 +110,16 @@ namespace VoxelGame
             }
 
             return default;
+        }
+
+        public static implicit operator Mesh(Chunk chunk)
+        {
+            return chunk.As<Mesh>();
+        }
+
+        public static implicit operator Transform(Chunk chunk)
+        {
+            return chunk.As<Transform>();
         }
     }
 }

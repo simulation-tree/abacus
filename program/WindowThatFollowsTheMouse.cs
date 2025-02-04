@@ -37,7 +37,7 @@ namespace Abacus
 
         StatusCode IProgram.Update(in TimeSpan delta)
         {
-            if (followerWindow.IsDestroyed())
+            if (followerWindow.IsDestroyed)
             {
                 return StatusCode.Success(0);
             }
@@ -73,7 +73,7 @@ namespace Abacus
 
         void IProgram.Finish(in StatusCode statusCode)
         {
-            if (!followerWindow.IsDestroyed())
+            if (!followerWindow.IsDestroyed)
             {
                 followerWindow.Dispose();
             }

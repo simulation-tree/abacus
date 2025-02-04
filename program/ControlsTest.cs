@@ -1,10 +1,5 @@
 ﻿using Cameras;
 using InputDevices;
-using InteractionKit;
-using InteractionKit.Components;
-using InteractionKit.ControlEditors;
-using InteractionKit.Functions;
-using Rendering;
 using Simulation;
 using System;
 using System.Diagnostics;
@@ -13,6 +8,10 @@ using System.Runtime.InteropServices;
 using Textures;
 using Transforms;
 using Transforms.Components;
+using UI;
+using UI.Components;
+using UI.ControlEditors;
+using UI.Functions;
 using Unmanaged;
 using Windows;
 using Worlds;
@@ -25,12 +24,12 @@ namespace Abacus
         private readonly Menu rightClickMenu;
         private readonly Dropdown enumDropdown;
 
-        private readonly World World => window.GetWorld();
+        private readonly World World => window.world;
 
         private unsafe ControlsTest(World world)
         {
             window = new(world, "Editor", new(200, 200), new(900, 720), "vulkan", new(&OnWindowClosed));
-            window.SetClearColor(new(0.5f, 0.5f, 0.5f, 1));
+            window.ClearColor = new(0.5f, 0.5f, 0.5f, 1);
             window.IsResizable = true;
 
             Settings settings = new(world);
@@ -42,14 +41,14 @@ namespace Abacus
             box.Position = new(40, 40);
             box.Z += Settings.ZScale;
             //box.Anchor = new(new(2f, true), new(2f, true), new(0f, false), new(2f, true), new(2f, true), new(0f, false));
-            
+
             Image image = new(canvas);
             image.Size = new(200, 200);
             image.Position = new(100, 100);
             Resizable resizable = image.AsEntity().Become<Resizable>();
             resizable.Boundary = IsResizable.Boundary.All;
             DropShadow dropShadow = new(canvas, image);
-            
+
             Label anotherLabel = new(canvas, "Hello there\nWith another line\nNice");
             anotherLabel.Position = new(105, 150);
             anotherLabel.Color = new(0, 0, 0, 1);
@@ -124,7 +123,7 @@ namespace Abacus
 
         void IProgram.Finish(in StatusCode statusCode)
         {
-            if (!window.IsDestroyed())
+            if (!window.IsDestroyed)
             {
                 window.Dispose();
             }
@@ -259,12 +258,12 @@ namespace Abacus
                 y -= singleLineHeight + gap;
                 indent += 20f;
                 {
-                    World world = canvas.GetWorld();
+                    World world = canvas.world;
                     world.Schema.RegisterComponent<bool>();
                     world.Schema.RegisterComponent<float>();
                     world.Schema.RegisterComponent<FixedString>();
 
-                    Entity dataEntity = new(canvas.GetWorld());
+                    Entity dataEntity = new(world);
                     dataEntity.AddComponent(true);
                     dataEntity.AddComponent(0f);
                     dataEntity.AddComponent(new FixedString("babash"));
@@ -360,23 +359,22 @@ namespace Abacus
             [UnmanagedCallersOnly]
             private static void PressedTestButton(Entity buttonEntity)
             {
-                World world = buttonEntity.GetWorld();
-                Entity containerEntity = buttonEntity.GetParent();
-                USpan<uint> children = containerEntity.GetChildren();
+                World world = buttonEntity.world;
+                Entity containerEntity = buttonEntity.Parent;
+                USpan<uint> children = containerEntity.Children;
                 bool toggleValue = default;
                 for (uint i = 0; i < children.Length; i++)
                 {
                     uint child = children[i];
                     if (world.ContainsComponent<IsToggle>(child))
                     {
-                        Toggle toggle = new(world, child);
-                        //toggle.Value = !toggle.Value;
+                        Toggle toggle = new Entity(world, child).As<Toggle>();
                         toggleValue = toggle.Value;
                         break;
                     }
                 }
 
-                children = buttonEntity.GetChildren();
+                children = buttonEntity.Children;
                 for (uint i = 0; i < children.Length; i++)
                 {
                     uint child = children[i];

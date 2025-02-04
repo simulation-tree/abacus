@@ -1,7 +1,7 @@
 ﻿using InputDevices;
-using InteractionKit;
-using InteractionKit.Components;
-using InteractionKit.Functions;
+using UI;
+using UI.Components;
+using UI.Functions;
 using Rendering;
 using System;
 using System.Numerics;
@@ -175,7 +175,7 @@ public static class SharedFunctions
             foreach (Canvas canvas in world.GetAll<Canvas>())
             {
                 Cameras.Camera camera = canvas.Camera;
-                if (!camera.IsDestroyed() && camera.Destination == window)
+                if (!camera.IsDestroyed && camera.Destination == window)
                 {
                     selectionMask |= canvas.SelectionMask;
                 }
@@ -200,7 +200,7 @@ public static class SharedFunctions
             LayerMask resizableMask = r.component1.selectionMask;
             if (pointerSelectionMask.ContainsAny(resizableMask))
             {
-                Resizable resizable = new(world, r.entity);
+                Resizable resizable = new Entity(world, r.entity).As<Resizable>();
                 IsResizable.Boundary boundary = resizable.GetBoundary(pointer.Position);
                 if (boundary != default)
                 {
@@ -223,7 +223,7 @@ public static class SharedFunctions
         }
 
         Entity hoveringOver = pointer.HoveringOver;
-        if (hoveringOver != default && !hoveringOver.IsDestroyed())
+        if (hoveringOver != default && !hoveringOver.IsDestroyed)
         {
             if (hoveringOver.Is<TextField>())
             {
@@ -246,7 +246,7 @@ public static class SharedFunctions
     public static void CopyMouseIntoPointer(this World world, Mouse mouse, LayerMask selectionMask)
     {
         Schema schema = world.Schema;
-        Definition pointerDefinition = Archetype.Get<Pointer>(schema).definition;
+        Archetype pointerDefinition = Archetype.Get<Pointer>(schema);
         if (!mouse.Is(pointerDefinition))
         {
             mouse.Become(pointerDefinition);
@@ -303,7 +303,7 @@ public static class SharedFunctions
     }
 
     [UnmanagedCallersOnly]
-    private static InteractionKit.Boolean TryHandleFPS(TryProcessLabel.Input input)
+    private static UI.Boolean TryHandleFPS(TryProcessLabel.Input input)
     {
         const string Token = "{{fps}}";
         if (input.OriginalText.Contains(Token.AsSpan()))

@@ -4,11 +4,12 @@ using Cameras.Components;
 using Data;
 using DefaultPresentationAssets;
 using InputDevices;
-using InteractionKit;
+using UI;
+using Materials;
+using Materials.Components;
 using Meshes;
 using Models;
 using Physics;
-using Physics.Components;
 using Physics.Events;
 using Rendering;
 using Rendering.Components;
@@ -37,7 +38,7 @@ namespace Abacus
         private readonly Body leftWallBody;
         private readonly Body rightWallBody;
 
-        private readonly World World => window.GetWorld();
+        private readonly World World => window.world;
 
         void IProgram.Start(in Simulator simulator, in Allocation allocation, in World world)
         {
@@ -46,7 +47,7 @@ namespace Abacus
 
         StatusCode IProgram.Update(in TimeSpan delta)
         {
-            if (window.IsDestroyed())
+            if (window.IsDestroyed)
             {
                 return StatusCode.Success(0);
             }
@@ -66,7 +67,7 @@ namespace Abacus
 
         void IProgram.Finish(in StatusCode statusCode)
         {
-            if (!window.IsDestroyed())
+            if (!window.IsDestroyed)
             {
                 window.Dispose();
             }
@@ -81,15 +82,15 @@ namespace Abacus
             window.IsTransparent = true;
             window.IsBorderless = true;
             window.AlwaysOnTop = true;
-            window.SetClearColor(new(0, 0, 0, 0));
+            window.ClearColor = new(0, 0, 0, 0);
 
             Settings settings = new(world);
-            camera = new(world, window, CameraSettings.PerspectiveFromDegrees(60));
+            camera = new(world, window, CameraSettings.CreatePerspectiveDegrees(60));
             Transform cameraTransform = camera.AsEntity().Become<Transform>();
             cameraTransform.LocalPosition = new(0, 0, -1);
 
-            Texture squareTexture = new(world, Address.Get<SquareTexture>());
-            Model cubeModel = new(world, Address.Get<CubeModel>());
+            Texture squareTexture = new(world, EmbeddedResourceRegistry.Get<SquareTexture>());
+            Model cubeModel = new(world, EmbeddedResourceRegistry.Get<CubeModel>());
             Mesh cubeMesh = new(world, cubeModel);
 
             Mesh quadMesh = new(world);
@@ -113,22 +114,22 @@ namespace Abacus
             quadMesh.AddTriangle(2, 1, 0);
             quadMesh.AddTriangle(0, 3, 2);
 
-            Material unlitMaterial = new(world, Address.Get<UnlitTexturedMaterial>());
+            Material unlitMaterial = new(world, EmbeddedResourceRegistry.Get<UnlitTexturedMaterial>());
             unlitMaterial.AddPushBinding<Color>();
             unlitMaterial.AddPushBinding<LocalToWorld>();
-            unlitMaterial.AddComponentBinding<CameraMatrices>(0, 0, camera);
-            unlitMaterial.AddTextureBinding(1, 0, squareTexture);
+            unlitMaterial.AddComponentBinding<CameraMatrices>(new(0, 0), camera);
+            unlitMaterial.AddTextureBinding(new(1, 0), squareTexture);
 
             AtlasTexture playerAtlas = GetPlayerAtlas(simulator, world);
 
-            Material playerMaterial = new(world, Address.Get<UnlitTexturedMaterial>());
+            Material playerMaterial = new(world, EmbeddedResourceRegistry.Get<UnlitTexturedMaterial>());
             playerMaterial.AddPushBinding<Color>();
             playerMaterial.AddPushBinding<LocalToWorld>();
-            playerMaterial.AddComponentBinding<CameraMatrices>(0, 0, camera);
-            playerMaterial.AddTextureBinding(1, 0, playerAtlas, TextureFiltering.Nearest);
+            playerMaterial.AddComponentBinding<CameraMatrices>(new(0, 0), camera);
+            playerMaterial.AddTextureBinding(new(1, 0), playerAtlas, TextureFiltering.Nearest);
 
             //create player
-            Body playerBody = new(world, new CubeShape(0.5f), IsBody.Type.Dynamic);
+            Body playerBody = new(world, new CubeShape(0.5f), BodyType.Dynamic);
             MeshRenderer playerRenderer = playerBody.AsEntity().Become<MeshRenderer>();
             playerRenderer.Mesh = quadMesh;
             playerRenderer.Material = playerMaterial;
@@ -170,9 +171,9 @@ namespace Abacus
             playerAnimator.AddOrSetLink<AnimatedSprite>("Falling", fallingAnimation);
 
             //create wall colliders
-            floorBody = new(world, new CubeShape(0.5f, 0.5f, 0.5f), IsBody.Type.Static);
-            leftWallBody = new(world, new CubeShape(0.5f, 0.5f, 0.5f), IsBody.Type.Static);
-            rightWallBody = new(world, new CubeShape(0.5f, 0.5f, 0.5f), IsBody.Type.Static);
+            floorBody = new(world, new CubeShape(0.5f, 0.5f, 0.5f), BodyType.Static);
+            leftWallBody = new(world, new CubeShape(0.5f, 0.5f, 0.5f), BodyType.Static);
+            rightWallBody = new(world, new CubeShape(0.5f, 0.5f, 0.5f), BodyType.Static);
 
             //Renderer floorRenderer = floorBody.AsEntity().Become<Renderer>();
             //floorRenderer.Mesh = cubeMesh;
@@ -246,7 +247,9 @@ namespace Abacus
             {
                 if (mouse.WasPressed(Mouse.Button.LeftButton))
                 {
-                    (uint width, uint height, uint refreshRate) = window.Display;
+                    Display display = window.Display;
+                    uint width = display.Width;
+                    uint height = display.Height;
                     Vector2 mousePosition = mouse.Position;
                     mousePosition.X -= width * 0.5f;
                     mousePosition.Y += height * 0.5f;
@@ -383,7 +386,7 @@ namespace Abacus
                 Entity player = new(world, playerEntity);
                 Transform playerTransform = player.As<Transform>();
                 player.SetComponent(new GroundedState(false));
-                simulator.TryHandleMessage(new RaycastRequest(world, playerTransform.WorldPosition, -Vector3.UnitY, new(&GroundHitCallback), 0.5f, player.GetEntityValue()));
+                simulator.TryHandleMessage(new RaycastRequest(world, playerTransform.WorldPosition, -Vector3.UnitY, new(&GroundHitCallback), 0.5f, player.value));
             }
 
             [UnmanagedCallersOnly]
@@ -421,23 +424,25 @@ namespace Abacus
         {
             Transform cameraTransform = camera.AsEntity().Become<Transform>();
             Vector3 cameraPosition = cameraTransform.WorldPosition;
-            (uint width, uint height, uint refreshRate) display = window.Display;
-            float maxWidth = display.width * DisplayScale;
-            float maxHeight = display.height * DisplayScale;
+            Display display = window.Display;
+            uint width = display.Width;
+            uint height = display.Height;
+            float maxWidth = width * DisplayScale;
+            float maxHeight = height * DisplayScale;
             Vector2 windowSize = window.Size;
             Vector2 windowPosition = default;
             float taskBarSize = 64f;
-            windowPosition.X = Lerp(windowSize.X * 0.5f, display.width - windowSize.X, (cameraPosition.X / maxWidth) + 0.5f) - windowSize.X * 0.5f;
-            windowPosition.Y = Lerp((windowSize.Y * 0.5f) - taskBarSize, display.height - windowSize.Y, (cameraPosition.Y / maxHeight) + 0.5f) + windowSize.Y * 0.5f;
-            window.Position = new(windowPosition.X, display.height - windowPosition.Y);
+            windowPosition.X = Lerp(windowSize.X * 0.5f, width - windowSize.X, (cameraPosition.X / maxWidth) + 0.5f) - windowSize.X * 0.5f;
+            windowPosition.Y = Lerp((windowSize.Y * 0.5f) - taskBarSize, height - windowSize.Y, (cameraPosition.Y / maxHeight) + 0.5f) + windowSize.Y * 0.5f;
+            window.Position = new(windowPosition.X, height - windowPosition.Y);
         }
 
         private readonly void UpdateCollidersToMatchDisplay(World world)
         {
-            (uint width, uint height, uint refreshRate) display = window.Display;
+            Display display = window.Display;
             Transform floorTransform = floorBody;
-            float width = display.width * DisplayScale;
-            float height = display.height * DisplayScale;
+            float width = display.Width * DisplayScale;
+            float height = display.Height * DisplayScale;
 
             floorTransform.LocalPosition = new(0f, height * -0.5f, 0f);
             floorTransform.LocalScale = new(width, 2f, 2f);
@@ -496,10 +501,10 @@ namespace Abacus
             {
                 ref AnimatedSprite animatedSprite = ref r.component1;
                 uint entity = r.entity;
-                MeshRenderer renderer = new(world, entity);
+                MeshRenderer renderer = new Entity(world, entity).As<MeshRenderer>();
                 Material material = renderer.Material;
-                ref MaterialTextureBinding binding = ref material.GetTextureBindingRef(1, 0);
-                AtlasTexture atlasTexture = new(world, binding.TextureEntity);
+                ref TextureBinding binding = ref material.GetTextureBinding(new(1, 0));
+                AtlasTexture atlasTexture = new Entity(world, binding.Entity).As<AtlasTexture>();
                 if (atlasTexture.TryGetSprite(animatedSprite.spriteName, out AtlasSprite sprite))
                 {
                     binding.SetRegion(sprite.region);

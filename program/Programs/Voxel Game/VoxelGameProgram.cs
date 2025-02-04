@@ -4,7 +4,8 @@ using Collections;
 using Data;
 using DefaultPresentationAssets;
 using InputDevices;
-using InteractionKit;
+using UI;
+using Materials;
 using Meshes;
 using Models;
 using Rendering;
@@ -46,20 +47,20 @@ namespace VoxelGame
                 window.Dispose();
             }
 
-            camera = new(world, window, CameraSettings.PerspectiveFromDegrees(90f));
+            camera = new(world, window, CameraSettings.CreatePerspectiveDegrees(90f));
             Transform cameraTransform = camera.AsEntity().Become<Transform>();
             cameraTransform.LocalPosition = new(0f, 1f, -10f);
             cameraPosition = cameraTransform.LocalPosition;
 
             (chunkAtlas, blockTextures) = GetChunkAtlas(simulator, world);
 
-            chunkMaterial = new(world, Address.Get<UnlitTexturedMaterial>());
+            chunkMaterial = new(world, EmbeddedResourceRegistry.Get<UnlitTexturedMaterial>());
             chunkMaterial.AddPushBinding<Color>();
             chunkMaterial.AddPushBinding<LocalToWorld>();
-            chunkMaterial.AddComponentBinding<CameraMatrices>(0, 0, camera);
-            chunkMaterial.AddTextureBinding(1, 0, chunkAtlas, TextureFiltering.Nearest);
+            chunkMaterial.AddComponentBinding<CameraMatrices>(new(0, 0), camera);
+            chunkMaterial.AddTextureBinding(new(1, 0), chunkAtlas, TextureFiltering.Nearest);
 
-            Model quadModel = new(world, Address.Get<QuadModel>());
+            Model quadModel = new(world, EmbeddedResourceRegistry.Get<QuadModel>());
             quadMesh = new(world, quadModel);
 
             MeshRenderer quadRenderer = new(world, quadMesh, chunkMaterial);
@@ -130,7 +131,7 @@ namespace VoxelGame
 
         readonly void IProgram.Finish(in StatusCode statusCode)
         {
-            if (!window.IsDestroyed())
+            if (!window.IsDestroyed)
             {
                 window.Dispose();
             }

@@ -1,6 +1,6 @@
 ﻿using Cameras;
-using InteractionKit;
-using InteractionKit.Components;
+using UI;
+using UI.Components;
 using Rendering;
 using Simulation;
 using System;
@@ -91,7 +91,7 @@ namespace Abacus
             LayerMask layerMask = new LayerMask().Set(layer);
 
             Window window = new(world, title, windowPosition, new(200, 200), "vulkan", new(&OnWindowClosed));
-            window.SetClearColor(Vector4.Lerp(new(0f, 0f, 0f, 1f), color, 0.3f));
+            window.ClearColor = Vector4.Lerp(new(0f, 0f, 0f, 1f), color, 0.3f);
             window.IsResizable = true;
 
             Camera camera = Camera.CreateOrthographic(world, window, 1f, layerMask);
@@ -116,7 +116,7 @@ namespace Abacus
             uint count = 0;
             foreach (Window window in world.GetAll<Window>())
             {
-                toDestroy[count++] = window.GetEntityValue();
+                toDestroy[count++] = window.value;
             }
 
             for (uint i = 0; i < count; i++)

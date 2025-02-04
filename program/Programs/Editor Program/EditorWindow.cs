@@ -1,9 +1,9 @@
 ﻿using Cameras;
-using InteractionKit;
 using Rendering;
 using System;
 using System.Numerics;
 using Transforms;
+using UI;
 using Unmanaged;
 using Windows;
 using Worlds;
@@ -14,22 +14,13 @@ namespace Editor
     {
         private readonly Entity entity;
 
-        readonly World IEntity.World => entity.GetWorld();
-        readonly uint IEntity.Value => entity.GetEntityValue();
-
-        readonly void IEntity.Describe(ref Archetype archetype)
-        {
-            archetype.AddComponentType<IsEditorWindow>();
-            archetype.Add<Window>();
-        }
-
         public unsafe EditorWindow(World world, Settings settings, Vector2 position, Vector2 size, Layer layer)
         {
             LayerMask layerMask = new LayerMask().Set(layer);
 
             FixedString title = default(T).Title;
             Window window = new(world, title, position, size, "vulkan", new(&CloseFunction.OnWindowClosed));
-            window.SetClearColor(new(0.5f, 0.5f, 0.5f, 1));
+            window.ClearColor = new(0.5f, 0.5f, 0.5f, 1);
             window.IsResizable = true;
 
             Camera camera = Camera.CreateOrthographic(world, window, 1f, layerMask);
@@ -47,6 +38,12 @@ namespace Editor
             entity = window;
 
             default(T).OnCreated(container, canvas);
+        }
+
+        readonly void IEntity.Describe(ref Archetype archetype)
+        {
+            archetype.AddComponentType<IsEditorWindow>();
+            archetype.Add<Window>();
         }
 
         public readonly void Dispose()

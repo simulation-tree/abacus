@@ -1,9 +1,9 @@
 ﻿using Cameras;
-using FileDialog;
-using FileDialog.Functions;
+using FileDialogs;
+using FileDialogs.Functions;
 using InputDevices;
-using InteractionKit;
-using InteractionKit.Components;
+using UI;
+using UI.Components;
 using Rendering;
 using Simulation;
 using System;
@@ -32,11 +32,11 @@ namespace Abacus
             LayerMask secondLayer = new LayerMask().Set(2);
 
             firstWindow = new(world, "First Window", new(200, 200), new(300, 300), "vulkan", new(&OnWindowClosed));
-            firstWindow.SetClearColor(new(0.2f, 0.2f, 0.4f, 1.0f));
+            firstWindow.ClearColor = new(0.2f, 0.2f, 0.4f, 1.0f);
             firstWindow.IsResizable = true;
 
             secondWindow = new(world, "Second Window", new(500, 200), new(300, 300), "vulkan", new(&OnWindowClosed));
-            secondWindow.SetClearColor(new(0.4f, 0.2f, 0.2f, 1.0f));
+            secondWindow.ClearColor = new(0.4f, 0.2f, 0.2f, 1.0f);
             secondWindow.IsResizable = true;
 
             Settings settings = new(world);
@@ -86,7 +86,7 @@ namespace Abacus
 
         unsafe StatusCode IProgram.Update(in TimeSpan delta)
         {
-            if (firstWindow.IsDestroyed() && secondWindow.IsDestroyed())
+            if (firstWindow.IsDestroyed && secondWindow.IsDestroyed)
             {
                 return StatusCode.Success(0);
             }
@@ -95,19 +95,19 @@ namespace Abacus
             {
                 if (keyboard.WasPressed(Keyboard.Button.Z))
                 {
-                    FileDialogEntity.OpenMultipleFiles(world, new(&ChosenFile), userData: secondCanvas.GetEntityValue());
+                    FileDialog.OpenMultipleFiles(world, new(&ChosenFile), userData: secondCanvas.value);
                 }
                 else if (keyboard.WasPressed(Keyboard.Button.X))
                 {
-                    FileDialogEntity.OpenFile(world, new(&ChosenFile), userData: secondCanvas.GetEntityValue());
+                    FileDialog.OpenFile(world, new(&ChosenFile), userData: secondCanvas.value);
                 }
                 else if (keyboard.WasPressed(Keyboard.Button.C))
                 {
-                    FileDialogEntity.SaveFile(world, new(&ChosenFile), userData: secondCanvas.GetEntityValue());
+                    FileDialog.SaveFile(world, new(&ChosenFile), userData: secondCanvas.value);
                 }
                 else if (keyboard.WasPressed(Keyboard.Button.V))
                 {
-                    FileDialogEntity.ChooseDirectory(world, new(&ChosenFile), userData: secondCanvas.GetEntityValue());
+                    FileDialog.ChooseDirectory(world, new(&ChosenFile), userData: secondCanvas.value);
                 }
             }
 
@@ -128,7 +128,7 @@ namespace Abacus
         [UnmanagedCallersOnly]
         private static void ChosenFile(Chosen.Input input)
         {
-            Canvas secondCanvas = new(input.world, (uint)input.userData);
+            Canvas secondCanvas = new Entity(input.world, (uint)input.userData).As<Canvas>();
 
             DestroyAllLabels(secondCanvas);
 
@@ -139,7 +139,7 @@ namespace Abacus
             title.Pivot = new(0, 1, 0);
 
             Vector2 position = new(10, -50);
-            if (input.status == FileDialogEntity.Status.Failed)
+            if (input.status == FileDialogStatus.Failed)
             {
                 Label label = new(secondCanvas, input.Paths[0]);
                 label.Position = position;
@@ -147,7 +147,7 @@ namespace Abacus
                 label.Anchor = Anchor.TopLeft;
                 label.Pivot = new(0, 1, 0);
             }
-            else if (input.status == FileDialogEntity.Status.Cancelled)
+            else if (input.status == FileDialogStatus.Cancelled)
             {
                 Label label = new(secondCanvas, "Cancelled");
                 label.Position = position;
@@ -171,7 +171,7 @@ namespace Abacus
 
         private static void DestroyAllLabels(Canvas canvas)
         {
-            World world = canvas.GetWorld();
+            World world = canvas.world;
             USpan<uint> toDestroy = stackalloc uint[256];
             uint count = 0;
             foreach (Label label in world.GetAll<Label>())
@@ -179,7 +179,7 @@ namespace Abacus
                 Canvas labelCanvas = label.GetCanvas();
                 if (labelCanvas == canvas)
                 {
-                    toDestroy[count++] = label.GetEntityValue();
+                    toDestroy[count++] = label.value;
                 }
             }
 

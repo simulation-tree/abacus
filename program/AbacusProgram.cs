@@ -4,6 +4,8 @@ using Data;
 using DefaultPresentationAssets;
 using Fonts;
 using InputDevices;
+using Materials;
+using Materials.Components;
 using Meshes;
 using Meshes.NineSliced;
 using Models;
@@ -40,7 +42,7 @@ namespace Abacus
         private readonly Mesh9Sliced glowMesh;
         private readonly MeshRenderer glowRenderer;
 
-        private readonly World World => window.GetWorld();
+        private readonly World World => window.world;
 
         void IProgram.Start(in Simulator simulator, in Allocation allocation, in World world)
         {
@@ -50,7 +52,7 @@ namespace Abacus
         StatusCode IProgram.Update(in TimeSpan delta)
         {
             time += delta;
-            if (time.TotalSeconds > 120f || window.IsDestroyed())
+            if (time.TotalSeconds > 120f || window.IsDestroyed)
             {
                 Trace.WriteLine("Conditions reached for finishing the demo");
                 return StatusCode.Success(0); //source of "shutdown" event
@@ -74,7 +76,7 @@ namespace Abacus
 
         void IProgram.Finish(in StatusCode statusCode)
         {
-            if (!window.IsDestroyed())
+            if (!window.IsDestroyed)
             {
                 window.Dispose();
             }
@@ -102,7 +104,7 @@ namespace Abacus
             //find existing camera or create new one
             if (!world.TryGetFirst(out camera))
             {
-                camera = new(world, window, CameraSettings.PerspectiveFromDegrees(90f));
+                camera = new(world, window, CameraSettings.CreatePerspectiveDegrees(90f));
             }
             else
             {
@@ -144,34 +146,34 @@ namespace Abacus
             manuallyBuiltMesh.AddTriangle(0, 1, 2);
             manuallyBuiltMesh.AddTriangle(2, 3, 0);
 
-            Model quadModel = new(world, Address.Get<QuadModel>());
+            Model quadModel = new(world, EmbeddedResourceRegistry.Get<QuadModel>());
             Mesh quadMesh = new(world, quadModel);
             testImage = new(world, "Assets/Textures/texture.jpg");
             //Shader shader = new(world, "Assets/Shaders/unlit.vertex.glsl", "Assets/Shaders/unlit.fragment.glsl");
 
-            Material material = new(world, Address.Get<UnlitTexturedMaterial>());
+            Material material = new(world, EmbeddedResourceRegistry.Get<UnlitTexturedMaterial>());
             material.AddPushBinding<Color>();
             material.AddPushBinding<LocalToWorld>();
-            material.AddComponentBinding<CameraMatrices>(0, 0, camera);
-            material.AddTextureBinding(1, 0, testImage);
+            material.AddComponentBinding<CameraMatrices>(new(0, 0), camera);
+            material.AddTextureBinding(new(1, 0), testImage);
 
             dummyRenderer = new(world, quadMesh, material);
             dummyRenderer.AddComponent(Color.Yellow);
             dummyRenderer.AsEntity().Become<Transform>();
 
             waveImage = new(world, "Assets/Textures/wave.png");
-            Material testMaterial = new(world, Address.Get<UnlitTexturedMaterial>());
+            Material testMaterial = new(world, EmbeddedResourceRegistry.Get<UnlitTexturedMaterial>());
             testMaterial.AddPushBinding<Color>();
             testMaterial.AddPushBinding<LocalToWorld>();
-            testMaterial.AddComponentBinding<CameraMatrices>(0, 0, camera);
-            testMaterial.AddTextureBinding(1, 0, waveImage);
+            testMaterial.AddComponentBinding<CameraMatrices>(new(0, 0), camera);
+            testMaterial.AddTextureBinding(new(1, 0), waveImage);
 
-            Texture squareTexture = new(world, Address.Get<SquareTexture>());
-            Material defaultSquareMaterial = new(world, Address.Get<UnlitTexturedMaterial>());
+            Texture squareTexture = new(world, EmbeddedResourceRegistry.Get<SquareTexture>());
+            Material defaultSquareMaterial = new(world, EmbeddedResourceRegistry.Get<UnlitTexturedMaterial>());
             defaultSquareMaterial.AddPushBinding<Color>();
             defaultSquareMaterial.AddPushBinding<LocalToWorld>();
-            defaultSquareMaterial.AddComponentBinding<CameraMatrices>(0, 0, camera);
-            defaultSquareMaterial.AddTextureBinding(1, 0, squareTexture);
+            defaultSquareMaterial.AddComponentBinding<CameraMatrices>(new(0, 0), camera);
+            defaultSquareMaterial.AddTextureBinding(new(1, 0), squareTexture);
 
             squareBox = new(world, quadMesh, defaultSquareMaterial);
             squareBox.AddComponent(Color.Red);
@@ -180,11 +182,11 @@ namespace Abacus
             squareTransform.LocalScale = new(4, 4, 1);
 
             //font entity (reusable)
-            Font cascadiaMono = new(world, Address.Get<CascadiaMonoFont>());
+            Font cascadiaMono = new(world, EmbeddedResourceRegistry.Get<CascadiaMonoFont>());
 
             //material entity (reusable)
-            Material textMaterial = new(world, Address.Get<TextMaterial>());
-            textMaterial.AddComponentBinding<CameraMatrices>(1, 0, camera);
+            Material textMaterial = new(world, EmbeddedResourceRegistry.Get<TextMaterial>());
+            textMaterial.AddComponentBinding<CameraMatrices>(new(1, 0), camera);
             textMaterial.AddPushBinding<Color>();
             textMaterial.AddPushBinding<LocalToWorld>();
 
@@ -234,13 +236,13 @@ namespace Abacus
             testRenderer.AddComponent(new RendererScissor(100, 100, 200, 200));
 
             //9 sliced mesh test
-            Texture radialGradient = new(world, Address.Get<RadialGradientAlphaTexture>());
+            Texture radialGradient = new(world, EmbeddedResourceRegistry.Get<RadialGradientAlphaTexture>());
 
-            Material glowMaterial = new(world, Address.Get<UnlitTexturedMaterial>());
+            Material glowMaterial = new(world, EmbeddedResourceRegistry.Get<UnlitTexturedMaterial>());
             glowMaterial.AddPushBinding<Color>();
             glowMaterial.AddPushBinding<LocalToWorld>();
-            glowMaterial.AddComponentBinding<CameraMatrices>(0, 0, camera);
-            glowMaterial.AddTextureBinding(1, 0, radialGradient);
+            glowMaterial.AddComponentBinding<CameraMatrices>(new(0, 0), camera);
+            glowMaterial.AddTextureBinding(new(1, 0), radialGradient);
 
             glowMesh = new Mesh9Sliced(world, new(1f), new(0.5f));
             glowMesh.AsEntity().Become<Transform>();
@@ -306,13 +308,13 @@ namespace Abacus
             {
                 if (keyboard.WasPressed(Keyboard.Button.J))
                 {
-                    dummyRenderer.SetEnabled(!dummyRenderer.IsEnabled());
+                    dummyRenderer.IsEnabled = !dummyRenderer.IsEnabled;
                 }
 
                 if (keyboard.IsPressed(Keyboard.Button.O))
                 {
                     Mesh mesh = dummyRenderer.Mesh;
-                    USpan<Vector3> positions = mesh.GetVertexPositions();
+                    USpan<Vector3> positions = mesh.Positions;
                     float revolveSpeed = 2f;
                     float revolveDistance = 0.7f;
                     float x = MathF.Sin((float)time.TotalSeconds * revolveSpeed) * revolveDistance;
@@ -328,8 +330,8 @@ namespace Abacus
                 if (keyboard.WasPressed(Keyboard.Button.E))
                 {
                     Material dummyMaterial = dummyRenderer.Material;
-                    ref MaterialTextureBinding textureBinding = ref dummyMaterial.GetTextureBindingRef(1, 0);
-                    bool shouldToggle = textureBinding.TextureEntity == waveImage.GetEntityValue();
+                    ref TextureBinding textureBinding = ref dummyMaterial.GetTextureBinding(new(1, 0));
+                    bool shouldToggle = textureBinding.Entity == waveImage.value;
                     textureBinding.SetTexture(shouldToggle ? testImage : waveImage);
 
                     using RandomGenerator rng = new();

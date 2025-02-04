@@ -1,5 +1,4 @@
 ﻿using Abacus.Simulator;
-using Data;
 using Simulation;
 using System;
 using System.Diagnostics;
@@ -12,7 +11,7 @@ Trace.Listeners.Add(new CustomTraceListener("latest.log"));
 Trace.AutoFlush = true;
 
 TypeRegistryLoader.Load();
-EmbeddedAddressTable.RegisterAll();
+EmbeddedResourceRegistryLoader.Load();
 
 Trace.WriteLine("Starting simulator program");
 
@@ -54,21 +53,4 @@ else
 {
     Trace.WriteLine($"Program failed with status code {statusCode.Code}");
     return statusCode.Code;
-}
-
-public class CustomTraceListener : TextWriterTraceListener
-{
-    public CustomTraceListener(string? fileName) : base(fileName, "listener")
-    {
-    }
-
-    public override void WriteLine(string? message)
-    {
-        base.WriteLine(AppendTimestamp(message));
-    }
-
-    private static string AppendTimestamp(string? message)
-    {
-        return $"{DateTime.Now:yyyy-dd-M--HH-mm-ss} {message}";
-    }
 }

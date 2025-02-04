@@ -11,14 +11,14 @@ namespace Abacus
     {
         private readonly Window window;
 
-        private readonly World World => window.GetWorld();
+        private readonly World World => window.world;
 
-        void IProgram.Start(in Simulator simulator, in Allocation allocation, in World world)
+        readonly  void IProgram.Start(in Simulator simulator, in Allocation allocation, in World world)
         {
             allocation.Write(new JustOneWindow(world));
         }
 
-        StatusCode IProgram.Update(in TimeSpan delta)
+        readonly  StatusCode IProgram.Update(in TimeSpan delta)
         {
             if (!IsAnyWindowOpen(World))
             {
@@ -28,9 +28,9 @@ namespace Abacus
             return StatusCode.Continue;
         }
 
-        void IProgram.Finish(in StatusCode statusCode)
+        readonly void IProgram.Finish(in StatusCode statusCode)
         {
-            if (!window.IsDestroyed())
+            if (!window.IsDestroyed)
             {
                 window.Dispose();
             }

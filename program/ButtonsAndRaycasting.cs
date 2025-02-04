@@ -4,8 +4,9 @@ using Data;
 using DefaultPresentationAssets;
 using Fonts;
 using InputDevices;
-using InteractionKit;
-using InteractionKit.Components;
+using UI;
+using UI.Components;
+using Materials;
 using Meshes;
 using Models;
 using Physics;
@@ -34,7 +35,7 @@ namespace Abacus
         private Vector3 cameraPosition;
         private Vector2 cameraPitchYaw;
 
-        private readonly World World => window.GetWorld();
+        private readonly World World => window.world;
 
         void IProgram.Start(in Simulator simulator, in Allocation allocation, in World world)
         {
@@ -43,7 +44,7 @@ namespace Abacus
 
         unsafe StatusCode IProgram.Update(in TimeSpan delta)
         {
-            if (window.IsDestroyed())
+            if (window.IsDestroyed)
             {
                 return StatusCode.Success(0);
             }
@@ -75,7 +76,7 @@ namespace Abacus
                 if (mouse.WasPressed(Mouse.Button.LeftButton))
                 {
                     Vector2 screenPoint = worldCamera.Destination.GetScreenPointFromPosition(mouse.Position);
-                    (Vector3 origin, Vector3 direction) ray = worldCamera.GetMatrices().GetRayFromScreenPoint(screenPoint);
+                    (Vector3 origin, Vector3 direction) ray = worldCamera.Matrices.GetRayFromScreenPoint(screenPoint);
                     simulator.TryHandleMessage(new RaycastRequest(World, ray.origin, ray.direction, new(&OnRaycastHit)));
 
                     [UnmanagedCallersOnly]
@@ -99,7 +100,7 @@ namespace Abacus
 
         void IProgram.Finish(in StatusCode statusCode)
         {
-            if (!window.IsDestroyed())
+            if (!window.IsDestroyed)
             {
                 window.Dispose();
             }
@@ -114,30 +115,30 @@ namespace Abacus
             window.IsResizable = true;
             window.BecomeMaximized();
 
-            worldCamera = new(world, window, CameraSettings.PerspectiveFromDegrees(90));
+            worldCamera = new(world, window, CameraSettings.CreatePerspectiveDegrees(90));
             Transform cameraTransform = worldCamera.AsEntity().Become<Transform>();
             cameraTransform.LocalPosition = new(0, 0, -10);
             cameraPosition = cameraTransform.LocalPosition;
 
-            Camera uiCamera = new(world, window, CameraSettings.Orthographic(1f));
+            Camera uiCamera = new(world, window, CameraSettings.CreateOrthographic(1f));
 
             //global references
-            Texture squareTexture = new(world, Address.Get<SquareTexture>());
-            Model cubeModel = new(world, Address.Get<CubeModel>());
+            Texture squareTexture = new(world, EmbeddedResourceRegistry.Get<SquareTexture>());
+            Model cubeModel = new(world, EmbeddedResourceRegistry.Get<CubeModel>());
             Mesh cubeMesh = new(world, cubeModel);
-            Font robotoFont = new(world, Address.Get<RobotoFont>());
+            Font robotoFont = new(world, EmbeddedResourceRegistry.Get<RobotoFont>());
 
-            Material unlitWorldMaterial = new(world, Address.Get<UnlitTexturedMaterial>());
+            Material unlitWorldMaterial = new(world, EmbeddedResourceRegistry.Get<UnlitTexturedMaterial>());
             unlitWorldMaterial.AddPushBinding<Color>();
             unlitWorldMaterial.AddPushBinding<LocalToWorld>();
-            unlitWorldMaterial.AddComponentBinding<CameraMatrices>(0, 0, worldCamera);
-            unlitWorldMaterial.AddTextureBinding(1, 0, squareTexture);
+            unlitWorldMaterial.AddComponentBinding<CameraMatrices>(new(0, 0), worldCamera);
+            unlitWorldMaterial.AddTextureBinding(new(1, 0), squareTexture);
 
             Settings settings = new(world);
             Canvas canvas = new(world, settings, uiCamera);
 
-            Material textMaterial = new(world, Address.Get<TextMaterial>());
-            textMaterial.AddComponentBinding<CameraMatrices>(1, 0, uiCamera);
+            Material textMaterial = new(world, EmbeddedResourceRegistry.Get<TextMaterial>());
+            textMaterial.AddComponentBinding<CameraMatrices>(new(1, 0), uiCamera);
             textMaterial.AddPushBinding<Color>();
             textMaterial.AddPushBinding<LocalToWorld>();
 
@@ -145,7 +146,7 @@ namespace Abacus
             MeshRenderer waveRenderer = new(world, cubeMesh, unlitWorldMaterial, worldCamera.RenderMask);
             Transform waveTransform = waveRenderer.AsEntity().Become<Transform>();
             waveRenderer.AddComponent(Color.Red);
-            waveRenderer.AddComponent(new IsBody(new CubeShape(0.5f), IsBody.Type.Static));
+            waveRenderer.AddComponent(new IsBody(new CubeShape(0.5f), BodyType.Static));
 
             //create ui boxes
             Button testWindow = new(new(&TestBoxPressed), canvas);

@@ -1,5 +1,5 @@
 ﻿using Cameras;
-using InteractionKit;
+using UI;
 using Simulation;
 using System;
 using System.Diagnostics;
@@ -15,7 +15,7 @@ namespace Abacus
     {
         private readonly Window window;
 
-        private readonly World World => window.GetWorld();
+        private readonly World World => window.world;
 
         void IProgram.Start(in Simulator simulator, in Allocation allocation, in World world)
         {
@@ -66,7 +66,7 @@ namespace Abacus
 
         void IProgram.Finish(in StatusCode statusCode)
         {
-            if (!window.IsDestroyed())
+            if (!window.IsDestroyed)
             {
                 window.Dispose();
             }
