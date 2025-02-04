@@ -62,7 +62,7 @@ namespace Abacus
             TestMouseInputs(World);
             UpdateGlowMeshSize(World);
             AnimateTestRenderer(World, deltaSeconds);
-            Transform cameraTransform = camera.AsEntity().Become<Transform>();
+            Transform cameraTransform = camera.Become<Transform>();
             SharedFunctions.MoveCameraAround(World, cameraTransform, delta, ref cameraPosition, ref cameraPitchYaw, new(1f, 1f));
             ModifyText(World);
             if (TestWindowEntity(World, deltaSeconds))
@@ -112,7 +112,7 @@ namespace Abacus
             }
 
             //build scene
-            Transform cameraTransform = camera.AsEntity().Become<Transform>();
+            Transform cameraTransform = camera.Become<Transform>();
             cameraTransform.LocalPosition = new(0f, 0f, -10f);
             cameraPosition = cameraTransform.LocalPosition;
 
@@ -159,7 +159,7 @@ namespace Abacus
 
             dummyRenderer = new(world, quadMesh, material);
             dummyRenderer.AddComponent(Color.Yellow);
-            dummyRenderer.AsEntity().Become<Transform>();
+            dummyRenderer.Become<Transform>();
 
             waveImage = new(world, "Assets/Textures/wave.png");
             Material testMaterial = new(world, EmbeddedResourceRegistry.Get<UnlitTexturedMaterial>());
@@ -177,7 +177,7 @@ namespace Abacus
 
             squareBox = new(world, quadMesh, defaultSquareMaterial);
             squareBox.AddComponent(Color.Red);
-            Transform squareTransform = squareBox.AsEntity().Become<Transform>();
+            Transform squareTransform = squareBox.Become<Transform>();
             squareTransform.LocalPosition = new(8, 4, -2);
             squareTransform.LocalScale = new(4, 4, 1);
 
@@ -230,7 +230,7 @@ namespace Abacus
 
             testRenderer = new(world, manuallyBuiltMesh, testMaterial);
             testRenderer.AddComponent(Color.White);
-            Transform testTransform = testRenderer.AsEntity().Become<Transform>();
+            Transform testTransform = testRenderer.Become<Transform>();
             testTransform.LocalPosition = new(-7, -4, -2);
             testTransform.LocalScale = new(8f, 8f, 1f);
             testRenderer.AddComponent(new RendererScissor(100, 100, 200, 200));
@@ -245,13 +245,13 @@ namespace Abacus
             glowMaterial.AddTextureBinding(new(1, 0), radialGradient);
 
             glowMesh = new Mesh9Sliced(world, new(1f), new(0.5f));
-            glowMesh.AsEntity().Become<Transform>();
+            glowMesh.Become<Transform>();
 
             glowRenderer = new MeshRenderer(world, glowMesh, glowMaterial);
             glowRenderer.AddComponent(new Color(1f, 0.5f, 0.5f, 1f));
 
             const float Padding = 1f;
-            Transform glowTransform = glowRenderer.AsEntity().Become<Transform>();
+            Transform glowTransform = glowRenderer.Become<Transform>();
             glowTransform.LocalPosition = new(0, 0, 0.02f);
             glowTransform.AddComponent(new Anchor($"-{Padding}", $"-{Padding}", "0", $"-{Padding}", $"-{Padding}", "0"));
             glowTransform.SetParent(squareBox);
@@ -265,8 +265,8 @@ namespace Abacus
 
         private readonly void UpdateGlowMeshSize(World world)
         {
-            Transform glowMeshTransform = glowMesh.AsEntity().As<Transform>();
-            Transform glowRendererTransform = glowRenderer.AsEntity().As<Transform>();
+            Transform glowMeshTransform = glowMesh.As<Transform>();
+            Transform glowRendererTransform = glowRenderer.As<Transform>();
             glowMeshTransform.LocalScale = glowRendererTransform.WorldScale;
         }
 
@@ -343,7 +343,7 @@ namespace Abacus
                 }
             }
 
-            ref Color color = ref dummyRenderer.AsEntity().GetComponent<Color>();
+            ref Color color = ref dummyRenderer.GetComponent<Color>();
             float hue = color.value.GetHue();
             hue += delta * 0.2f;
             while (hue > 1f)
@@ -455,7 +455,7 @@ namespace Abacus
                 if (keyboard.IsPressed(Keyboard.Button.B))
                 {
                     float speed = 20f;
-                    Transform squareBoxTransform = squareBox.AsEntity().As<Transform>();
+                    Transform squareBoxTransform = squareBox.As<Transform>();
                     if (alt.IsPressed)
                     {
                         squareBoxTransform.LocalPosition += new Vector3(direction, 0) * delta * speed;

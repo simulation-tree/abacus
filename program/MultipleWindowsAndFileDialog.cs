@@ -60,7 +60,7 @@ namespace Abacus
             firstSquare.Position = new(50, 50);
             firstSquare.Color = new(1, 0.5f, 0.5f, 1.0f);
 
-            Resizable resizable = firstSquare.AsEntity().Become<Resizable>();
+            Resizable resizable = firstSquare.Become<Resizable>();
             resizable.Boundary = IsResizable.Boundary.All;
             resizable.SelectionMask = firstLayer;
 
@@ -74,7 +74,7 @@ namespace Abacus
             secondSquare.Position = new(150, 150);
             secondSquare.Color = new(0.5f, 0.5f, 1, 1.0f);
 
-            resizable = secondSquare.AsEntity().Become<Resizable>();
+            resizable = secondSquare.Become<Resizable>();
             resizable.Boundary = IsResizable.Boundary.All;
             resizable.SelectionMask = secondLayer;
         }

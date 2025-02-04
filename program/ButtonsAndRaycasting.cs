@@ -49,17 +49,17 @@ namespace Abacus
                 return StatusCode.Success(0);
             }
 
-            Transform cameraTransform = worldCamera.AsEntity().Become<Transform>();
+            Transform cameraTransform = worldCamera.Become<Transform>();
             SharedFunctions.MoveCameraAround(World, cameraTransform, delta, ref cameraPosition, ref cameraPitchYaw, new(1f, 1f));
 
             if (World.TryGetFirst(out Mouse mouse))
             {
-                if (!mouse.AsEntity().ContainsComponent<IsPointer>())
+                if (!mouse.ContainsComponent<IsPointer>())
                 {
                     mouse.AddComponent(new IsPointer(mouse.Position));
                 }
 
-                ref IsPointer pointer = ref mouse.AsEntity().GetComponent<IsPointer>();
+                ref IsPointer pointer = ref mouse.GetComponent<IsPointer>();
                 pointer.position = mouse.Position;
                 pointer.action = default;
                 pointer.scroll = mouse.Scroll;
@@ -116,7 +116,7 @@ namespace Abacus
             window.BecomeMaximized();
 
             worldCamera = new(world, window, CameraSettings.CreatePerspectiveDegrees(90));
-            Transform cameraTransform = worldCamera.AsEntity().Become<Transform>();
+            Transform cameraTransform = worldCamera.Become<Transform>();
             cameraTransform.LocalPosition = new(0, 0, -10);
             cameraPosition = cameraTransform.LocalPosition;
 
@@ -144,7 +144,7 @@ namespace Abacus
 
             //crate test cube
             MeshRenderer waveRenderer = new(world, cubeMesh, unlitWorldMaterial, worldCamera.RenderMask);
-            Transform waveTransform = waveRenderer.AsEntity().Become<Transform>();
+            Transform waveTransform = waveRenderer.Become<Transform>();
             waveRenderer.AddComponent(Color.Red);
             waveRenderer.AddComponent(new IsBody(new CubeShape(0.5f), BodyType.Static));
 
@@ -163,7 +163,7 @@ namespace Abacus
             TextMesh textMesh = new(world, "abacus 123 hiii", robotoFont);
             TextRenderer textRenderer = new(world, textMesh, textMaterial, uiCamera.RenderMask);
             textRenderer.SetParent(anotherBox);
-            Transform textTransform = textRenderer.AsEntity().Become<Transform>();
+            Transform textTransform = textRenderer.Become<Transform>();
             textTransform.LocalPosition = new(4f, -4f, 0.1f);
             textTransform.LocalScale = Vector3.One * 32f;
             textRenderer.AddComponent(Color.Orange);

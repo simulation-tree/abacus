@@ -86,7 +86,7 @@ namespace Abacus
 
             Settings settings = new(world);
             camera = new(world, window, CameraSettings.CreatePerspectiveDegrees(60));
-            Transform cameraTransform = camera.AsEntity().Become<Transform>();
+            Transform cameraTransform = camera.Become<Transform>();
             cameraTransform.LocalPosition = new(0, 0, -1);
 
             Texture squareTexture = new(world, EmbeddedResourceRegistry.Get<SquareTexture>());
@@ -130,7 +130,7 @@ namespace Abacus
 
             //create player
             Body playerBody = new(world, new CubeShape(0.5f), BodyType.Dynamic);
-            MeshRenderer playerRenderer = playerBody.AsEntity().Become<MeshRenderer>();
+            MeshRenderer playerRenderer = playerBody.Become<MeshRenderer>();
             playerRenderer.Mesh = quadMesh;
             playerRenderer.Material = playerMaterial;
             playerRenderer.RenderMask = new LayerMask().Set(1);
@@ -160,7 +160,7 @@ namespace Abacus
             Automation<FixedString> jumpingUpAnimation = new(world, [new(0f, "JumpingUp.png")]);
             Automation<FixedString> fallingAnimation = new(world, [new(0f, "Falling.png")]);
 
-            StatefulAutomationPlayer playerAnimator = playerBody.AsEntity().Become<StatefulAutomationPlayer>();
+            StatefulAutomationPlayer playerAnimator = playerBody.Become<StatefulAutomationPlayer>();
             playerAnimator.StateMachine = playerAnimationStateMachine;
             playerAnimator.AddParameter("velocityX", 0f);
             playerAnimator.AddParameter("velocityY", 0f);
@@ -179,17 +179,17 @@ namespace Abacus
             //floorRenderer.Mesh = cubeMesh;
             //floorRenderer.Material = unlitMaterial;
             //floorRenderer.Camera = camera;
-            //floorBody.AsEntity().AddComponent(Color.Green);
-            //Renderer leftWallRenderer = leftWallBody.AsEntity().Become<Renderer>();
+            //floorBody.AddComponent(Color.Green);
+            //Renderer leftWallRenderer = leftWallBody.Become<Renderer>();
             //leftWallRenderer.Mesh = cubeMesh;
             //leftWallRenderer.Material = unlitMaterial;
             //leftWallRenderer.Camera = camera;
-            //leftWallBody.AsEntity().AddComponent(Color.Blue);
+            //leftWallBody.AddComponent(Color.Blue);
             //Renderer rightWallRenderer = rightWallBody.AsEntity().Become<Renderer>();
             //rightWallRenderer.Mesh = cubeMesh;
             //rightWallRenderer.Material = unlitMaterial;
             //rightWallRenderer.Camera = camera;
-            //rightWallBody.AsEntity().AddComponent(Color.Blue);
+            //rightWallBody.AddComponent(Color.Blue);
 
             //create directional gravity
             new DirectionalGravity(world, -Vector3.UnitY, Gravity);
@@ -414,7 +414,7 @@ namespace Abacus
             }
 
             Transform playerTransform = player.As<Transform>();
-            Transform cameraTransform = camera.AsEntity().Become<Transform>();
+            Transform cameraTransform = camera.Become<Transform>();
             Vector3 playerPosition = playerTransform.WorldPosition;
             Vector3 cameraPosition = cameraTransform.WorldPosition;
             cameraTransform.LocalPosition = new(playerPosition.X, playerPosition.Y, cameraPosition.Z);
@@ -422,7 +422,7 @@ namespace Abacus
 
         private readonly void MakeWindowFollowCamera(World world)
         {
-            Transform cameraTransform = camera.AsEntity().Become<Transform>();
+            Transform cameraTransform = camera.Become<Transform>();
             Vector3 cameraPosition = cameraTransform.WorldPosition;
             Display display = window.Display;
             uint width = display.Width;

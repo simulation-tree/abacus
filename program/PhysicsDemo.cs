@@ -185,7 +185,7 @@ namespace Abacus
             window.IsResizable = true;
 
             camera = new(world, window, CameraSettings.CreatePerspectiveDegrees(90f));
-            cameraTransform = camera.AsEntity().Become<Transform>();
+            cameraTransform = camera.Become<Transform>();
             cameraTransform.LocalPosition = new(-1f, 2f, -10f);
             cameraPosition = cameraTransform.LocalPosition;
 

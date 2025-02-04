@@ -32,21 +32,21 @@ namespace VoxelGame
             Mesh mesh = new(world);
             value = mesh.value;
 
-            mesh.AsEntity().AddTag<IsChunk>();
+            mesh.AddTag<IsChunk>();
             mesh.CreatePositions(0);
             mesh.CreateColors(0);
             mesh.CreateUVs(0);
 
-            USpan<BlockID> blocks = mesh.AsEntity().CreateArray<BlockID>(capacity);
+            USpan<BlockID> blocks = mesh.CreateArray<BlockID>(capacity);
             blocks.Clear();
 
-            MeshRenderer chunkRenderer = mesh.AsEntity().Become<MeshRenderer>();
+            MeshRenderer chunkRenderer = mesh.Become<MeshRenderer>();
             chunkRenderer.Mesh = mesh;
             chunkRenderer.Material = unlitMaterial;
             chunkRenderer.RenderMask = new LayerMask().Set(1);
 
             chunkRenderer.AddComponent(Color.White);
-            Transform chunkTransform = chunkRenderer.AsEntity().Become<Transform>();
+            Transform chunkTransform = chunkRenderer.Become<Transform>();
             chunkTransform.LocalPosition = new Vector3(cx, cy, cz) * chunkSize;
         }
 

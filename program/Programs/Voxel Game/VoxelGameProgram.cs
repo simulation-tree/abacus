@@ -48,7 +48,7 @@ namespace VoxelGame
             }
 
             camera = new(world, window, CameraSettings.CreatePerspectiveDegrees(90f));
-            Transform cameraTransform = camera.AsEntity().Become<Transform>();
+            Transform cameraTransform = camera.Become<Transform>();
             cameraTransform.LocalPosition = new(0f, 1f, -10f);
             cameraPosition = cameraTransform.LocalPosition;
 
@@ -65,7 +65,7 @@ namespace VoxelGame
 
             MeshRenderer quadRenderer = new(world, quadMesh, chunkMaterial);
             quadRenderer.AddComponent(Color.White);
-            Transform ballTransform = quadRenderer.AsEntity().Become<Transform>();
+            Transform ballTransform = quadRenderer.Become<Transform>();
             ballTransform.LocalPosition = new(0f, 4f, 0f);
 
             world.CreateEntity(new VoxelSettings(16));
@@ -123,7 +123,7 @@ namespace VoxelGame
                 }
             }
 
-            Transform cameraTransform = camera.AsEntity().As<Transform>();
+            Transform cameraTransform = camera.As<Transform>();
             SharedFunctions.TrackFramesPerSecond();
             SharedFunctions.MoveCameraAround(world, cameraTransform, delta, ref cameraPosition, ref cameraPitchYaw, new(1f, 1f));
             return StatusCode.Continue;

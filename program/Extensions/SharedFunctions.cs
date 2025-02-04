@@ -190,7 +190,7 @@ public static class SharedFunctions
 
     public static void UpdateCursorIconBasedOnPointerState(this World world, Mouse mouse)
     {
-        Pointer pointer = mouse.AsEntity().As<Pointer>();
+        Pointer pointer = mouse.As<Pointer>();
         LayerMask pointerSelectionMask = pointer.SelectionMask;
 
         bool nonDefaultCursor = false;
@@ -252,7 +252,7 @@ public static class SharedFunctions
             mouse.Become(pointerDefinition);
         }
 
-        Pointer pointer = mouse.AsEntity().As<Pointer>();
+        Pointer pointer = mouse.As<Pointer>();
         pointer.SelectionMask = selectionMask;
         pointer.Position = mouse.Position;
         pointer.HasPrimaryIntent = mouse.IsPressed(Mouse.Button.LeftButton);
