@@ -1,121 +1,92 @@
-﻿using System;
-using System.Diagnostics;
+﻿using Collections;
+using System;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
-using static Functions;
+using Unmanaged;
 
-public readonly struct Test : ICommand
+namespace Abacus.Manager.Commands
 {
-    ReadOnlySpan<char> ICommand.Name => "test";
-    ReadOnlySpan<char> ICommand.Description => "Tests all projects (--release, --coverage-xplat --coverage-coverlet, --generate-reports)";
-
-    void ICommand.Execute(ReadOnlySpan<char> workingDirectory, ReadOnlySpan<char> arguments)
+    public readonly struct Test : ICommand
     {
-        bool releaseMode = false;
-        if (arguments.IndexOf("--release") != -1)
-        {
-            releaseMode = true;
-        }
+        readonly string ICommand.Name => "test";
+        readonly string ICommand.Description => "Tests all projects (--release, --coverage-xplat --coverage-coverlet, --generate-reports)";
 
-        bool xplatCoverage = false;
-        if (arguments.IndexOf("--coverage-xplat") != -1)
+        readonly void ICommand.Execute(Runner runner, Arguments arguments)
         {
-            xplatCoverage = true;
-        }
-
-        bool coverletCoverage = false;
-        if (arguments.IndexOf("--coverage-coverlet") != -1)
-        {
-            coverletCoverage = true;
-        }
-
-        bool generateReports = false;
-        if (arguments.IndexOf("--generate-reports") != -1)
-        {
-            generateReports = true;
-        }
-
-        string reportTypes = "Html";
-        foreach (Project project in GetProjects(workingDirectory))
-        {
-            if (project.isTestProject)
+            bool releaseMode = false;
+            if (arguments.Contains("--release"))
             {
-                string command = $"dotnet test \"{project.Path.ToString()}\"";
-                if (releaseMode)
+                releaseMode = true;
+            }
+
+            bool xplatCoverage = false;
+            if (arguments.Contains("--coverage-xplat"))
+            {
+                xplatCoverage = true;
+            }
+
+            bool coverletCoverage = false;
+            if (arguments.Contains("--coverage-coverlet"))
+            {
+                coverletCoverage = true;
+            }
+
+            bool generateReports = false;
+            if (arguments.Contains("--generate-reports"))
+            {
+                generateReports = true;
+            }
+
+            string reportTypes = "Html";
+            string command = "dotnet test";
+            if (releaseMode)
+            {
+                command += " -c Release";
+            }
+            else
+            {
+                command += " -c Debug";
+            }
+
+            if (coverletCoverage)
+            {
+                command += " /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura";
+            }
+
+            if (xplatCoverage)
+            {
+                command += " --collect:\"XPlat Code Coverage;Format=cobertura\"";
+            }
+
+            string solutionFolder = Directory.GetParent(runner.SolutionPath.ToString())?.FullName ?? string.Empty;
+            if (releaseMode)
+            {
+                Terminal.Execute(solutionFolder, "dotnet build -c Release");
+            }
+            else
+            {
+                Terminal.Execute(solutionFolder, "dotnet build -c Debug");
+            }
+
+            USpan<char> result = Terminal.Execute(solutionFolder, $"{command} --no-build");
+            if (!result.IsEmpty)
+            {
+                if (result.TryIndexOf("Starting test execution".AsSpan(), out uint index))
                 {
-                    command += " -c Release";
+                    runner.WriteInfoLine(result.Slice(index));
                 }
                 else
                 {
-                    command += " -c Debug";
-                }
-
-                if (coverletCoverage)
-                {
-                    command += " /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura";
-                }
-
-                if (xplatCoverage)
-                {
-                    command += " --collect:\"XPlat Code Coverage;Format=cobertura\"";
-                }
-
-                if (releaseMode)
-                {
-                    Call($"dotnet build \"{project.Path.ToString()}\" -c Release");
-                }
-                else
-                {
-                    Call($"dotnet build \"{project.Path.ToString()}\" -c Debug");
-                }
-
-                string? result = Call($"{command} --no-build");
-                if (result is not null)
-                {
-                    int index = result.IndexOf("Starting test execution");
-                    if (index != -1)
-                    {
-                        Trace.WriteLine(result.Substring(index));
-                    }
-                    else
-                    {
-                        Trace.TraceError(result);
-                    }
-                }
-
-                if (generateReports)
-                {
-                    string projectFolder = project.WorkingDirectory.ToString();
-                    if (Directory.Exists(projectFolder))
-                    {
-                        string testResultsFolder = Path.Combine(projectFolder, "TestResults");
-                        if (TryGetTestResultsFile(testResultsFolder, out string? testResultsPath))
-                        {
-                            string targetDir = Path.Combine(testResultsFolder, "report");
-                            command = $"reportgenerator -reports:\"{testResultsPath}\" -targetdir:\"{targetDir}\" -reporttypes:{reportTypes}";
-                            Call(command);
-                        }
-                    }
+                    runner.WriteErrorLine(result);
                 }
             }
-        }
-    }
 
-    private static bool TryGetTestResultsFile(string directory, [NotNullWhen(true)] out string? testResultsPath)
-    {
-        DateTime lastModifiedTime = DateTime.MinValue;
-        string[] files = Directory.GetFiles(directory, "*.xml", SearchOption.AllDirectories);
-        testResultsPath = null;
-        foreach (string file in files)
-        {
-            DateTime modifiedTime = File.GetLastWriteTimeUtc(file);
-            if (modifiedTime > lastModifiedTime)
+            if (generateReports)
             {
-                lastModifiedTime = modifiedTime;
-                testResultsPath = file;
+                string targetDir = Path.Combine(runner.WorkingDirectory.ToString(), "report");
+                command = $"reportgenerator -reports:\"{runner.WorkingDirectory.ToString()}/**/coverage.cobertura.xml\" -targetdir:\"{targetDir}\" -reporttypes:{reportTypes}";
+                Terminal.Execute(runner.WorkingDirectory, command);
             }
         }
-
-        return testResultsPath is not null;
     }
 }

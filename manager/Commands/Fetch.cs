@@ -1,16 +1,20 @@
-﻿using System;
-using static Functions;
+﻿using Collections;
 
-public readonly struct Fetch : ICommand
+namespace Abacus.Manager.Commands
 {
-    ReadOnlySpan<char> ICommand.Name => "fetch";
-    ReadOnlySpan<char> ICommand.Description => "Fetches commits for all projects";
-
-    void ICommand.Execute(ReadOnlySpan<char> workingDirectory, ReadOnlySpan<char> arguments)
+    public readonly struct Fetch : ICommand
     {
-        foreach (Project project in GetProjects(workingDirectory))
+        readonly string ICommand.Name => "fetch";
+        readonly string ICommand.Description => "Fetches commits for all projects";
+
+        readonly void ICommand.Execute(Runner runner, Arguments arguments)
         {
-            Call(project.WorkingDirectory, $"git fetch");
+            using Array<Repository> repositories = runner.GetRepositories();
+            foreach (Repository repository in repositories)
+            {
+                Terminal.Execute(repository.Path, $"git fetch");
+                repository.Dispose();
+            }
         }
     }
 }

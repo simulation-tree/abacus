@@ -1,22 +1,26 @@
-﻿using System;
-using System.Diagnostics;
-using static Functions;
+﻿using Collections;
 
-public readonly struct Commit : ICommand
+namespace Abacus.Manager.Commands
 {
-    ReadOnlySpan<char> ICommand.Name => "commit";
-    ReadOnlySpan<char> ICommand.Description => "Creates a commit for all projects";
-
-    void ICommand.Execute(ReadOnlySpan<char> workingDirectory, ReadOnlySpan<char> arguments)
+    public readonly struct Commit : ICommand
     {
-        if (arguments.Length == 0)
-        {
-            Trace.TraceError("A commit message is expected as a parameter");
-        }
+        readonly string ICommand.Name => "commit";
+        readonly string ICommand.Description => "Creates a commit for all projects";
 
-        foreach (Project project in GetProjects(workingDirectory))
+        readonly void ICommand.Execute(Runner runner, Arguments arguments)
         {
-            Call(project.WorkingDirectory, $"git commit -m \"{arguments.ToString()}\"");
+            if (arguments.IsEmpty)
+            {
+                runner.WriteErrorLine("A commit message is expected as a parameter");
+                return;
+            }
+
+            using Array<Repository> repositories = runner.GetRepositories();
+            foreach (Repository repository in repositories)
+            {
+                Terminal.Execute(repository.Path, $"git commit -m \"{arguments.ToString()}\"");
+                repository.Dispose();
+            }
         }
     }
 }

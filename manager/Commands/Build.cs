@@ -1,35 +1,42 @@
-﻿using System;
-using static Functions;
+﻿using Collections;
 
-public readonly struct Build : ICommand
+namespace Abacus.Manager.Commands
 {
-    ReadOnlySpan<char> ICommand.Name => "build";
-    ReadOnlySpan<char> ICommand.Description => "Builds all project (--release)";
-
-    void ICommand.Execute(ReadOnlySpan<char> workingDirectory, ReadOnlySpan<char> arguments)
+    public readonly struct Build : ICommand
     {
-        bool releaseMode = false;
-        if (arguments.IndexOf("--release") != -1)
-        {
-            releaseMode = true;
-        }
+        readonly string ICommand.Name => "build";
+        readonly string ICommand.Description => "Builds all project (--release)";
 
-        foreach (Project project in GetProjects(workingDirectory))
+        readonly void ICommand.Execute(Runner runner, Arguments arguments)
         {
-            if (!project.isTestProject)
+            bool releaseMode = false;
+            if (arguments.Contains("--release"))
             {
-                string command = $"dotnet build \"{project.Path.ToString()}\"";
-                if (releaseMode)
+                releaseMode = true;
+            }
+
+            using Array<Project> projects = runner.GetProjects();
+            foreach (Project project in projects)
+            {
+                if (!project.isTestProject)
                 {
-                    command += " -c Release";
-                }
-                else
-                {
-                    command += " -c Debug";
+                    string command = $"dotnet build \"{project.Path.ToString()}\"";
+                    if (releaseMode)
+                    {
+                        command += " -c Release";
+                    }
+                    else
+                    {
+                        command += " -c Debug";
+                    }
+
+                    Terminal.Execute(runner.WorkingDirectory, command);
                 }
 
-                Call(command);
+                project.Dispose();
             }
+
+            projects.Dispose();
         }
     }
 }

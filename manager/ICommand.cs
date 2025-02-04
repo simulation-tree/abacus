@@ -1,9 +1,10 @@
-﻿using System;
-
-public interface ICommand
+﻿namespace Abacus.Manager
 {
-    ReadOnlySpan<char> Name { get; }
-    ReadOnlySpan<char> Description { get; }
+    public interface ICommand
+    {
+        string Name { get; }
+        string? Description { get; }
 
-    void Execute(ReadOnlySpan<char> workingDirectory, ReadOnlySpan<char> arguments);
+        void Execute(Runner runner, Arguments arguments);
+    }
 }

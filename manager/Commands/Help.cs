@@ -1,23 +1,21 @@
-﻿using System;
-using System.Diagnostics;
-
-public readonly struct Help : ICommand
+﻿namespace Abacus.Manager.Commands
 {
-    ReadOnlySpan<char> ICommand.Name => "help";
-    ReadOnlySpan<char> ICommand.Description => "Lists all commands available";
-
-    void ICommand.Execute(ReadOnlySpan<char> workingDirectory, ReadOnlySpan<char> arguments)
+    public readonly struct Help : ICommand
     {
-        int namePadding = 20;
-        int descriptionPadding = 60;
-        string nameTitle = "Name".PadRight(namePadding);
-        string isTestProjectTitle = "Description".PadRight(descriptionPadding);
-        string header = $"{nameTitle} | {isTestProjectTitle}";
-        Trace.WriteLine(header);
-        Trace.WriteLine(new string('-', header.Length));
-        foreach (ICommand command in CommandsRegistry.Commands)
+        readonly string ICommand.Name => "help";
+        readonly string ICommand.Description => "Lists all commands available";
+
+        readonly void ICommand.Execute(Runner runner, Arguments arguments)
         {
-            Trace.WriteLine($"{command.Name.ToString().PadRight(namePadding)} | {command.Description.ToString().PadRight(descriptionPadding)}");
+            using TableBuilder table = new("Name", "Description");
+            foreach (ICommand command in CommandsRegistry.Commands)
+            {
+                string name = command.Name;
+                string description = command.Description ?? string.Empty;
+                table.AddRow(name, description);
+            }
+
+            runner.WriteInfoLine(table.ToString());
         }
     }
 }

@@ -1,24 +1,60 @@
-﻿using System;
-using System.Diagnostics;
-using static Functions;
+﻿using Collections;
 
-public readonly struct List : ICommand
+namespace Abacus.Manager.Commands
 {
-    ReadOnlySpan<char> ICommand.Name => "list";
-    ReadOnlySpan<char> ICommand.Description => "Lists all projects";
-
-    void ICommand.Execute(ReadOnlySpan<char> workingDirectory, ReadOnlySpan<char> arguments)
+    public readonly struct List : ICommand
     {
-        int titlePadding = 50;
-        int isTestPadding = 10;
-        string nameTitle = "Name".PadRight(titlePadding);
-        string isTestProjectTitle = "Is Test?".PadRight(isTestPadding);
-        string header = $"{nameTitle} | {isTestProjectTitle}";
-        Trace.WriteLine(header);
-        Trace.WriteLine(new string('-', header.Length));
-        foreach (Project project in GetProjects(workingDirectory))
+        readonly string ICommand.Name => "list";
+        readonly string ICommand.Description => "Lists all repositories and projects (--projects, --repositories)";
+
+        readonly void ICommand.Execute(Runner runner, Arguments arguments)
         {
-            Trace.WriteLine($"{project.Name.ToString().PadRight(titlePadding)} | {project.isTestProject.ToString().PadRight(isTestPadding)}");
+            bool listProjects = arguments.Contains("--projects");
+            bool listRepositories = arguments.Contains("--repositories");
+            if (listRepositories)
+            {
+                using TableBuilder table = new("Name", "Remote", "Projects");
+                using Array<Repository> repositories = runner.GetRepositories();
+                foreach (Repository repository in repositories)
+                {
+                    string name = repository.Name.ToString();
+                    string remote = repository.Remote.ToString();
+                    string projects = string.Empty;
+                    foreach (Project project in repository.Projects)
+                    {
+                        projects += project.Name.ToString() + ", ";
+                    }
+
+                    if (projects.Length > 0)
+                    {
+                        projects = projects.Substring(0, projects.Length - 2);
+                    }
+
+                    table.AddRow(name, remote, projects);
+                    repository.Dispose();
+                }
+
+                runner.WriteInfoLine(table.ToString());
+            }
+            else if (listProjects)
+            {
+                using TableBuilder table = new("Name", "Is Test?");
+                using Array<Project> projects = runner.GetProjects();
+                foreach (Project project in projects)
+                {
+                    string name = project.Name.ToString();
+                    string isTest = project.isTestProject ? "Yes" : "No";
+                    table.AddRow(name, isTest);
+                    project.Dispose();
+                }
+
+                runner.WriteInfoLine(table.ToString());
+
+            }
+            else
+            {
+                runner.WriteErrorLine("No list option specified");
+            }
         }
     }
 }

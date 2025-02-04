@@ -1,12 +1,13 @@
-﻿using System;
-
-public readonly struct Quit : ICommand
+﻿namespace Abacus.Manager.Commands
 {
-    ReadOnlySpan<char> ICommand.Name => "quit";
-    ReadOnlySpan<char> ICommand.Description => "Quits the application";
-
-    void ICommand.Execute(ReadOnlySpan<char> workingDirectory, ReadOnlySpan<char> arguments)
+    public readonly struct Quit : ICommand
     {
-        Environment.Exit(0);
+        readonly string ICommand.Name => "quit";
+        readonly string ICommand.Description => "Quits the application";
+
+        readonly void ICommand.Execute(Runner runner, Arguments arguments)
+        {
+            Program.requestExit = true;
+        }
     }
 }

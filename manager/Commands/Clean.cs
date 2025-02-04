@@ -1,119 +1,122 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
+﻿using Collections;
 using System.IO;
-using static Functions;
 
-public readonly struct Clean : ICommand
+namespace Abacus.Manager.Commands
 {
-    ReadOnlySpan<char> ICommand.Name => "clean";
-    ReadOnlySpan<char> ICommand.Description => "Cleans project of artifacts (--source-control, --ide, --test-results, --builds)";
-
-    void ICommand.Execute(ReadOnlySpan<char> workingDirectory, ReadOnlySpan<char> arguments)
+    public readonly struct Clean : ICommand
     {
-        bool sourceControlArtifacts = false;
-        if (arguments.IndexOf("--source-control") != -1)
-        {
-            sourceControlArtifacts = true;
-        }
+        readonly string ICommand.Name => "clean";
+        readonly string ICommand.Description => "Cleans project of artifacts (--source-control, --ide, --test-results, --builds)";
 
-        bool ideArtifacts = false;
-        if (arguments.IndexOf("--ide") != -1)
+        readonly void ICommand.Execute(Runner runner, Arguments arguments)
         {
-            ideArtifacts = true;
-        }
-
-        bool testResults = false;
-        if (arguments.IndexOf("--test-results") != -1)
-        {
-            testResults = true;
-        }
-
-        bool builds = false;
-        if (arguments.IndexOf("--builds") != -1)
-        {
-            builds = true;
-        }
-
-        if (!sourceControlArtifacts && !ideArtifacts && !testResults && !builds)
-        {
-            Trace.TraceError("At least one clean filter is requried: --source-control, --ide, --test-results, --builds");
-            return;
-        }
-
-        foreach (Project project in GetProjects(workingDirectory))
-        {
-            Stack<string> stack = new();
-            stack.Push(project.WorkingDirectory.ToString());
-
-            while (stack.Count > 0)
+            bool sourceControlArtifacts = false;
+            if (arguments.Contains("--source-control"))
             {
-                string currentFolder = stack.Pop();
-                string folderName = Path.GetFileName(currentFolder);
-                if (sourceControlArtifacts)
+                sourceControlArtifacts = true;
+            }
+
+            bool ideArtifacts = false;
+            if (arguments.Contains("--ide"))
+            {
+                ideArtifacts = true;
+            }
+
+            bool testResults = false;
+            if (arguments.Contains("--test-results"))
+            {
+                testResults = true;
+            }
+
+            bool builds = false;
+            if (arguments.Contains("--builds"))
+            {
+                builds = true;
+            }
+
+            if (!sourceControlArtifacts && !ideArtifacts && !testResults && !builds)
+            {
+                runner.WriteErrorLine("At least one clean filter is requried: --source-control, --ide, --test-results, --builds");
+                return;
+            }
+
+            using Array<Repository> repositories = runner.GetRepositories();
+            foreach (Repository repository in repositories)
+            {
+                System.Collections.Generic.Stack<string> stack = new();
+                stack.Push(repository.Path.ToString());
+
+                while (stack.Count > 0)
                 {
-                    if (folderName == ".github" || folderName == ".git")
+                    string currentFolder = stack.Pop();
+                    string folderName = Path.GetFileName(currentFolder);
+                    if (sourceControlArtifacts)
                     {
-                        DeleteDirectory(currentFolder);
-                        continue;
+                        if (folderName == ".github" || folderName == ".git")
+                        {
+                            DeleteDirectory(runner, currentFolder);
+                            continue;
+                        }
+
+                        string gitIgnore = Path.Combine(currentFolder, ".gitignore");
+                        DeleteFile(runner, gitIgnore);
                     }
 
-                    string gitIgnore = Path.Combine(currentFolder, ".gitignore");
-                    DeleteFile(gitIgnore);
-                }
-
-                if (ideArtifacts)
-                {
-                    if (folderName == ".vs" || folderName == ".idea" || folderName == ".vscode")
+                    if (ideArtifacts)
                     {
-                        DeleteDirectory(currentFolder);
-                        continue;
+                        if (folderName == ".vs" || folderName == ".idea" || folderName == ".vscode")
+                        {
+                            DeleteDirectory(runner, currentFolder);
+                            continue;
+                        }
+                    }
+
+                    if (testResults)
+                    {
+                        if (folderName == "TestResults")
+                        {
+                            DeleteDirectory(runner, currentFolder);
+                            continue;
+                        }
+                    }
+
+                    if (builds)
+                    {
+                        if (folderName == "bin" || folderName == "obj")
+                        {
+                            DeleteDirectory(runner, currentFolder);
+                            continue;
+                        }
+                    }
+
+                    foreach (string directory in Directory.GetDirectories(currentFolder, "*", SearchOption.TopDirectoryOnly))
+                    {
+                        stack.Push(directory);
                     }
                 }
 
-                if (testResults)
-                {
-                    if (folderName == "TestResults")
-                    {
-                        DeleteDirectory(currentFolder);
-                        continue;
-                    }
-                }
-
-                if (builds)
-                {
-                    if (folderName == "bin" || folderName == "obj")
-                    {
-                        DeleteDirectory(currentFolder);
-                        continue;
-                    }
-                }
-
-                foreach (string directory in Directory.GetDirectories(currentFolder, "*", SearchOption.TopDirectoryOnly))
-                {
-                    stack.Push(directory);
-                }
+                repository.Dispose();
             }
         }
-    }
 
-    private static void DeleteDirectory(string path)
-    {
-        try
+        private static void DeleteDirectory(Runner runner, string path)
         {
-            Directory.Delete(path, true);
-            Trace.WriteLine($"Deleted directory `{path}`");
+            try
+            {
+                Directory.Delete(path, true);
+                runner.WriteInfoLine($"Deleted directory `{path}`");
+            }
+            catch { }
         }
-        catch { }
-    }
 
-    private static void DeleteFile(string path)
-    {
-        try
+        private static void DeleteFile(Runner runner, string path)
         {
-            File.Delete(path);
-            Trace.WriteLine($"Deleted file `{path}`");
+            try
+            {
+                File.Delete(path);
+                runner.WriteInfoLine($"Deleted file `{path}`");
+            }
+            catch { }
         }
-        catch { }
     }
 }

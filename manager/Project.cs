@@ -1,156 +1,187 @@
-﻿using Serialization.XML;
+﻿using Collections;
+using Serialization.XML;
 using System;
-using System.Collections.Generic;
 using Unmanaged;
 
-public class Project
+namespace Abacus.Manager
 {
-    public readonly bool isTestProject;
-
-    private readonly string path;
-    private readonly string name;
-    private readonly List<ProjectReference> projectReferences;
-    private readonly List<PackageReference> packageReferences;
-
-    /// <summary>
-    /// Name of the project based on the file name.
-    /// </summary>
-    public ReadOnlySpan<char> Name => name;
-
-    /// <summary>
-    /// Path to the .csproj file.
-    /// </summary>
-    public ReadOnlySpan<char> Path => path;
-    
-    /// <summary>
-    /// The directory that the project is in.
-    /// </summary>
-    public ReadOnlySpan<char> WorkingDirectory
+    public readonly struct Project : IDisposable
     {
-        get
+        public readonly bool isTestProject;
+
+        private readonly Text path;
+        private readonly Text name;
+        private readonly Array<ProjectReference> projectReferences;
+        private readonly Array<PackageReference> packageReferences;
+
+        /// <summary>
+        /// Name of the project based on the file name.
+        /// </summary>
+        public readonly USpan<char> Name => name.AsSpan();
+
+        /// <summary>
+        /// Path to the .csproj file.
+        /// </summary>
+        public readonly USpan<char> Path => path.AsSpan();
+
+        /// <summary>
+        /// The directory that the project is in.
+        /// </summary>
+        public readonly USpan<char> WorkingDirectory
         {
-            Span<char> buffer = stackalloc char[path.Length];
-            path.CopyTo(buffer);
-            for (int i = 0; i < buffer.Length; i++)
+            get
             {
-                ref char c = ref buffer[i];
-                if (c == '\\')
+                USpan<char> buffer = stackalloc char[(int)path.Length];
+                path.CopyTo(buffer);
+                for (uint i = 0; i < buffer.Length; i++)
                 {
-                    c = '/';
+                    ref char c = ref buffer[i];
+                    if (c == '\\')
+                    {
+                        c = '/';
+                    }
                 }
-            }
 
-            int index = buffer.LastIndexOf('/');
-            if (index != -1)
-            {
-                return path.AsSpan(0, index);
-            }
-            else
-            {
-                return path;
-            }
-        }
-    }
-
-    public IReadOnlyCollection<ProjectReference> ProjectReferences => projectReferences;
-    public IReadOnlyCollection<PackageReference> PackageReferences => packageReferences;
-
-    public Project(ReadOnlySpan<char> path)
-    {
-        this.path = path.ToString();
-        this.name = System.IO.Path.GetFileNameWithoutExtension(this.path);
-        this.projectReferences = new();
-        this.packageReferences = new();
-
-        using System.IO.FileStream fileStream = System.IO.File.OpenRead(this.path);
-        using BinaryReader reader = new(fileStream);
-        using XMLNode rootNode = reader.ReadObject<XMLNode>();
-        Stack<XMLNode> stack = new();
-        stack.Push(rootNode);
-
-        while (stack.Count > 0)
-        {
-            XMLNode node = stack.Pop();
-            if (node.Name.SequenceEqual("ProjectReference".AsSpan()))
-            {
-                if (node.TryGetAttribute("Include", out USpan<char> referencedProjectPath))
+                if (buffer.TryLastIndexOf('/', out uint index))
                 {
-                    projectReferences.Add(new(referencedProjectPath));
+                    return path.AsSpan().Slice(0, index);
                 }
-            }
-            else if (node.Name.SequenceEqual("PackageReference".AsSpan()))
-            {
-                if (node.TryGetAttribute("Include", out USpan<char> referencedProjectPath) && node.TryGetAttribute("Version", out USpan<char> version))
+                else
                 {
-                    packageReferences.Add(new(referencedProjectPath, version));
-                }
-            }
-            else
-            {
-                foreach (XMLNode child in node.Children)
-                {
-                    stack.Push(child);
+                    return path.AsSpan();
                 }
             }
         }
 
-        isTestProject = ContainsTestPackages();
-    }
+        public readonly USpan<ProjectReference> ProjectReferences => projectReferences.AsSpan();
+        public readonly USpan<PackageReference> PackageReferences => packageReferences.AsSpan();
 
-    private bool ContainsTestPackages()
-    {
-        foreach (PackageReference packageReference in packageReferences)
+        public Project(USpan<char> path)
         {
-            if (packageReference.Include.IndexOf("NUnit") != -1)
+            this.path = new(path);
+            this.name = new(System.IO.Path.GetFileNameWithoutExtension(path));
+
+            using System.IO.FileStream fileStream = System.IO.File.OpenRead(this.path);
+            using BinaryReader reader = new(fileStream);
+            using XMLNode rootNode = reader.ReadObject<XMLNode>();
+            using Stack<XMLNode> stack = new();
+            stack.Push(rootNode);
+
+            USpan<ProjectReference> projectReferences = stackalloc ProjectReference[128];
+            uint projectReferencesCount = 0;
+            USpan<PackageReference> packageReferences = stackalloc PackageReference[128];
+            uint packageReferencesCount = 0;
+            while (stack.Count > 0)
             {
-                return true;
+                XMLNode node = stack.Pop();
+                if (node.Name.SequenceEqual("ProjectReference".AsSpan()))
+                {
+                    if (node.TryGetAttribute("Include", out USpan<char> referencedProjectPath))
+                    {
+                        projectReferences[projectReferencesCount++] = new(referencedProjectPath);
+                    }
+                }
+                else if (node.Name.SequenceEqual("PackageReference".AsSpan()))
+                {
+                    if (node.TryGetAttribute("Include", out USpan<char> referencedProjectPath) && node.TryGetAttribute("Version", out USpan<char> version))
+                    {
+                        packageReferences[packageReferencesCount++] = new(referencedProjectPath, version);
+                    }
+                }
+                else
+                {
+                    foreach (XMLNode child in node.Children)
+                    {
+                        stack.Push(child);
+                    }
+                }
             }
-            else if (packageReference.Include.IndexOf("xunit") != -1)
+
+            this.projectReferences = new(projectReferences.Slice(0, projectReferencesCount));
+            this.packageReferences = new(packageReferences.Slice(0, packageReferencesCount));
+            isTestProject = ContainsTestPackages();
+        }
+
+        private readonly bool ContainsTestPackages()
+        {
+            foreach (PackageReference packageReference in packageReferences)
             {
-                return true;
+                if (packageReference.Include.Contains("NUnit".AsSpan()))
+                {
+                    return true;
+                }
+                else if (packageReference.Include.Contains("xunit".AsSpan()))
+                {
+                    return true;
+                }
+                else if (packageReference.Include.Contains("Microsoft.NET.Test.Sdk".AsSpan()))
+                {
+                    return true;
+                }
             }
-            else if (packageReference.Include.IndexOf("Microsoft.NET.Test.Sdk") != -1)
+
+            return false;
+        }
+
+        public override string ToString()
+        {
+            return path;
+        }
+
+        public readonly void Dispose()
+        {
+            for (uint i = 0; i < projectReferences.Length; i++)
             {
-                return true;
+                projectReferences[i].Dispose();
+            }
+
+            for (uint i = 0; i < packageReferences.Length; i++)
+            {
+                packageReferences[i].Dispose();
+            }
+
+            projectReferences.Dispose();
+            packageReferences.Dispose();
+            name.Dispose();
+            path.Dispose();
+        }
+
+        public readonly struct PackageReference : IDisposable
+        {
+            private readonly Text include;
+            private readonly Text version;
+
+            public readonly USpan<char> Include => include.AsSpan();
+            public readonly USpan<char> Version => version.AsSpan();
+
+            public PackageReference(USpan<char> include, USpan<char> version)
+            {
+                this.include = new Text(include);
+                this.version = new Text(version);
+            }
+
+            public readonly void Dispose()
+            {
+                version.Dispose();
+                include.Dispose();
             }
         }
 
-        return false;
-    }
-
-    public override string ToString()
-    {
-        return path;
-    }
-
-    public class PackageReference : Reference
-    {
-        private readonly string version;
-
-        public ReadOnlySpan<char> Version => version;
-
-        public PackageReference(ReadOnlySpan<char> include, ReadOnlySpan<char> version) : base(include)
+        public readonly struct ProjectReference : IDisposable
         {
-            this.version = version.ToString();
-        }
-    }
+            private readonly Text include;
 
-    public class ProjectReference : Reference
-    {
-        public ProjectReference(ReadOnlySpan<char> include) : base(include)
-        {
-        }
-    }
+            public readonly USpan<char> Include => include.AsSpan();
 
-    public class Reference
-    {
-        private readonly string include;
+            public ProjectReference(USpan<char> include)
+            {
+                this.include = new Text(include);
+            }
 
-        public ReadOnlySpan<char> Include => include;
-
-        public Reference(ReadOnlySpan<char> include)
-        {
-            this.include = include.ToString();
+            public readonly void Dispose()
+            {
+                include.Dispose();
+            }
         }
     }
 }
