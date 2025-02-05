@@ -57,6 +57,22 @@ namespace Abacus.Manager.Commands
 
         private static void GenerateGitHubTestWorkflow(Repository repository, Array<Repository> repositories)
         {
+            //check if theres any test project present
+            bool hasTestProject = false;
+            foreach (Project project in repository.Projects)
+            {
+                if (project.isTestProject)
+                {
+                    hasTestProject = true;
+                    break;
+                }
+            }
+
+            if (!hasTestProject)
+            {
+                return;
+            }
+
             string rootFolder = repository.Path.ToString();
             string githubFolder = System.IO.Path.Combine(rootFolder, ".github");
             if (!System.IO.Directory.Exists(githubFolder))

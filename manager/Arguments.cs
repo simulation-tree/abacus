@@ -36,12 +36,16 @@ namespace Abacus.Manager
                 bool atEnd = index == arguments.Length - 1;
                 if (atEnd)
                 {
+                    URange range;
                     if (insideQuotes)
                     {
-                        throw new ArgumentException("Unterminated quotes");
+                        range = new(start + 1, index);
+                    }
+                    else
+                    {
+                        range = new(start, index + 1);
                     }
 
-                    URange range = new(start, index + 1);
                     USpan<char> argument = arguments.Slice(range);
                     argumentsBuffer[argumentCount++] = range;
                     break;
@@ -54,7 +58,7 @@ namespace Abacus.Manager
                         insideQuotes = !insideQuotes;
                         if (!insideQuotes)
                         {
-                            URange range = new(start, index);
+                            URange range = new(start + 1, index);
                             USpan<char> argument = arguments.Slice(range);
                             argumentsBuffer[argumentCount++] = range;
                         }

@@ -1,4 +1,5 @@
 ﻿using Collections;
+using Unmanaged;
 
 namespace Abacus.Manager.Commands
 {
@@ -9,16 +10,23 @@ namespace Abacus.Manager.Commands
 
         readonly void ICommand.Execute(Runner runner, Arguments arguments)
         {
-            if (arguments.IsEmpty)
+            if (arguments.Count != 1)
             {
                 runner.WriteErrorLine("A commit message is expected as a parameter");
                 return;
             }
 
+
+            USpan<char> message = arguments.RawText;
+            if (message.StartsWith('"') && message.EndsWith('"'))
+            {
+                message = message.Slice(1, message.Length - 2);
+            }
+
             using Array<Repository> repositories = runner.GetRepositories();
             foreach (Repository repository in repositories)
             {
-                Terminal.Execute(repository.Path, $"git commit -m \"{arguments.ToString()}\"");
+                Terminal.Execute(repository.Path, $"git commit -a -m \"{message.ToString()}\"");
                 repository.Dispose();
             }
         }
