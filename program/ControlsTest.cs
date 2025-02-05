@@ -380,7 +380,7 @@ namespace Abacus
                 for (uint i = 0; i < children.Length; i++)
                 {
                     uint child = children[i];
-                    if (world.ContainsComponent<IsLabel>(child))
+                    if (world.ContainsTag<IsLabel>(child))
                     {
                         Label label = new Entity(world, child).As<Label>();
                         USpan<char> text = label.Text;
