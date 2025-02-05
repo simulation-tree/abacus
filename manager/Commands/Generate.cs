@@ -113,12 +113,29 @@ namespace Abacus.Manager.Commands
 
         private static string GetSource(string source, Repository repository, Array<Repository> repositories, bool release)
         {
+            bool containsTestProject = false;
+            foreach (Project project in repository.Projects)
+            {
+                if (project.isTestProject)
+                {
+                    containsTestProject = true;
+                    break;
+                }
+            }
+
             source = source.TrimStart('\r');
             source = source.TrimStart('\n');
             using Array<Repository> dependencies = GetDependencies(repository, repositories);
             int indent = GetIndentation(source, "{{CheckoutDependenciesStep}}");
             source = source.Replace("{{CheckoutDependenciesStep}}", GetIndented(GetCheckoutDependencies(dependencies), indent));
-            source = source.Replace("{{TestStep}}", GetIndented(GitHubWorkflowTemplate.TestStep, indent));
+            if (containsTestProject)
+            {
+                source = source.Replace("{{TestStep}}", GetIndented(GitHubWorkflowTemplate.TestStep, indent));
+            }
+            else
+            {
+                source = source.Replace("{{TestStep}}", string.Empty);
+            }
 
             if (source.Contains("{{ReportStep}}"))
             {
