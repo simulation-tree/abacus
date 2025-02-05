@@ -121,8 +121,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Types.Generator", "..\types
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FileDialogs", "..\file-dialog\source\FileDialogs.csproj", "{DC062EFB-54DF-EBF3-02F2-DAFE459ADF6A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Worlds.Analyzer", "..\worlds\analyzer\Worlds.Analyzer.csproj", "{E203D5FB-C9C6-792C-2062-4FA39A498486}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Types.Core", "..\types\core\Types.Core.csproj", "{7803D919-3599-6A3E-00EE-367C17986D8D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Types", "..\types\source\Types.csproj", "{3E590E2F-309A-000B-8272-0E13D685E0A3}"
@@ -437,10 +435,6 @@ Global
 		{DC062EFB-54DF-EBF3-02F2-DAFE459ADF6A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DC062EFB-54DF-EBF3-02F2-DAFE459ADF6A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DC062EFB-54DF-EBF3-02F2-DAFE459ADF6A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{E203D5FB-C9C6-792C-2062-4FA39A498486}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E203D5FB-C9C6-792C-2062-4FA39A498486}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E203D5FB-C9C6-792C-2062-4FA39A498486}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E203D5FB-C9C6-792C-2062-4FA39A498486}.Release|Any CPU.Build.0 = Release|Any CPU
 		{7803D919-3599-6A3E-00EE-367C17986D8D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{7803D919-3599-6A3E-00EE-367C17986D8D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7803D919-3599-6A3E-00EE-367C17986D8D}.Release|Any CPU.ActiveCfg = Release|Any CPU
