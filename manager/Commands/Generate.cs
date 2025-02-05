@@ -1,6 +1,7 @@
 ﻿using Collections;
 using System;
 using System.Diagnostics;
+using Unmanaged;
 
 namespace Abacus.Manager.Commands
 {
@@ -50,7 +51,7 @@ namespace Abacus.Manager.Commands
             }
             else
             {
-                Trace.WriteLine("No generation branch was selected");
+                runner.WriteErrorLine("No generation branch was selected");
             }
         }
 
@@ -307,6 +308,17 @@ namespace Abacus.Manager.Commands
             {
                 string folderName = System.IO.Path.GetFileNameWithoutExtension(project.Directory.ToString());
                 source = source.Replace("{{ProjectFolderName}}", folderName);
+            }
+
+            if (source.Contains("{{PackageID}}"))
+            {
+                USpan<char> packageId = project.PackageID;
+                if (packageId.IsEmpty)
+                {
+                    packageId = project.Name;
+                }
+
+                source = source.Replace("{{PackageID}}", packageId.ToString());
             }
 
             return source;

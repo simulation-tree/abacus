@@ -11,6 +11,7 @@ namespace Abacus.Manager
 
         private readonly Text path;
         private readonly Text name;
+        private readonly Text packageId;
         private readonly Array<ProjectReference> projectReferences;
         private readonly Array<PackageReference> packageReferences;
 
@@ -23,6 +24,14 @@ namespace Abacus.Manager
         /// Path to the .csproj file.
         /// </summary>
         public readonly USpan<char> Path => path.AsSpan();
+
+        /// <summary>
+        /// NuGet package ID.
+        /// <para>
+        /// Also the name of the generated package.
+        /// </para>
+        /// </summary>
+        public readonly USpan<char> PackageID => packageId.AsSpan();
 
         /// <summary>
         /// The directory that the project is in.
@@ -60,6 +69,7 @@ namespace Abacus.Manager
         {
             this.path = new(path);
             this.name = new(System.IO.Path.GetFileNameWithoutExtension(path));
+            this.packageId = new();
 
             using System.IO.FileStream fileStream = System.IO.File.OpenRead(this.path);
             using BinaryReader reader = new(fileStream);
@@ -87,6 +97,10 @@ namespace Abacus.Manager
                     {
                         packageReferences[packageReferencesCount++] = new(referencedProjectPath, version);
                     }
+                }
+                else if (node.Name.SequenceEqual("PackageId".AsSpan()))
+                {
+                    packageId.CopyFrom(node.Content);
                 }
                 else
                 {
@@ -142,6 +156,7 @@ namespace Abacus.Manager
 
             projectReferences.Dispose();
             packageReferences.Dispose();
+            packageId.Dispose();
             name.Dispose();
             path.Dispose();
         }
