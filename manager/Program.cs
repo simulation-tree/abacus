@@ -1,6 +1,7 @@
 ﻿using Abacus.Manager;
 using Abacus.Manager.Commands;
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 using Unmanaged;
@@ -105,7 +106,19 @@ public static class Program
         runner.ClearMessages();
         Task execute = Task.Run(() =>
         {
-            command.Execute(runner, arguments);
+            try
+            {
+                command.Execute(runner, arguments);
+            }
+            catch (Exception ex)
+            {
+                runner.WriteErrorLine(ex.Message);
+                string? stackTrace = ex.StackTrace;
+                if (stackTrace is not null)
+                {
+                    runner.WriteErrorLine(stackTrace);
+                }
+            }
         });
 
         int left = command.Name.Length + (int)arguments.RawText.Length + 4;

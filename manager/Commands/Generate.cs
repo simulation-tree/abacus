@@ -14,17 +14,17 @@ namespace Abacus.Manager.Commands
             Branch branch = default;
             if (arguments.Contains("--gh-test-workflow"))
             {
-                branch = Branch.GitHubTestWorkflow;
+                branch |= Branch.GitHubTestWorkflow;
             }
 
             if (arguments.Contains("--gh-publish-workflow"))
             {
-                branch = Branch.GitHubPublishWorkflow;
+                branch |= Branch.GitHubPublishWorkflow;
             }
 
             if (arguments.Contains("--clone-script"))
             {
-                branch = Branch.CloneScript;
+                branch |= Branch.CloneScript;
             }
 
             if (branch != default)
