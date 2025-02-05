@@ -53,6 +53,7 @@ namespace Abacus.Manager
 
         public readonly override string ToString()
         {
+            const string Separator = " | ";
             Row header = rows[0];
             using Array<uint> columnLengths = new(header.Columns);
             for (uint y = 0; y < rows.Count; y++)
@@ -77,10 +78,10 @@ namespace Abacus.Manager
                 uint remainingLength = columnLength - column.Length;
                 builder.Append(column);
                 builder.Append(' ', remainingLength);
-                builder.Append(" | ");
+                builder.Append(Separator);
             }
 
-            builder.SetLength(builder.Length - 3);
+            builder.SetLength(builder.Length - (uint)Separator.Length);
             uint headerLength = builder.Length;
             builder.Append('\n');
             builder.Append('-', headerLength);
@@ -97,10 +98,10 @@ namespace Abacus.Manager
                         uint remainingLength = columnLength - column.Length;
                         builder.Append(column);
                         builder.Append(' ', remainingLength);
-                        builder.Append(" | ");
+                        builder.Append(Separator);
                     }
 
-                    builder.SetLength(builder.Length - 3);
+                    builder.SetLength(builder.Length - (uint)Separator.Length);
                     builder.Append('\n');
                 }
 

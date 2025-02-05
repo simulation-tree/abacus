@@ -107,17 +107,14 @@ namespace Abacus.Manager.Commands
         private static string GetCheckoutDependencies(Repository repository, Array<Repository> repositories)
         {
             using List<Repository> referencedRepositories = new();
-            for (uint x = 0; x < repository.Projects.Length; x++)
+            foreach (Project project in repository.Projects)
             {
-                Project project = repository.Projects[x];
-                for (uint y = 0; y < project.ProjectReferences.Length; y++)
+                foreach (Project.ProjectReference projectReference in project.ProjectReferences)
                 {
-                    Project.ProjectReference projectReference = project.ProjectReferences[y];
                     string projectName = System.IO.Path.GetFileNameWithoutExtension(projectReference.Include.ToString());
                     Repository foundRepository = default;
-                    for (uint z = 0; z < repositories.Length; z++)
+                    foreach (Repository otherRepository in repositories)
                     {
-                        Repository otherRepository = repositories[z];
                         for (uint w = 0; w < otherRepository.Projects.Length; w++)
                         {
                             Project otherProject = otherRepository.Projects[w];
@@ -143,6 +140,45 @@ namespace Abacus.Manager.Commands
 
             if (referencedRepositories.Count > 0)
             {
+                using Stack<Repository> stack = new(referencedRepositories.Count);
+                stack.PushRange(referencedRepositories.AsSpan());
+                while (stack.TryPop(out Repository current))
+                {
+                    foreach (Project currentProject in current.Projects)
+                    {
+                        foreach (Project.ProjectReference currentProjectReference in currentProject.ProjectReferences)
+                        {
+                            string projectName = System.IO.Path.GetFileNameWithoutExtension(currentProjectReference.Include.ToString());
+                            Repository foundRepository = default;
+                            foreach (Repository otherRepository in repositories)
+                            {
+                                for (uint w = 0; w < otherRepository.Projects.Length; w++)
+                                {
+                                    Project otherProject = otherRepository.Projects[w];
+                                    if (otherProject.Name.SequenceEqual(projectName.AsSpan()))
+                                    {
+                                        foundRepository = otherRepository;
+                                        break;
+                                    }
+                                }
+
+                                if (foundRepository != default)
+                                {
+                                    break;
+                                }
+                            }
+
+                            if (foundRepository != default && repository != foundRepository)
+                            {
+                                if (referencedRepositories.TryAdd(foundRepository))
+                                {
+                                    stack.Push(foundRepository);
+                                }
+                            }
+                        }
+                    }
+                }
+
                 string text = string.Empty;
                 foreach (Repository projectReference in referencedRepositories)
                 {

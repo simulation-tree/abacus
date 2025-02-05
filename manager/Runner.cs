@@ -80,41 +80,39 @@ namespace Abacus.Manager
 
         public readonly Array<Repository> GetRepositories()
         {
-            using List<long> pathHashes = new();
-            using Array<Project> projects = GetProjects();
-            USpan<Repository> foundRepositories = stackalloc Repository[(int)projects.Length];
-            uint foundRepositoryCount = 0;
-            foreach (Project project in projects)
+            using Stack<Text> stack = new();
+            stack.Push(new(WorkingDirectory));
+
+            using List<Text> foundRepositories = new();
+            while (stack.TryPop(out Text currentDirectory))
             {
-                USpan<char> workingDirectory = project.WorkingDirectory;
-                while (true)
+                foreach (string directory in Directory.GetDirectories(currentDirectory, "*", SearchOption.TopDirectoryOnly))
                 {
-                    string gitDirectory = Path.Combine(workingDirectory.ToString(), ".git");
-                    if (Directory.Exists(gitDirectory))
+                    if (directory.EndsWith("/.git") || directory.EndsWith("\\.git"))
                     {
-                        long pathHash = FixedString.GetLongHashCode(workingDirectory);
-                        if (pathHashes.TryAdd(pathHash))
-                        {
-                            USpan<char> remote = Terminal.Execute(workingDirectory, "git remote get-url origin");
-                            foundRepositories[foundRepositoryCount++] = new(workingDirectory, remote);
-                        }
-
-                        break;
+                        foundRepositories.Add(new(currentDirectory.AsSpan()));
                     }
-
-                    DirectoryInfo? parent = Directory.GetParent(workingDirectory.ToString());
-                    if (parent is null)
+                    else
                     {
-                        break;
+                        stack.Push(new(directory));
                     }
-
-                    workingDirectory = parent.FullName.AsSpan();
                 }
 
-                project.Dispose();
+                currentDirectory.Dispose();
             }
 
-            return new(foundRepositories.Slice(0, foundRepositoryCount));
+            Array<Repository> repositories = new(foundRepositories.Count);
+            for (uint i = 0; i < foundRepositories.Count; i++)
+            {
+                Text repositoryPath = foundRepositories[i];
+                USpan<char> remote = Terminal.Execute(repositoryPath, "git remote get-url origin");
+                remote = remote.TrimEnd('\n');
+                remote = remote.TrimEnd('\r');
+                repositories[i] = new(repositoryPath.AsSpan(), remote);
+                repositoryPath.Dispose();
+            }
+
+            return repositories;
         }
 
         public readonly Array<Project> GetProjects()
