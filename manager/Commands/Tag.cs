@@ -1,4 +1,5 @@
 ﻿using Collections;
+using System;
 using Unmanaged;
 
 namespace Abacus.Manager.Commands
@@ -27,8 +28,17 @@ namespace Abacus.Manager.Commands
             using Array<Repository> repositories = runner.GetRepositories();
             foreach (Repository repository in repositories)
             {
-                Terminal.Execute(repository.Path, $"git tag {tag.ToString()} {branchName.ToString()}");
-                Terminal.Execute(repository.Path, $"git push origin tag {tag.ToString()}");
+                USpan<char> response = Terminal.Execute(repository.Path, $"git tag {tag.ToString()} {branchName.ToString()}");
+                if (!response.Contains("fatal: ".AsSpan()))
+                {
+                    Terminal.Execute(repository.Path, $"git push origin tag {tag.ToString()}");
+                }
+                else
+                {
+                    string error = $"Failed to tag repository `{repository.Name.ToString()}`: {response.ToString()}";
+                    runner.WriteErrorLine(error);
+                }
+
                 repository.Dispose();
             }
         }
