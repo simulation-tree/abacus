@@ -4,17 +4,34 @@ using Unmanaged;
 
 namespace Abacus.Manager
 {
-    public readonly struct Repository : IDisposable
+    public readonly struct Repository : IDisposable, IEquatable<Repository>
     {
         private readonly Text path;
         private readonly Text remote;
         private readonly Text name;
         private readonly Array<Project> projects;
 
+        /// <summary>
+        /// Name of the repository.
+        /// </summary>
         public readonly USpan<char> Name => name.AsSpan();
+
+        /// <summary>
+        /// The remote URL.
+        /// </summary>
         public readonly USpan<char> Remote => remote.AsSpan();
+
+        /// <summary>
+        /// Path to the repository folder.
+        /// </summary>
         public readonly USpan<char> Path => path.AsSpan();
+
+        /// <summary>
+        /// Projects part of this repository.
+        /// </summary>
         public readonly USpan<Project> Projects => projects.AsSpan();
+
+        public readonly bool IsDisposed => path.IsDisposed;
 
         [Obsolete("Default constructor not supported")]
         public Repository()
@@ -47,6 +64,40 @@ namespace Abacus.Manager
             name.Dispose();
             remote.Dispose();
             path.Dispose();
+        }
+
+        public readonly override bool Equals(object? obj)
+        {
+            return obj is Repository repository && Equals(repository);
+        }
+
+        public readonly bool Equals(Repository other)
+        {
+            if (path.IsDisposed != other.path.IsDisposed)
+            {
+                return false;
+            }
+            else if (path.IsDisposed && other.path.IsDisposed)
+            {
+                return true;
+            }
+
+            return path.Equals(other.path);
+        }
+
+        public readonly override int GetHashCode()
+        {
+            return path.GetHashCode();
+        }
+
+        public static bool operator ==(Repository left, Repository right)
+        {
+            return left.Equals(right);
+        }
+
+        public static bool operator !=(Repository left, Repository right)
+        {
+            return !(left == right);
         }
     }
 }
