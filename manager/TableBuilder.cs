@@ -41,6 +41,18 @@ namespace Abacus.Manager
             AddRow(first, second, third, fourth);
         }
 
+        public TableBuilder(string first, string second, string third, string fourth, string fifth)
+        {
+            rows = new();
+            AddRow(first, second, third, fourth, fifth);
+        }
+
+        public TableBuilder(string first, string second, string third, string fourth, string fifth, string sixth)
+        {
+            rows = new();
+            AddRow(first, second, third, fourth, fifth, sixth);
+        }
+
         public readonly void Dispose()
         {
             foreach (Row row in rows)
@@ -154,6 +166,33 @@ namespace Abacus.Manager
             row.Add(second);
             row.Add(third);
             row.Add(fourth);
+            rows.Add(row);
+        }
+
+        public readonly void AddRow(string first, string second, string third, string fourth, string fifth)
+        {
+            ThrowIfRowLengthMismatch(5);
+
+            Row row = new();
+            row.Add(first);
+            row.Add(second);
+            row.Add(third);
+            row.Add(fourth);
+            row.Add(fifth);
+            rows.Add(row);
+        }
+
+        public readonly void AddRow(string first, string second, string third, string fourth, string fifth, string sixth)
+        {
+            ThrowIfRowLengthMismatch(6);
+
+            Row row = new();
+            row.Add(first);
+            row.Add(second);
+            row.Add(third);
+            row.Add(fourth);
+            row.Add(fifth);
+            row.Add(sixth);
             rows.Add(row);
         }
 

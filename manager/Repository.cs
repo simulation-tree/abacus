@@ -45,10 +45,22 @@ namespace Abacus.Manager
             this.remote = new(remote);
             this.name = new(System.IO.Path.GetFileNameWithoutExtension(path));
             string[] projectPaths = System.IO.Directory.GetFiles(this.path, "*.csproj", System.IO.SearchOption.AllDirectories);
-            this.projects = new((uint)projectPaths.Length);
+            USpan<uint> projectPathIndicesBuffer = stackalloc uint[projectPaths.Length];
+            uint projectCount = 0;
             for (uint i = 0; i < projectPaths.Length; i++)
             {
                 string projectPath = projectPaths[i];
+                string projectDirectory = System.IO.Path.GetDirectoryName(projectPath) ?? string.Empty;
+                if (System.IO.Directory.GetFiles(projectDirectory, "*.sln").Length == 0)
+                {
+                    projectPathIndicesBuffer[projectCount++] = i;
+                }
+            }
+
+            this.projects = new(projectCount);
+            for (uint i = 0; i < projectCount; i++)
+            {
+                string projectPath = projectPaths[projectPathIndicesBuffer[i]];
                 projects[i] = new(projectPath.AsSpan());
             }
         }

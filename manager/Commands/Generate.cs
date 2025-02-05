@@ -1,7 +1,6 @@
 ﻿using Collections;
 using System;
 using System.Diagnostics;
-using Unmanaged;
 
 namespace Abacus.Manager.Commands
 {
@@ -40,7 +39,7 @@ namespace Abacus.Manager.Commands
 
                     if ((branch & Branch.GitHubPublishWorkflow) == Branch.GitHubPublishWorkflow)
                     {
-                        GenerateGitHubPublishWorkflow(repository);
+                        GenerateGitHubPublishWorkflow(repository, repositories);
                     }
                 }
 
@@ -87,24 +86,75 @@ namespace Abacus.Manager.Commands
             }
 
             string filePath = System.IO.Path.Combine(workflowsFolder, "test.yml");
-            string source = GitHubWorkflowTemplate.Source.TrimStart('\r', '\n');
-            int indent = GetIndentation(source, "{{CheckoutDependenciesStep}}");
-            string checkoutDependencies = GetCheckoutDependencies(repository, repositories);
-            source = source.Replace("{{CheckoutDependenciesStep}}", GetIndented(checkoutDependencies, indent));
-            source = source.Replace("{{TestStep}}", GetIndented(GitHubWorkflowTemplate.TestStep, indent));
-            source = source.Replace("{{ReportStep}}", GetIndented(GitHubWorkflowTemplate.ReportStep, indent));
-            source = source.Replace("{{SetupStep}}", GetIndented(GitHubWorkflowTemplate.SetupStep, indent));
-            source = source.Replace("{{BuildMode}}", "Debug");
-            source = source.Replace("{{DotNetVersion}}", "'9.0.x'");
-            source = source.Replace("{{RepositoryName}}", repository.Name.ToString());
+            string source = GetSource(GitHubWorkflowTemplate.TestSource, repository, repositories, false);
             System.IO.File.WriteAllText(filePath, source);
         }
 
-        private static void GenerateGitHubPublishWorkflow(Repository repository)
+        private static void GenerateGitHubPublishWorkflow(Repository repository, Array<Repository> repositories)
         {
+            string rootFolder = repository.Path.ToString();
+            string githubFolder = System.IO.Path.Combine(rootFolder, ".github");
+            if (!System.IO.Directory.Exists(githubFolder))
+            {
+                System.IO.Directory.CreateDirectory(githubFolder);
+            }
+
+            string workflowsFolder = System.IO.Path.Combine(githubFolder, "workflows");
+            if (!System.IO.Directory.Exists(workflowsFolder))
+            {
+                System.IO.Directory.CreateDirectory(workflowsFolder);
+            }
+
+            string filePath = System.IO.Path.Combine(workflowsFolder, "publish.yml");
+            string source = GetSource(GitHubWorkflowTemplate.PublishSource, repository, repositories, true);
+            System.IO.File.WriteAllText(filePath, source);
         }
 
-        private static string GetCheckoutDependencies(Repository repository, Array<Repository> repositories)
+        private static string GetSource(string source, Repository repository, Array<Repository> repositories, bool release)
+        {
+            source = source.TrimStart('\r');
+            source = source.TrimStart('\n');
+            using Array<Repository> dependencies = GetDependencies(repository, repositories);
+            int indent = GetIndentation(source, "{{CheckoutDependenciesStep}}");
+            source = source.Replace("{{CheckoutDependenciesStep}}", GetIndented(GetCheckoutDependencies(dependencies), indent));
+            source = source.Replace("{{TestStep}}", GetIndented(GitHubWorkflowTemplate.TestStep, indent));
+
+            if (source.Contains("{{ReportStep}}"))
+            {
+                source = source.Replace("{{ReportStep}}", GetIndented(GitHubWorkflowTemplate.ReportStep, indent));
+            }
+
+            if (source.Contains("{{SetupStep}}"))
+            {
+                source = source.Replace("{{SetupStep}}", GetIndented(GitHubWorkflowTemplate.SetupStep, indent));
+            }
+
+            if (source.Contains("{{BuildProjectsStep}}"))
+            {
+                source = source.Replace("{{BuildProjectsStep}}", GetIndented(GetBuildSteps(repository), indent));
+            }
+
+            if (source.Contains("{{PackProjectsStep}}"))
+            {
+                source = source.Replace("{{PackProjectsStep}}", GetIndented(GetPackSteps(repository), indent));
+            }
+
+            if (source.Contains("{{PublishProjectsStep}}"))
+            {
+                source = source.Replace("{{PublishProjectsStep}}", GetIndented(GetPublishSteps(repository), indent));
+            }
+
+            if (source.Contains("{{BuildMode}}"))
+            {
+                source = source.Replace("{{BuildMode}}", release ? "Release" : "Debug");
+            }
+
+            source = source.Replace("{{DotNetVersion}}", "'9.0.x'");
+            source = source.Replace("{{RepositoryName}}", repository.Name.ToString());
+            return source;
+        }
+
+        private static Array<Repository> GetDependencies(Repository repository, Array<Repository> repositories)
         {
             using List<Repository> referencedRepositories = new();
             foreach (Project project in repository.Projects)
@@ -179,11 +229,23 @@ namespace Abacus.Manager.Commands
                     }
                 }
 
+                return new(referencedRepositories.AsSpan());
+            }
+            else
+            {
+                return new();
+            }
+        }
+
+        private static string GetCheckoutDependencies(Array<Repository> dependencies)
+        {
+            if (dependencies.Length > 0)
+            {
                 string text = string.Empty;
-                foreach (Repository projectReference in referencedRepositories)
+                foreach (Repository dependency in dependencies)
                 {
                     string source = GitHubWorkflowTemplate.CheckoutStep;
-                    source = source.Replace("{{RepositoryName}}", projectReference.Name.ToString());
+                    source = source.Replace("{{RepositoryName}}", dependency.Name.ToString());
                     text += source + '\n';
                 }
 
@@ -193,6 +255,61 @@ namespace Abacus.Manager.Commands
             {
                 return string.Empty;
             }
+        }
+
+        private static string GetBuildSteps(Repository repository)
+        {
+            string text = string.Empty;
+            foreach (Project project in repository.Projects)
+            {
+                text += GetSource(GitHubWorkflowTemplate.BuildStep, project) + '\n';
+            }
+
+            return text.TrimEnd('\n');
+        }
+
+        private static string GetPackSteps(Repository repository)
+        {
+            string text = string.Empty;
+            foreach (Project project in repository.Projects)
+            {
+                if (!project.isTestProject)
+                {
+                    text += GetSource(GitHubWorkflowTemplate.PackStep, project) + '\n';
+                }
+            }
+
+            return text.TrimEnd('\n');
+        }
+
+        private static string GetPublishSteps(Repository repository)
+        {
+            string text = string.Empty;
+            foreach (Project project in repository.Projects)
+            {
+                if (!project.isTestProject)
+                {
+                    text += GetSource(GitHubWorkflowTemplate.PublishStep, project) + '\n';
+                }
+            }
+
+            return text.TrimEnd('\n');
+        }
+
+        private static string GetSource(string source, Project project)
+        {
+            if (source.Contains("{{ProjectName}}"))
+            {
+                source = source.Replace("{{ProjectName}}", project.Name.ToString());
+            }
+
+            if (source.Contains("{{ProjectFolderName}}"))
+            {
+                string folderName = System.IO.Path.GetFileNameWithoutExtension(project.Directory.ToString());
+                source = source.Replace("{{ProjectFolderName}}", folderName);
+            }
+
+            return source;
         }
 
         private static int GetIndentation(string text, string keyword)

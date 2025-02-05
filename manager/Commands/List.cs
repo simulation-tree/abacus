@@ -5,7 +5,7 @@ namespace Abacus.Manager.Commands
     public readonly struct List : ICommand
     {
         readonly string ICommand.Name => "list";
-        readonly string ICommand.Description => "Lists all repositories and projects (--projects, --repositories)";
+        readonly string ICommand.Description => "General list command (--projects, --repositories)";
 
         readonly void ICommand.Execute(Runner runner, Arguments arguments)
         {
@@ -13,13 +13,20 @@ namespace Abacus.Manager.Commands
             bool listRepositories = arguments.Contains("--repositories");
             if (listRepositories)
             {
-                using TableBuilder table = new("Name", "Remote", "Projects");
+                using TableBuilder table = new("Name", "Remote", "Projects", "Commits?", "Changes?");
                 using Array<Repository> repositories = runner.GetRepositories();
                 foreach (Repository repository in repositories)
                 {
                     string name = repository.Name.ToString();
                     string remote = repository.Remote.ToString();
+                    if (remote.StartsWith("https://github.com/"))
+                    {
+                        remote = remote.Substring(19);
+                    }
+
                     string projects = string.Empty;
+                    bool hasCommits = Terminal.Execute(repository.Path, "git log --branches --not --remotes").Length > 0;
+                    bool hasChanges = Terminal.Execute(repository.Path, "git status --porcelain=v1").Length > 0;
                     foreach (Project project in repository.Projects)
                     {
                         projects += project.Name.ToString() + ", ";
@@ -30,7 +37,7 @@ namespace Abacus.Manager.Commands
                         projects = projects.Substring(0, projects.Length - 2);
                     }
 
-                    table.AddRow(name, remote, projects);
+                    table.AddRow(name, remote, projects, hasCommits ? "Yes" : string.Empty, hasChanges ? "Yes" : string.Empty);
                     repository.Dispose();
                 }
 

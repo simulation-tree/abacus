@@ -27,7 +27,7 @@ namespace Abacus.Manager
         /// <summary>
         /// The directory that the project is in.
         /// </summary>
-        public readonly USpan<char> WorkingDirectory
+        public readonly USpan<char> Directory
         {
             get
             {
