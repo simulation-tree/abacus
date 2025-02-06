@@ -44,6 +44,11 @@ namespace Abacus.Manager.Commands
                     }
                 }
 
+                if ((branch & Branch.CloneScript) == Branch.CloneScript)
+                {
+                    GenerateCloneScript(runner, repositories);
+                }
+
                 foreach (Repository repository in repositories)
                 {
                     repository.Dispose();
@@ -109,6 +114,23 @@ namespace Abacus.Manager.Commands
             string filePath = System.IO.Path.Combine(workflowsFolder, "publish.yml");
             string source = GetSource(GitHubWorkflowTemplate.PublishSource, repository, repositories, true);
             System.IO.File.WriteAllText(filePath, source);
+        }
+
+        private static void GenerateCloneScript(Runner runner, Array<Repository> repositories)
+        {
+            string solutionFolder = System.IO.Path.GetDirectoryName(runner.SolutionPath.ToString()) ?? string.Empty;
+            string cloneScript = System.IO.Path.Combine(solutionFolder, "clone-dependencies.bat");
+            using Text builder = new();
+            builder.Append("cd ..");
+            builder.Append('\n');
+            foreach (Repository repository in repositories)
+            {
+                builder.Append("git clone ");
+                builder.Append(repository.Remote.ToString());
+                builder.Append('\n');
+            }
+
+            System.IO.File.WriteAllText(cloneScript, builder.ToString());
         }
 
         private static string GetSource(string source, Repository repository, Array<Repository> repositories, bool release)
