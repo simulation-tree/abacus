@@ -111,7 +111,7 @@ namespace Abacus.Manager
         {
             for (uint i = 0; i < Count; i++)
             {
-                Unmanaged.URange range = arguments[i];
+                URange range = arguments[i];
                 USpan<char> current = text.AsSpan().Slice(range);
                 if (current.SequenceEqual(argument))
                 {
