@@ -43,7 +43,7 @@ namespace VoxelGame
             MeshRenderer chunkRenderer = mesh.Become<MeshRenderer>();
             chunkRenderer.Mesh = mesh;
             chunkRenderer.Material = unlitMaterial;
-            chunkRenderer.RenderMask = new LayerMask().Set(1);
+            chunkRenderer.RenderMask = VoxelGameProgram.worldMask;
 
             chunkRenderer.AddComponent(Color.White);
             Transform chunkTransform = chunkRenderer.Become<Transform>();

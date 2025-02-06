@@ -24,6 +24,9 @@ namespace VoxelGame
 {
     public partial struct VoxelGameProgram : IProgram
     {
+        public static readonly LayerMask worldMask = new LayerMask().Set(0);
+        public static readonly LayerMask uiMask = new LayerMask().Set(1);
+
         private readonly Window window;
         private readonly Camera camera;
         private readonly Material chunkMaterial;
@@ -48,6 +51,7 @@ namespace VoxelGame
             }
 
             camera = new(world, window, CameraSettings.CreatePerspectiveDegrees(90f));
+            camera.RenderMask = worldMask;
             Transform cameraTransform = camera.Become<Transform>();
             cameraTransform.LocalPosition = new(0f, 1f, -10f);
             cameraPosition = cameraTransform.LocalPosition;
@@ -88,7 +92,8 @@ namespace VoxelGame
 
             Settings settings = new(world);
             Camera uiCamera = Camera.CreateOrthographic(world, window, 1f);
-            Canvas canvas = new(world, settings, uiCamera);
+            uiCamera.RenderMask = uiMask;
+            Canvas canvas = new(world, settings, uiCamera, uiMask, LayerMask.All);
 
             Label fpsLabel = new(canvas, "{{fps}}");
             fpsLabel.Anchor = Anchor.TopLeft;
