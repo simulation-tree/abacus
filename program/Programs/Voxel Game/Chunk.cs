@@ -93,19 +93,29 @@ namespace VoxelGame
 
         public static USpan<uint> GetBlocks(World world, int cx, int cy, int cz)
         {
-            ComponentQuery<Position> query = new(world);
-            query.RequireTag<IsChunk>();
             byte chunkSize = world.GetFirstComponent<VoxelSettings>().chunkSize;
-            foreach (var r in query)
+            TagType chunkType = world.Schema.GetTag<IsChunk>();
+            ComponentType positionType = world.Schema.GetComponent<Position>();
+            foreach (Worlds.Chunk chunk in world.Chunks)
             {
-                ref Position position = ref r.component1;
-                Vector3 worldPosition = position.value;
-                int chunkX = (int)MathF.Floor(worldPosition.X / chunkSize);
-                int chunkY = (int)MathF.Floor(worldPosition.Y / chunkSize);
-                int chunkZ = (int)MathF.Floor(worldPosition.Z / chunkSize);
-                if (chunkX == cx && chunkY == cy && chunkZ == cz)
+                Definition key = chunk.Definition;
+                if (key.Contains(chunkType) && key.Contains(positionType))
                 {
-                    return world.GetArray<BlockID>(r.entity).As<uint>();
+                    USpan<uint> entities = chunk.Entities;
+                    USpan<Position> components = chunk.GetComponents<Position>(positionType);
+                    for (uint i = 0; i < components.Length; i++)
+                    {
+                        ref Position position = ref components[i];
+                        Vector3 worldPosition = position.value;
+                        int chunkX = (int)MathF.Floor(worldPosition.X / chunkSize);
+                        int chunkY = (int)MathF.Floor(worldPosition.Y / chunkSize);
+                        int chunkZ = (int)MathF.Floor(worldPosition.Z / chunkSize);
+                        if (chunkX == cx && chunkY == cy && chunkZ == cz)
+                        {
+                            uint entity = entities[i];
+                            return world.GetArray<BlockID>(entity).As<uint>();
+                        }
+                    }
                 }
             }
 
