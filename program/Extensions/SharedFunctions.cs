@@ -1,12 +1,12 @@
 ﻿using InputDevices;
-using UI;
-using UI.Components;
-using UI.Functions;
 using Rendering;
 using System;
 using System.Numerics;
 using System.Runtime.InteropServices;
 using Transforms;
+using UI;
+using UI.Components;
+using UI.Functions;
 using Unmanaged;
 using Worlds;
 
@@ -37,7 +37,7 @@ public static class SharedFunctions
         if (operation.Count > 0)
         {
             operation.DestroySelected();
-            world.Perform(operation);
+            operation.Perform(world);
         }
     }
 
