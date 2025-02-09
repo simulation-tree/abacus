@@ -16,8 +16,15 @@ public static class SharedFunctions
     private static Vector2 lastPointerPosition;
     private static bool hasLastPointerPosition;
     private static readonly System.Collections.Generic.List<double> frameTimes = new();
-    private static double averageFps;
+    private static double currentFps;
+    private static readonly DateTime firstTime;
     private static DateTime nextFpsUpdateTime;
+    private static readonly System.Collections.Generic.List<double> fpsHistory = new();
+
+    static SharedFunctions()
+    {
+        firstTime = DateTime.UtcNow;
+    }
 
     public static void DestroyTemporaryEntities(this World world, TimeSpan deltaSpan)
     {
@@ -154,14 +161,20 @@ public static class SharedFunctions
         if (now >= nextFpsUpdateTime)
         {
             nextFpsUpdateTime = now + TimeSpan.FromSeconds(0.5f);
-            averageFps = 0f;
+            currentFps = 0f;
             if (frameTimes.Count > 1)
             {
                 double first = frameTimes[0];
                 double last = frameTimes[^1];
                 double total = last - first;
-                averageFps = frameTimes.Count / total;
+                currentFps = frameTimes.Count / total;
                 frameTimes.Clear();
+            }
+
+            TimeSpan timeStartStart = now - firstTime;
+            if (timeStartStart > TimeSpan.FromSeconds(10f))
+            {
+                fpsHistory.Add(currentFps);
             }
         }
     }
@@ -299,21 +312,59 @@ public static class SharedFunctions
 
     public unsafe static void AddLabelProcessors(this World world)
     {
-        new LabelProcessor(world, new(&TryHandleFPS));
+        new LabelProcessor(world, new(&TryHandleCurrentFPS));
+        new LabelProcessor(world, new(&TryHandleAverageFPS));
     }
 
     [UnmanagedCallersOnly]
-    private static UI.Boolean TryHandleFPS(TryProcessLabel.Input input)
+    private static UI.Boolean TryHandleCurrentFPS(TryProcessLabel.Input input)
     {
-        const string Token = "{{fps}}";
-        if (input.OriginalText.Contains(Token.AsSpan()))
+        const string CurrentFPS = "{{currentFps}}";
+        if (input.OriginalText.Contains(CurrentFPS.AsSpan()))
         {
             USpan<char> replacement = stackalloc char[128];
-            uint replacementLength = averageFps.ToString(replacement);
-            uint newLength = input.OriginalText.Length - (uint)Token.Length + 64;
+            uint replacementLength = currentFps.ToString(replacement);
+            replacementLength = Math.Min(replacementLength, 6);
+            uint newLength = input.OriginalText.Length - (uint)CurrentFPS.Length + 64;
             USpan<char> destination = stackalloc char[(int)newLength];
-            newLength = Text.Replace(input.OriginalText, Token.AsSpan(), replacement.Slice(0, replacementLength), destination);
+            newLength = Text.Replace(input.OriginalText, CurrentFPS.AsSpan(), replacement.Slice(0, replacementLength), destination);
+            USpan<char> newText = destination.Slice(0, newLength);
+            if (!input.OriginalText.SequenceEqual(newText))
+            {
+                input.SetResult(newText);
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    [UnmanagedCallersOnly]
+    private static UI.Boolean TryHandleAverageFPS(TryProcessLabel.Input input)
+    {
+        const string AverageFPS = "{{averageFps}}";
+        if (input.OriginalText.Contains(AverageFPS.AsSpan()))
+        {
+            USpan<char> replacement = stackalloc char[128];
+            double averageFps = 0;
+            for (int i = 0; i < fpsHistory.Count; i++)
+            {
+                averageFps += fpsHistory[i];
+            }
+
+            averageFps /= fpsHistory.Count;
+            uint replacementLength = averageFps.ToString(replacement);
+            replacementLength = Math.Min(replacementLength, 6);
+            uint newLength = input.OriginalText.Length - (uint)AverageFPS.Length + 64;
+            USpan<char> destination = stackalloc char[(int)newLength];
+            newLength = Text.Replace(input.OriginalText, AverageFPS.AsSpan(), replacement.Slice(0, replacementLength), destination);
             input.SetResult(destination.Slice(0, newLength));
+            USpan<char> newText = destination.Slice(0, newLength);
+            if (!input.OriginalText.SequenceEqual(newText))
+            {
+                input.SetResult(newText);
+                return true;
+            }
         }
 
         return false;

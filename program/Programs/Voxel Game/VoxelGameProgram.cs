@@ -95,7 +95,7 @@ namespace VoxelGame
             uiCamera.RenderMask = uiMask;
             Canvas canvas = new(world, settings, uiCamera, uiMask, LayerMask.All);
 
-            Label fpsLabel = new(canvas, "{{fps}}");
+            Label fpsLabel = new(canvas, "Current FPS: {{currentFps}}\nAverage FPS: {{averageFps}}");
             fpsLabel.Anchor = Anchor.TopLeft;
             fpsLabel.Pivot = new(0f, 1f, 0f);
 
@@ -103,7 +103,7 @@ namespace VoxelGame
             Label controlsLabel = new(canvas, infoLabel);
             controlsLabel.Anchor = Anchor.TopLeft;
             controlsLabel.Pivot = new(0f, 1f, 0f);
-            controlsLabel.Position = new(0f, -20f);
+            controlsLabel.Position = new(0f, -100f);
 
             SharedFunctions.AddLabelProcessors(world);
         }
