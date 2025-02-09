@@ -172,7 +172,7 @@ public static class SharedFunctions
             }
 
             TimeSpan timeStartStart = now - firstTime;
-            if (timeStartStart > TimeSpan.FromSeconds(10f))
+            if (timeStartStart > TimeSpan.FromSeconds(3f))
             {
                 fpsHistory.Add(currentFps);
             }
