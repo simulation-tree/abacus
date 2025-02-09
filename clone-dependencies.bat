@@ -29,6 +29,7 @@ git clone https://github.com/game-simulations/materials.git
 git clone https://github.com/game-simulations/material-systems.git
 git clone https://github.com/game-simulations/input-devices.git
 git clone https://github.com/game-simulations/input-device-systems.git
+git clone https://github.com/game-simulations/global-kbm-systems.git
 git clone https://github.com/game-simulations/freetype.git
 git clone https://github.com/game-simulations/fonts.git
 git clone https://github.com/game-simulations/font-systems.git

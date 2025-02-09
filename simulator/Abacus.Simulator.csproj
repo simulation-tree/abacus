@@ -43,6 +43,7 @@
 		<ProjectReference Include="..\..\camera-systems\source\Camera.Systems.csproj" />
 		<ProjectReference Include="..\..\cameras\source\Cameras.csproj" />
 		<ProjectReference Include="..\..\data-systems\source\Data.Systems.csproj" />
+		<ProjectReference Include="..\..\global-kbm-systems\source\GlobalKeyboardAndMouse.Systems.csproj" />
 		<ProjectReference Include="..\..\material-systems\source\Materials.Systems.csproj" />
 		<ProjectReference Include="..\..\data\core\Data.Core.csproj" />
 		<ProjectReference Include="..\..\data\generator\Data.Generator.csproj">
@@ -58,6 +59,7 @@
 		<ProjectReference Include="..\..\model-systems\source\Models.Systems.csproj" />
 		<ProjectReference Include="..\..\physics-systems\source\Physics.Systems.csproj" />
 		<ProjectReference Include="..\..\shader-systems\source\Shaders.Systems.csproj" />
+		<ProjectReference Include="..\..\unmanaged\source\Unmanaged.csproj" />
 		<ProjectReference Include="..\..\worlds\generator\Worlds.Generator.csproj">
 			<OutputItemType>Analyzer</OutputItemType>
 			<ReferenceOutputAssembly>false</ReferenceOutputAssembly>
