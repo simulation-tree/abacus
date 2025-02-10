@@ -4,6 +4,7 @@ using Simulation;
 using System;
 using System.Diagnostics;
 using Unmanaged;
+using VoxelGame;
 using Worlds;
 using Simulator = AbacusSimulator.AbacusSimulator;
 
@@ -17,7 +18,7 @@ using (World world = new(schema))
 {
     using (Simulator simulator = new(world))
     {
-        using (Program<PhysicsDemo> program = new(world))
+        using (Program<VoxelGameProgram> program = new(world))
         {
             while (!program.IsFinished(out statusCode))
             {
