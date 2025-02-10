@@ -1,4 +1,5 @@
-﻿using Abacus.Simulator;
+﻿using Abacus;
+using Abacus.Simulator;
 using Simulation;
 using System;
 using System.Diagnostics;
@@ -16,7 +17,7 @@ using (World world = new(schema))
 {
     using (Simulator simulator = new(world))
     {
-        using (Program<VoxelGame.VoxelGameProgram> program = new(world))
+        using (Program<PhysicsDemo> program = new(world))
         {
             while (!program.IsFinished(out statusCode))
             {

@@ -1,6 +1,7 @@
 ﻿using InputDevices;
 using Rendering;
 using System;
+using System.Diagnostics;
 using System.Numerics;
 using System.Runtime.InteropServices;
 using Transforms;
@@ -13,8 +14,6 @@ using Worlds;
 public static class SharedFunctions
 {
     private static bool invertY;
-    private static Vector2 lastPointerPosition;
-    private static bool hasLastPointerPosition;
     private static readonly System.Collections.Generic.List<double> frameTimes = new();
     private static double currentFps;
     private static readonly DateTime firstTime;
@@ -126,20 +125,12 @@ public static class SharedFunctions
         //look around with mice
         if (world.TryGetFirst(out Mouse mouse))
         {
-            Vector2 pointerPosition = mouse.Position;
-            if (!hasLastPointerPosition && pointerPosition != default)
-            {
-                lastPointerPosition = pointerPosition;
-                hasLastPointerPosition = true;
-            }
-
-            Vector2 pointerMoveDelta = (pointerPosition - lastPointerPosition) * lookSensitivity;
+            Vector2 pointerMoveDelta = mouse.Delta * lookSensitivity;
             if (invertY)
             {
                 pointerMoveDelta.Y *= -1;
             }
 
-            lastPointerPosition = pointerPosition;
             pitchYaw.X += pointerMoveDelta.X * 0.01f;
             pitchYaw.Y += pointerMoveDelta.Y * 0.01f;
             pitchYaw.Y = Math.Clamp(pitchYaw.Y, -MathF.PI * 0.5f, MathF.PI * 0.5f);

@@ -39,6 +39,76 @@ namespace Abacus
 
         private readonly World World => window.world;
 
+        private unsafe PhysicsDemo(Simulator simulator, World world)
+        {
+            this.simulator = simulator;
+            window = new(world, "Physics Demo", new Vector2(400, 200), new(900, 720), "vulkan", new(&WindowClosed));
+            window.IsResizable = true;
+            window.CursorState = CursorState.HiddenAndConfined;
+
+            camera = new(world, window, CameraSettings.CreatePerspectiveDegrees(90f));
+            cameraTransform = camera.Become<Transform>();
+            cameraTransform.LocalPosition = new(-1f, 2f, -10f);
+            cameraPosition = cameraTransform.LocalPosition;
+
+            Texture squareTexture = new(world, EmbeddedResourceRegistry.Get<SquareTexture>());
+
+            unlitMaterial = new(world, EmbeddedResourceRegistry.Get<UnlitTexturedMaterial>());
+            unlitMaterial.AddPushBinding<Color>();
+            unlitMaterial.AddPushBinding<LocalToWorld>();
+            unlitMaterial.AddComponentBinding<CameraMatrices>(new(0, 0), camera);
+            unlitMaterial.AddTextureBinding(new(1, 0), squareTexture);
+
+            Model cubeModel = new(world, EmbeddedResourceRegistry.Get<CubeModel>());
+            cubeMesh = new Mesh(world, cubeModel);
+            Model sphereModel = new(world, EmbeddedResourceRegistry.Get<SphereModel>());
+            sphereMesh = new(world, sphereModel);
+
+            //create ball
+            ballBody = new(world, new SphereShape(0.5f), BodyType.Dynamic, new Vector3(0f, 3f, 0f));
+            Entity ballEntity = ballBody;
+            MeshRenderer ballRenderer = ballEntity.Become<MeshRenderer>();
+            ballRenderer.Mesh = sphereMesh;
+            ballRenderer.Material = unlitMaterial;
+            ballRenderer.RenderMask = new LayerMask().Set(1);
+
+            ballEntity.AddComponent(Color.Red);
+            Transform ballTransform = ballEntity.Become<Transform>();
+            ballTransform.LocalPosition = new(0f, 4f, 0f);
+
+            //create floor
+            floorBody = new(world, new CubeShape(0.5f, 0.5f, 0.5f), BodyType.Static);
+            Entity floorEntity = floorBody;
+            MeshRenderer floorRenderer = floorEntity.Become<MeshRenderer>();
+            floorRenderer.Mesh = cubeMesh;
+            floorRenderer.Material = unlitMaterial;
+            floorRenderer.RenderMask = new LayerMask().Set(1);
+
+            floorEntity.AddComponent(Color.Green);
+
+            //create directional gravity
+            DirectionalGravity downGravity = new(world, -Vector3.UnitY);
+
+            //create floating quad
+            Model quadModel = new(world, EmbeddedResourceRegistry.Get<QuadModel>());
+            Mesh quadMesh = new(world, quadModel);
+            quadEntity = new(world);
+            MeshRenderer quadRenderer = quadEntity.Become<MeshRenderer>();
+            quadRenderer.Mesh = quadMesh;
+            quadRenderer.Material = unlitMaterial;
+            quadRenderer.RenderMask = new LayerMask().Set(1);
+
+            quadEntity.AddComponent(Color.Blue);
+            Transform quadTransform = quadEntity.Become<Transform>();
+            quadTransform.LocalPosition = new(-2f, 2f, 0f);
+
+            [UnmanagedCallersOnly]
+            static void WindowClosed(Window window)
+            {
+                window.Dispose();
+            }
+        }
+
         readonly void IProgram.Start(in Simulator simulator, in Allocation allocation, in World world)
         {
             allocation.Write(new PhysicsDemo(simulator, world));
@@ -53,6 +123,11 @@ namespace Abacus
 
             if (World.TryGetFirst(out Keyboard keyboard))
             {
+                if (keyboard.WasPressed(Keyboard.Button.Escape))
+                {
+                    return StatusCode.Success(1);
+                }
+
                 Transform floorTransform = floorBody;
                 if (keyboard.WasPressed(Keyboard.Button.G))
                 {
@@ -123,7 +198,8 @@ namespace Abacus
 
             if (World.TryGetFirst(out Mouse mouse))
             {
-                Vector2 screenPoint = camera.Destination.GetScreenPointFromPosition(mouse.Position);
+                //Vector2 screenPoint = camera.Destination.GetScreenPointFromPosition(mouse.Position);
+                Vector2 screenPoint = new(0.5f, 0.5f);
                 CameraMatrices cameraProjection = camera.Matrices;
                 (Vector3 origin, Vector3 direction) = cameraProjection.GetRayFromScreenPoint(screenPoint);
                 unsafe
@@ -172,79 +248,6 @@ namespace Abacus
 
         readonly void IProgram.Finish(in StatusCode statusCode)
         {
-            if (!window.IsDestroyed)
-            {
-                window.Dispose();
-            }
-        }
-
-        private unsafe PhysicsDemo(Simulator simulator, World world)
-        {
-            this.simulator = simulator;
-            window = new(world, "Physics Demo", new Vector2(400, 200), new(900, 720), "vulkan", new(&WindowClosed));
-            window.IsResizable = true;
-
-            camera = new(world, window, CameraSettings.CreatePerspectiveDegrees(90f));
-            cameraTransform = camera.Become<Transform>();
-            cameraTransform.LocalPosition = new(-1f, 2f, -10f);
-            cameraPosition = cameraTransform.LocalPosition;
-
-            Texture squareTexture = new(world, EmbeddedResourceRegistry.Get<SquareTexture>());
-
-            unlitMaterial = new(world, EmbeddedResourceRegistry.Get<UnlitTexturedMaterial>());
-            unlitMaterial.AddPushBinding<Color>();
-            unlitMaterial.AddPushBinding<LocalToWorld>();
-            unlitMaterial.AddComponentBinding<CameraMatrices>(new(0, 0), camera);
-            unlitMaterial.AddTextureBinding(new(1, 0), squareTexture);
-
-            Model cubeModel = new(world, EmbeddedResourceRegistry.Get<CubeModel>());
-            cubeMesh = new Mesh(world, cubeModel);
-            Model sphereModel = new(world, EmbeddedResourceRegistry.Get<SphereModel>());
-            sphereMesh = new(world, sphereModel);
-
-            //create ball
-            ballBody = new(world, new SphereShape(0.5f), BodyType.Dynamic, new Vector3(0f, 3f, 0f));
-            Entity ballEntity = ballBody;
-            MeshRenderer ballRenderer = ballEntity.Become<MeshRenderer>();
-            ballRenderer.Mesh = sphereMesh;
-            ballRenderer.Material = unlitMaterial;
-            ballRenderer.RenderMask = new LayerMask().Set(1);
-
-            ballEntity.AddComponent(Color.Red);
-            Transform ballTransform = ballEntity.Become<Transform>();
-            ballTransform.LocalPosition = new(0f, 4f, 0f);
-
-            //create floor
-            floorBody = new(world, new CubeShape(0.5f, 0.5f, 0.5f), BodyType.Static);
-            Entity floorEntity = floorBody;
-            MeshRenderer floorRenderer = floorEntity.Become<MeshRenderer>();
-            floorRenderer.Mesh = cubeMesh;
-            floorRenderer.Material = unlitMaterial;
-            floorRenderer.RenderMask = new LayerMask().Set(1);
-
-            floorEntity.AddComponent(Color.Green);
-
-            //create directional gravity
-            DirectionalGravity downGravity = new(world, -Vector3.UnitY);
-
-            //create floating quad
-            Model quadModel = new(world, EmbeddedResourceRegistry.Get<QuadModel>());
-            Mesh quadMesh = new(world, quadModel);
-            quadEntity = new(world);
-            MeshRenderer quadRenderer = quadEntity.Become<MeshRenderer>();
-            quadRenderer.Mesh = quadMesh;
-            quadRenderer.Material = unlitMaterial;
-            quadRenderer.RenderMask = new LayerMask().Set(1);
-
-            quadEntity.AddComponent(Color.Blue);
-            Transform quadTransform = quadEntity.Become<Transform>();
-            quadTransform.LocalPosition = new(-2f, 2f, 0f);
-
-            [UnmanagedCallersOnly]
-            static void WindowClosed(Window window)
-            {
-                window.Dispose();
-            }
         }
 
         [UnmanagedCallersOnly]
