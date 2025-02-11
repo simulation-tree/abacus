@@ -112,11 +112,6 @@
 			<ReferenceOutputAssembly>false</ReferenceOutputAssembly>
 			<Visible>false</Visible>
 		</ProjectReference>
-		<ProjectReference Include="..\..\worlds\analyzer\Worlds.Analyzer.csproj">
-			<OutputItemType>Analyzer</OutputItemType>
-			<ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-			<Visible>false</Visible>
-		</ProjectReference>
 		<ProjectReference Include="..\..\worlds\generator\Worlds.Generator.csproj">
 			<OutputItemType>Analyzer</OutputItemType>
 			<ReferenceOutputAssembly>false</ReferenceOutputAssembly>
