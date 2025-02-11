@@ -37,6 +37,7 @@ namespace Abacus
         private readonly Body floorBody;
         private readonly Body leftWallBody;
         private readonly Body rightWallBody;
+        private readonly StatefulAutomationPlayer playerMaterialAnimator;
 
         private readonly World World => window.world;
 
@@ -59,7 +60,6 @@ namespace Abacus
             CheckIfPlayersAreGrounded(simulator, World);
             MakeCameraFollowPlayer(World);
             MakeWindowFollowCamera(World);
-            UpdateRegionToMatchAnimatedSprite(World);
             TeleportPlayerToMousePosition(World);
             CloseWindow(World);
             return StatusCode.Continue;
@@ -90,8 +90,6 @@ namespace Abacus
             cameraTransform.LocalPosition = new(0, 0, -1);
 
             Texture squareTexture = new(world, EmbeddedResourceRegistry.Get<SquareTexture>());
-            Model cubeModel = new(world, EmbeddedResourceRegistry.Get<CubeModel>());
-            Mesh cubeMesh = new(world, cubeModel);
 
             Mesh quadMesh = new(world);
             USpan<Vector3> positions = quadMesh.CreatePositions(4);
@@ -137,7 +135,6 @@ namespace Abacus
 
             playerBody.AddComponent(Color.White);
             playerBody.AddComponent(new GroundedState());
-            playerBody.AddComponent(new AnimatedSprite());
             playerBody.AddComponent(new IsPlayer(true));
             playerBody.AddComponent(new Jetpack(3f));
 
@@ -155,20 +152,29 @@ namespace Abacus
             playerAnimationStateMachine.AddTransition("JumpingUp", "Idle", "isGrounded", Transition.Condition.GreaterThan, 0f);
             playerAnimationStateMachine.EntryState = "Idle";
 
-            Automation<FixedString> idleAnimation = new(world, [new(0f, "Idle.png"), new(0.6f, "Idle2.png"), new(1f, "Idle.png")], true);
-            Automation<FixedString> movingAnimation = new(world, [new(0f, "Walk.png"), new(0.15f, "Walk2.png"), new(0.3f, "Walk.png")], true);
-            Automation<FixedString> jumpingUpAnimation = new(world, [new(0f, "JumpingUp.png")]);
-            Automation<FixedString> fallingAnimation = new(world, [new(0f, "Falling.png")]);
+            AtlasSprite idleSprite = playerAtlas["Idle.png"];
+            AtlasSprite idle2Sprite = playerAtlas["Idle2.png"];
+            AtlasSprite fallingSprite = playerAtlas["Falling.png"];
+            AtlasSprite jumpingUpSprite = playerAtlas["JumpingUp.png"];
+            AtlasSprite skidSprite = playerAtlas["Skid.png"];
+            AtlasSprite walkSprite = playerAtlas["Walk.png"];
+            AtlasSprite walk2Sprite = playerAtlas["Walk2.png"];
+            AutomationEntity<Vector4> idleAnimation = new(world, [new(0f, idleSprite.region), new(0.6f, idle2Sprite.region), new(1f, idleSprite.region)], true);
+            AutomationEntity<Vector4> movingAnimation = new(world, [new(0f, walkSprite.region), new(0.15f, walk2Sprite.region), new(0.3f, walkSprite.region)], true);
+            AutomationEntity<Vector4> jumpingUpAnimation = new(world, [new(0f, jumpingUpSprite.region)]);
+            AutomationEntity<Vector4> fallingAnimation = new(world, [new(0f, fallingSprite.region)]);
 
-            StatefulAutomationPlayer playerAnimator = playerBody.Become<StatefulAutomationPlayer>();
-            playerAnimator.StateMachine = playerAnimationStateMachine;
-            playerAnimator.AddParameter("velocityX", 0f);
-            playerAnimator.AddParameter("velocityY", 0f);
-            playerAnimator.AddParameter("isGrounded", 0f);
-            playerAnimator.AddOrSetLink<AnimatedSprite>("Idle", idleAnimation);
-            playerAnimator.AddOrSetLink<AnimatedSprite>("Moving", movingAnimation);
-            playerAnimator.AddOrSetLink<AnimatedSprite>("JumpingUp", jumpingUpAnimation);
-            playerAnimator.AddOrSetLink<AnimatedSprite>("Falling", fallingAnimation);
+            playerMaterialAnimator = playerMaterial.Become<StatefulAutomationPlayer>();
+            playerMaterialAnimator.StateMachine = playerAnimationStateMachine;
+            playerMaterialAnimator.AddParameter("velocityX", 0f);
+            playerMaterialAnimator.AddParameter("velocityY", 0f);
+            playerMaterialAnimator.AddParameter("isGrounded", 0f);
+
+            FixedString fieldName = "region";
+            playerMaterialAnimator.AddOrSetLinkToArrayElement<TextureBinding>("Idle", idleAnimation, 0, fieldName);
+            playerMaterialAnimator.AddOrSetLinkToArrayElement<TextureBinding>("Moving", movingAnimation, 0, fieldName);
+            playerMaterialAnimator.AddOrSetLinkToArrayElement<TextureBinding>("JumpingUp", jumpingUpAnimation, 0, fieldName);
+            playerMaterialAnimator.AddOrSetLinkToArrayElement<TextureBinding>("Falling", fallingAnimation, 0, fieldName);
 
             //create wall colliders
             floorBody = new(world, new CubeShape(0.5f, 0.5f, 0.5f), BodyType.Static);
@@ -463,7 +469,6 @@ namespace Abacus
                 Entity player = new(world, playerEntity);
                 Body playerBody = player.As<Body>();
                 bool isGrounded = player.GetComponent<GroundedState>().value;
-                StatefulAutomationPlayer playerAnimator = player.As<StatefulAutomationPlayer>();
                 Vector3 playerVelocity = playerBody.LinearVelocity;
                 float threshold = 0.4f;
                 float velocityX = MathF.Abs(playerVelocity.X);
@@ -483,33 +488,15 @@ namespace Abacus
                     playerTransform.LocalRotation = rotation;
                 }
 
-                playerAnimator.SetParameter("velocityX", velocityX);
-                playerAnimator.SetParameter("velocityY", playerVelocity.Y);
-                playerAnimator.SetParameter("isGrounded", isGrounded ? 1f : 0f);
+                playerMaterialAnimator.SetParameter("velocityX", velocityX);
+                playerMaterialAnimator.SetParameter("velocityY", playerVelocity.Y);
+                playerMaterialAnimator.SetParameter("isGrounded", isGrounded ? 1f : 0f);
             }
         }
 
         private static float Lerp(float a, float b, float t)
         {
             return a + (b - a) * t;
-        }
-
-        private readonly void UpdateRegionToMatchAnimatedSprite(World world)
-        {
-            ComponentQuery<AnimatedSprite, IsRenderer> query = new(world);
-            foreach (var r in query)
-            {
-                ref AnimatedSprite animatedSprite = ref r.component1;
-                uint entity = r.entity;
-                MeshRenderer renderer = new Entity(world, entity).As<MeshRenderer>();
-                Material material = renderer.Material;
-                ref TextureBinding binding = ref material.GetTextureBinding(new(1, 0));
-                AtlasTexture atlasTexture = new Entity(world, binding.Entity).As<AtlasTexture>();
-                if (atlasTexture.TryGetSprite(animatedSprite.spriteName, out AtlasSprite sprite))
-                {
-                    binding.SetRegion(sprite.region);
-                }
-            }
         }
 
         [Component]
@@ -520,17 +507,6 @@ namespace Abacus
             public GroundedState(bool value)
             {
                 this.value = value;
-            }
-        }
-
-        [Component]
-        public struct AnimatedSprite
-        {
-            public FixedString spriteName;
-
-            public AnimatedSprite(FixedString spriteName)
-            {
-                this.spriteName = spriteName;
             }
         }
 
