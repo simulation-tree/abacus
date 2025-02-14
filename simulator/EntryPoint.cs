@@ -12,8 +12,9 @@ InitializeTraceListeners();
 InitializeRegistries();
 
 Trace.WriteLine("Starting simulator program");
-Schema schema = SchemaLoader.Get();
 StatusCode statusCode;
+
+Schema schema = SchemaLoader.Get();
 using (World world = new(schema))
 {
     using (Simulator simulator = new(world))
