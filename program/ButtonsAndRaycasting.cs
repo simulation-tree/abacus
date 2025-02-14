@@ -123,12 +123,12 @@ namespace Abacus
             Camera uiCamera = new(world, window, CameraSettings.CreateOrthographic(1f));
 
             //global references
-            Texture squareTexture = new(world, EmbeddedResourceRegistry.Get<SquareTexture>());
-            Model cubeModel = new(world, EmbeddedResourceRegistry.Get<CubeModel>());
+            Texture squareTexture = new(world, EmbeddedResourceRegistry.GetAddress<SquareTexture>());
+            Model cubeModel = new(world, EmbeddedResourceRegistry.GetAddress<CubeModel>());
             Mesh cubeMesh = new(world, cubeModel);
-            Font robotoFont = new(world, EmbeddedResourceRegistry.Get<RobotoFont>());
+            Font robotoFont = new(world, EmbeddedResourceRegistry.GetAddress<RobotoFont>());
 
-            Material unlitWorldMaterial = new(world, EmbeddedResourceRegistry.Get<UnlitTexturedMaterial>());
+            Material unlitWorldMaterial = new(world, EmbeddedResourceRegistry.GetAddress<UnlitTexturedMaterial>());
             unlitWorldMaterial.AddPushBinding<Color>();
             unlitWorldMaterial.AddPushBinding<LocalToWorld>();
             unlitWorldMaterial.AddComponentBinding<CameraMatrices>(new(0, 0), worldCamera);
@@ -137,7 +137,7 @@ namespace Abacus
             Settings settings = new(world);
             Canvas canvas = new(world, settings, uiCamera);
 
-            Material textMaterial = new(world, EmbeddedResourceRegistry.Get<TextMaterial>());
+            Material textMaterial = new(world, EmbeddedResourceRegistry.GetAddress<TextMaterial>());
             textMaterial.AddComponentBinding<CameraMatrices>(new(1, 0), uiCamera);
             textMaterial.AddPushBinding<Color>();
             textMaterial.AddPushBinding<LocalToWorld>();
