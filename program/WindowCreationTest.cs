@@ -106,7 +106,7 @@ namespace Abacus
             square.Color = color;
 
             Resizable resizable = square.Become<Resizable>();
-            resizable.Boundary = IsResizable.Boundary.All;
+            resizable.Boundary = IsResizable.EdgeMask.All;
             resizable.SelectionMask = layerMask;
         }
 

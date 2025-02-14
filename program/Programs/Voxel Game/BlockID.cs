@@ -1,8 +1,5 @@
-﻿using Worlds;
-
-namespace VoxelGame
+﻿namespace VoxelGame
 {
-    [ArrayElement]
     public readonly struct BlockID
     {
         private readonly uint value;

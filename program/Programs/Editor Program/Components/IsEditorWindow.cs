@@ -2,7 +2,6 @@
 
 namespace Editor
 {
-    [Component]
     public readonly struct IsEditorWindow
     {
         public readonly rint canvasReference;

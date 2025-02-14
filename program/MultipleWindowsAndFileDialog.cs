@@ -61,7 +61,7 @@ namespace Abacus
             firstSquare.Color = new(1, 0.5f, 0.5f, 1.0f);
 
             Resizable resizable = firstSquare.Become<Resizable>();
-            resizable.Boundary = IsResizable.Boundary.All;
+            resizable.Boundary = IsResizable.EdgeMask.All;
             resizable.SelectionMask = firstLayer;
 
             Label label = new(firstCanvas, "Z = open multiple files\nX = open file\nC = save file\nV = choose directory");
@@ -75,7 +75,7 @@ namespace Abacus
             secondSquare.Color = new(0.5f, 0.5f, 1, 1.0f);
 
             resizable = secondSquare.Become<Resizable>();
-            resizable.Boundary = IsResizable.Boundary.All;
+            resizable.Boundary = IsResizable.EdgeMask.All;
             resizable.SelectionMask = secondLayer;
         }
 

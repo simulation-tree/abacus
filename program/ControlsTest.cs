@@ -47,7 +47,7 @@ namespace Abacus
             image.Position = new(100, 100);
 
             Resizable resizable = image.Become<Resizable>();
-            resizable.Boundary = IsResizable.Boundary.All;
+            resizable.Boundary = IsResizable.EdgeMask.All;
 
             DropShadow dropShadow = new(canvas, image);
 

@@ -4,15 +4,12 @@ using Cameras.Components;
 using Data;
 using DefaultPresentationAssets;
 using InputDevices;
-using UI;
 using Materials;
 using Materials.Components;
 using Meshes;
-using Models;
 using Physics;
 using Physics.Events;
 using Rendering;
-using Rendering.Components;
 using Simulation;
 using System;
 using System.Numerics;
@@ -20,6 +17,7 @@ using System.Runtime.InteropServices;
 using Textures;
 using Transforms;
 using Transforms.Components;
+using UI;
 using Unmanaged;
 using Windows;
 using Worlds;
@@ -499,7 +497,6 @@ namespace Abacus
             return a + (b - a) * t;
         }
 
-        [Component]
         public struct GroundedState
         {
             public bool value;
@@ -510,7 +507,6 @@ namespace Abacus
             }
         }
 
-        [Component]
         public struct IsPlayer
         {
             public bool main;
@@ -521,7 +517,6 @@ namespace Abacus
             }
         }
 
-        [Component]
         public struct Jetpack
         {
             public float availableTime;

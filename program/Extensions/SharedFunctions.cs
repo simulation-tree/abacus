@@ -205,19 +205,19 @@ public static class SharedFunctions
             if (pointerSelectionMask.ContainsAny(resizableMask))
             {
                 Resizable resizable = new Entity(world, r.entity).As<Resizable>();
-                IsResizable.Boundary boundary = resizable.GetBoundary(pointer.Position);
+                IsResizable.EdgeMask boundary = resizable.GetBoundary(pointer.Position);
                 if (boundary != default)
                 {
                     mouse.State.cursor = boundary switch
                     {
-                        IsResizable.Boundary.Top => Mouse.Cursor.ResizeVertical,
-                        IsResizable.Boundary.Bottom => Mouse.Cursor.ResizeVertical,
-                        IsResizable.Boundary.Left => Mouse.Cursor.ResizeHorizontal,
-                        IsResizable.Boundary.Right => Mouse.Cursor.ResizeHorizontal,
-                        IsResizable.Boundary.TopLeft => Mouse.Cursor.ResizeNWSE,
-                        IsResizable.Boundary.TopRight => Mouse.Cursor.ResizeNESW,
-                        IsResizable.Boundary.BottomLeft => Mouse.Cursor.ResizeNESW,
-                        IsResizable.Boundary.BottomRight => Mouse.Cursor.ResizeNWSE,
+                        IsResizable.EdgeMask.Top => Mouse.Cursor.ResizeVertical,
+                        IsResizable.EdgeMask.Bottom => Mouse.Cursor.ResizeVertical,
+                        IsResizable.EdgeMask.Left => Mouse.Cursor.ResizeHorizontal,
+                        IsResizable.EdgeMask.Right => Mouse.Cursor.ResizeHorizontal,
+                        IsResizable.EdgeMask.TopLeft => Mouse.Cursor.ResizeNWSE,
+                        IsResizable.EdgeMask.TopRight => Mouse.Cursor.ResizeNESW,
+                        IsResizable.EdgeMask.BottomLeft => Mouse.Cursor.ResizeNESW,
+                        IsResizable.EdgeMask.BottomRight => Mouse.Cursor.ResizeNWSE,
                         _ => Mouse.Cursor.Default,
                     };
 

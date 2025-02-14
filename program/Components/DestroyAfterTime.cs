@@ -1,7 +1,4 @@
-﻿using Worlds;
-
-[Component]
-public struct DestroyAfterTime
+﻿public struct DestroyAfterTime
 {
     public float time;
 

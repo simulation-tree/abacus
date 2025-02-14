@@ -2,7 +2,6 @@
 
 namespace Editor
 {
-    [Component]
     public struct EditorState
     {
         public World editingWorld;

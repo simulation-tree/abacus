@@ -1,8 +1,5 @@
-﻿using Worlds;
-
-namespace VoxelGame
+﻿namespace VoxelGame
 {
-    [Component]
     public readonly struct VoxelSettings
     {
         public readonly byte chunkSize;

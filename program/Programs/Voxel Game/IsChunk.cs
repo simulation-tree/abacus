@@ -1,8 +1,5 @@
-﻿using Worlds;
-
-namespace VoxelGame
+﻿namespace VoxelGame
 {
-    [Tag]
     public readonly struct IsChunk
     {
     }
