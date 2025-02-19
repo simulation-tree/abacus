@@ -12,9 +12,10 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <ProjectReference Include="..\..\clipboard\source\Clipboard.csproj" />
 	  <ProjectReference Include="..\..\collections\source\Collections.csproj" />
 	  <ProjectReference Include="..\..\serialization\source\Serialization.csproj" />
-	  <ProjectReference Include="..\..\unmanaged\source\Unmanaged.csproj" />
+	  <ProjectReference Include="..\..\unmanaged\core\Unmanaged.Core.csproj" />
 	</ItemGroup>
 
 </Project>

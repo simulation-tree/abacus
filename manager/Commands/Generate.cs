@@ -1,6 +1,5 @@
 ﻿using Collections;
 using System;
-using System.Diagnostics;
 using Unmanaged;
 
 namespace Abacus.Manager.Commands
@@ -8,7 +7,7 @@ namespace Abacus.Manager.Commands
     public readonly struct Generate : ICommand
     {
         readonly string ICommand.Name => "gen";
-        readonly string ICommand.Description => $"Generates files (--gh-test-workflow, --gh-publish-workflow, --clone-script)";
+        readonly string ICommand.Description => $"Generates files (--gh-test-workflow, --gh-publish-workflow, --clone-script --uml)";
 
         readonly void ICommand.Execute(Runner runner, Arguments arguments)
         {

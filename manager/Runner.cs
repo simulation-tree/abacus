@@ -1,5 +1,6 @@
 ﻿using Collections;
 using System;
+using System.Globalization;
 using System.IO;
 using Unmanaged;
 
@@ -115,7 +116,7 @@ namespace Abacus.Manager
             return repositories;
         }
 
-        public readonly Array<Project> GetProjects()
+        public readonly Array<Project> GetProjects(bool topologicallySorted = true)
         {
             using Stack<Text> stack = new();
             stack.Push(new(WorkingDirectory));
@@ -141,51 +142,70 @@ namespace Abacus.Manager
                 currentDirectory.Dispose();
             }
 
-            using List<(Text dependent, List<Text> prerequisites)> dependencies = new();
-            foreach (Project project in projectFiles.Values)
+            if (topologicallySorted)
             {
-                List<Text> prerequisites = new();
-                Text projectName = new(project.Name);
-                foreach (Project.ProjectReference projectReference in project.ProjectReferences)
+                using List<(Text dependent, List<Text> prerequisites)> dependencies = new();
+                foreach (Project project in projectFiles.Values)
                 {
-                    Text referencedProjectName = new(Path.GetFileNameWithoutExtension(projectReference.Include));
-                    if (projectFiles.ContainsKey(referencedProjectName))
+                    List<Text> prerequisites = new();
+                    Text projectName = new(project.Name);
+                    foreach (Project.ProjectReference projectReference in project.ProjectReferences)
                     {
-                        prerequisites.Add(referencedProjectName);
+                        Text referencedProjectName = new(Path.GetFileNameWithoutExtension(projectReference.Include));
+                        if (projectFiles.ContainsKey(referencedProjectName))
+                        {
+                            prerequisites.Add(referencedProjectName);
+                        }
+                        else
+                        {
+                            throw new Exception($"Project `{projectName}` references project `{referencedProjectName}` which does not exist");
+                        }
                     }
-                    else
-                    {
-                        throw new Exception($"Project `{projectName}` references project `{referencedProjectName}` which does not exist");
-                    }
+
+                    dependencies.Add((projectName, prerequisites));
                 }
 
-                dependencies.Add((projectName, prerequisites));
-            }
-
-            using Array<Text> sorted = TopologicalSortItems(projectFiles.Keys, dependencies);
-            Array<Project> projects = new(sorted.Length);
-            for (uint i = 0; i < sorted.Length; i++)
-            {
-                projects[i] = projectFiles[sorted[i]];
-            }
-
-            foreach ((Text dependent, List<Text> prerequisites) entry in dependencies)
-            {
-                foreach (Text prerequisite in entry.prerequisites)
+                using Array<Text> sorted = TopologicalSortItems(projectFiles.Keys, dependencies);
+                Array<Project> projects = new(sorted.Length);
+                for (uint i = 0; i < sorted.Length; i++)
                 {
-                    prerequisite.Dispose();
+                    projects[i] = projectFiles[sorted[i]];
                 }
 
-                entry.prerequisites.Dispose();
-                entry.dependent.Dispose();
-            }
+                foreach ((Text dependent, List<Text> prerequisites) entry in dependencies)
+                {
+                    foreach (Text prerequisite in entry.prerequisites)
+                    {
+                        prerequisite.Dispose();
+                    }
 
-            foreach (Text key in projectFiles.Keys)
+                    entry.prerequisites.Dispose();
+                    entry.dependent.Dispose();
+                }
+
+                foreach (Text key in projectFiles.Keys)
+                {
+                    key.Dispose();
+                }
+
+                return projects;
+            }
+            else
             {
-                key.Dispose();
-            }
+                uint i = 0;
+                Array<Project> projects = new(projectFiles.Count);
+                foreach (Project project in projectFiles.Values)
+                {
+                    projects[i++] = project;
+                }
 
-            return projects;
+                foreach (Text key in projectFiles.Keys)
+                {
+                    key.Dispose();
+                }
+
+                return projects;
+            }
         }
 
         public static Array<Text> TopologicalSortItems(System.Collections.Generic.IEnumerable<Text> items, List<(Text dependent, List<Text> prerequisites)> dependencies)

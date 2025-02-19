@@ -6,7 +6,7 @@ namespace Abacus.Manager.Commands
     public readonly struct Clean : ICommand
     {
         readonly string ICommand.Name => "clean";
-        readonly string ICommand.Description => "Cleans project of artifacts (--source-control, --ide, --test-results, --builds)";
+        readonly string ICommand.Description => "Cleans project of artifacts (--source-control, --ide, --test-results, --builds, --meta)";
 
         readonly void ICommand.Execute(Runner runner, Arguments arguments)
         {
@@ -34,18 +34,23 @@ namespace Abacus.Manager.Commands
                 builds = true;
             }
 
-            if (!sourceControlArtifacts && !ideArtifacts && !testResults && !builds)
+            bool meta = false;
+            if (arguments.Contains("--meta"))
             {
-                runner.WriteErrorLine("At least one clean filter is requried: --source-control, --ide, --test-results, --builds");
+                meta = true;
+            }
+
+            if (!sourceControlArtifacts && !ideArtifacts && !testResults && !builds && !meta)
+            {
+                runner.WriteErrorLine("At least one clean filter is required: --source-control, --ide, --test-results, --builds, --meta");
                 return;
             }
 
             using Array<Repository> repositories = runner.GetRepositories();
+            System.Collections.Generic.Stack<string> stack = new();
             foreach (Repository repository in repositories)
             {
-                System.Collections.Generic.Stack<string> stack = new();
                 stack.Push(repository.Path.ToString());
-
                 while (stack.Count > 0)
                 {
                     string currentFolder = stack.Pop();
@@ -86,6 +91,15 @@ namespace Abacus.Manager.Commands
                         {
                             DeleteDirectory(runner, currentFolder);
                             continue;
+                        }
+                    }
+
+                    if (meta)
+                    {
+                        string[] metaFiles = Directory.GetFiles(currentFolder, "*.meta", SearchOption.TopDirectoryOnly);
+                        foreach (string metaFile in metaFiles)
+                        {
+                            DeleteFile(runner, metaFile);
                         }
                     }
 

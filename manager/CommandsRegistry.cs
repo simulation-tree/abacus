@@ -27,6 +27,7 @@ namespace Abacus.Manager
             Register<Wait>();
             Register<Clear>();
             Register<Push>();
+            Register<UML>();
         }
 
         public static void Register<T>() where T : unmanaged, ICommand
