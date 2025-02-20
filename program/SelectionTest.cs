@@ -40,7 +40,7 @@ namespace Abacus
 
             Settings settings = new(world);
             Camera camera = Camera.CreateOrthographic(world, window, 1f);
-            Canvas canvas = new(world, settings, camera);
+            Canvas canvas = new(settings, camera);
 
             Button buttonA = new(new(&Pressed), canvas);
             buttonA.Position = new(100, 60);

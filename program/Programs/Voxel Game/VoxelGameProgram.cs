@@ -58,13 +58,13 @@ namespace VoxelGame
 
             (chunkAtlas, blockTextures) = GetChunkAtlas(simulator, world);
 
-            chunkMaterial = new(world, EmbeddedResourceRegistry.GetAddress<UnlitTexturedMaterial>());
+            chunkMaterial = new(world, EmbeddedResource.GetAddress<UnlitTexturedMaterial>());
             chunkMaterial.AddPushBinding<Color>();
             chunkMaterial.AddPushBinding<LocalToWorld>();
             chunkMaterial.AddComponentBinding<CameraMatrices>(new(0, 0), camera);
             chunkMaterial.AddTextureBinding(new(1, 0), chunkAtlas, TextureFiltering.Nearest);
 
-            Model quadModel = new(world, EmbeddedResourceRegistry.GetAddress<QuadModel>());
+            Model quadModel = new(world, EmbeddedResource.GetAddress<QuadModel>());
             quadMesh = new(world, quadModel);
 
             MeshRenderer quadRenderer = new(world, quadMesh, chunkMaterial);
@@ -93,7 +93,7 @@ namespace VoxelGame
             Settings settings = new(world);
             Camera uiCamera = Camera.CreateOrthographic(world, window, 1f);
             uiCamera.RenderMask = uiMask;
-            Canvas canvas = new(world, settings, uiCamera, uiMask, LayerMask.All);
+            Canvas canvas = new(settings, uiCamera, uiMask, LayerMask.All);
 
             Label fpsLabel = new(canvas, "Current FPS: {{currentFps}}\nAverage FPS: {{averageFps}}");
             fpsLabel.Anchor = Anchor.TopLeft;

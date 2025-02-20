@@ -34,7 +34,7 @@ namespace Abacus
 
             Settings settings = new(world);
             Camera camera = Camera.CreateOrthographic(world, window, 1f);
-            Canvas canvas = new(world, settings, camera);
+            Canvas canvas = new(settings, camera);
 
             VirtualWindow box = VirtualWindow.Create<ControlsDemoWindow>(world, canvas);
             box.Size = new(300, 300);
@@ -383,7 +383,7 @@ namespace Abacus
                     if (world.ContainsTag<IsLabel>(child))
                     {
                         Label label = new Entity(world, child).As<Label>();
-                        USpan<char> text = label.Text;
+                        USpan<char> text = label.ProcessedText;
                         uint startIndex = text.IndexOf(':') + 1;
                         int countValue = int.Parse(text.Slice(startIndex));
                         USpan<char> countText = stackalloc char[10];

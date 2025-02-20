@@ -87,7 +87,7 @@ namespace Abacus
             Transform cameraTransform = camera.Become<Transform>();
             cameraTransform.LocalPosition = new(0, 0, -1);
 
-            Texture squareTexture = new(world, EmbeddedResourceRegistry.GetAddress<SquareTexture>());
+            Texture squareTexture = new(world, EmbeddedResource.GetAddress<SquareTexture>());
 
             Mesh quadMesh = new(world);
             USpan<Vector3> positions = quadMesh.CreatePositions(4);
@@ -110,7 +110,7 @@ namespace Abacus
             quadMesh.AddTriangle(2, 1, 0);
             quadMesh.AddTriangle(0, 3, 2);
 
-            Material unlitMaterial = new(world, EmbeddedResourceRegistry.GetAddress<UnlitTexturedMaterial>());
+            Material unlitMaterial = new(world, EmbeddedResource.GetAddress<UnlitTexturedMaterial>());
             unlitMaterial.AddPushBinding<Color>();
             unlitMaterial.AddPushBinding<LocalToWorld>();
             unlitMaterial.AddComponentBinding<CameraMatrices>(new(0, 0), camera);
@@ -118,7 +118,7 @@ namespace Abacus
 
             AtlasTexture playerAtlas = GetPlayerAtlas(simulator, world);
 
-            Material playerMaterial = new(world, EmbeddedResourceRegistry.GetAddress<UnlitTexturedMaterial>());
+            Material playerMaterial = new(world, EmbeddedResource.GetAddress<UnlitTexturedMaterial>());
             playerMaterial.AddPushBinding<Color>();
             playerMaterial.AddPushBinding<LocalToWorld>();
             playerMaterial.AddComponentBinding<CameraMatrices>(new(0, 0), camera);

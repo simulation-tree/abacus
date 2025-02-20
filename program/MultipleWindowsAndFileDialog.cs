@@ -49,10 +49,10 @@ namespace Abacus
             secondCamera.RenderMask = secondLayer;
             secondCamera.SetParent(secondWindow);
 
-            firstCanvas = new(world, settings, firstCamera, firstLayer, firstLayer);
+            firstCanvas = new(settings, firstCamera, firstLayer, firstLayer);
             firstCamera.SetParent(firstWindow);
 
-            secondCanvas = new(world, settings, secondCamera, secondLayer, secondLayer);
+            secondCanvas = new(settings, secondCamera, secondLayer, secondLayer);
             secondCamera.SetParent(secondWindow);
 
             Image firstSquare = new(firstCanvas);

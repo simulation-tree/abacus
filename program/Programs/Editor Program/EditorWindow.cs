@@ -26,7 +26,7 @@ namespace Editor
             Camera camera = Camera.CreateOrthographic(world, window, 1f, layerMask);
             camera.SetParent(window);
 
-            Canvas canvas = new(world, settings, camera, layerMask, layerMask);
+            Canvas canvas = new(settings, camera, layerMask, layerMask);
             canvas.SetParent(window);
 
             Transform container = new(world);

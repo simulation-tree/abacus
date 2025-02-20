@@ -51,17 +51,17 @@ namespace Abacus
             cameraTransform.LocalPosition = new(-1f, 2f, -10f);
             cameraPosition = cameraTransform.LocalPosition;
 
-            Texture squareTexture = new(world, EmbeddedResourceRegistry.GetAddress<SquareTexture>());
+            Texture squareTexture = new(world, EmbeddedResource.GetAddress<SquareTexture>());
 
-            unlitMaterial = new(world, EmbeddedResourceRegistry.GetAddress<UnlitTexturedMaterial>());
+            unlitMaterial = new(world, EmbeddedResource.GetAddress<UnlitTexturedMaterial>());
             unlitMaterial.AddPushBinding<Color>();
             unlitMaterial.AddPushBinding<LocalToWorld>();
             unlitMaterial.AddComponentBinding<CameraMatrices>(new(0, 0), camera);
             unlitMaterial.AddTextureBinding(new(1, 0), squareTexture);
 
-            Model cubeModel = new(world, EmbeddedResourceRegistry.GetAddress<CubeModel>());
+            Model cubeModel = new(world, EmbeddedResource.GetAddress<CubeModel>());
             cubeMesh = new Mesh(world, cubeModel);
-            Model sphereModel = new(world, EmbeddedResourceRegistry.GetAddress<SphereModel>());
+            Model sphereModel = new(world, EmbeddedResource.GetAddress<SphereModel>());
             sphereMesh = new(world, sphereModel);
 
             //create ball
@@ -90,7 +90,7 @@ namespace Abacus
             DirectionalGravity downGravity = new(world, -Vector3.UnitY);
 
             //create floating quad
-            Model quadModel = new(world, EmbeddedResourceRegistry.GetAddress<QuadModel>());
+            Model quadModel = new(world, EmbeddedResource.GetAddress<QuadModel>());
             Mesh quadMesh = new(world, quadModel);
             quadEntity = new(world);
             MeshRenderer quadRenderer = quadEntity.Become<MeshRenderer>();
