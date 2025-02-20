@@ -13,6 +13,7 @@ git clone https://github.com/game-simulations/textures.git
 git clone https://github.com/game-simulations/texture-systems.git
 git clone https://github.com/game-simulations/text-rendering-systems.git
 git clone https://github.com/game-simulations/text-rendering.git
+git clone https://github.com/game-simulations/skybox.git
 git clone https://github.com/game-simulations/simulation
 git clone https://github.com/game-simulations/shaders.git
 git clone https://github.com/game-simulations/shader-systems.git
