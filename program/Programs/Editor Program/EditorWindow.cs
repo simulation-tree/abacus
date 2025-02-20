@@ -16,7 +16,7 @@ namespace Editor
 
         public unsafe EditorWindow(World world, Settings settings, Vector2 position, Vector2 size, Layer layer)
         {
-            LayerMask layerMask = new LayerMask().Set(layer);
+            LayerMask layerMask = new(layer);
 
             FixedString title = default(T).Title;
             Window window = new(world, title, position, size, "vulkan", new(&CloseFunction.OnWindowClosed));

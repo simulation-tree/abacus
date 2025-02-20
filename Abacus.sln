@@ -201,6 +201,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Unmanaged.Core", "..\unmana
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DefaultPresentationAssets.Tests", "..\default-presentation-assets\tests\DefaultPresentationAssets.Tests.csproj", "{EBDBFC91-90E3-64BC-8A08-30502BCF920F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Skybox", "..\skybox\source\Skybox.csproj", "{3C4EAECC-E722-ACC5-C405-9B30A12C14CF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Skybox.Tests", "..\skybox\tests\Skybox.Tests.csproj", "{F54C99FE-CAB7-2B14-BBE5-22570E974E6F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -603,6 +607,14 @@ Global
 		{EBDBFC91-90E3-64BC-8A08-30502BCF920F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EBDBFC91-90E3-64BC-8A08-30502BCF920F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EBDBFC91-90E3-64BC-8A08-30502BCF920F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3C4EAECC-E722-ACC5-C405-9B30A12C14CF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3C4EAECC-E722-ACC5-C405-9B30A12C14CF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3C4EAECC-E722-ACC5-C405-9B30A12C14CF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3C4EAECC-E722-ACC5-C405-9B30A12C14CF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F54C99FE-CAB7-2B14-BBE5-22570E974E6F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F54C99FE-CAB7-2B14-BBE5-22570E974E6F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F54C99FE-CAB7-2B14-BBE5-22570E974E6F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F54C99FE-CAB7-2B14-BBE5-22570E974E6F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

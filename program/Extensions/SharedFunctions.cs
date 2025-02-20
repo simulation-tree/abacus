@@ -1,7 +1,6 @@
 ﻿using InputDevices;
 using Rendering;
 using System;
-using System.Diagnostics;
 using System.Numerics;
 using System.Runtime.InteropServices;
 using Transforms;
@@ -151,7 +150,7 @@ public static class SharedFunctions
 
         if (now >= nextFpsUpdateTime)
         {
-            nextFpsUpdateTime = now + TimeSpan.FromSeconds(0.5f);
+            nextFpsUpdateTime = now + TimeSpan.FromSeconds(0.1f);
             currentFps = 0f;
             if (frameTimes.Count > 1)
             {

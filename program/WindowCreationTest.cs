@@ -88,7 +88,7 @@ namespace Abacus
 
         private readonly void CreateWindow(FixedString title, Vector2 windowPosition, Vector2 squarePosition, Vector4 color, Layer layer)
         {
-            LayerMask layerMask = new LayerMask().Set(layer);
+            LayerMask layerMask = new(layer);
 
             Window window = new(world, title, windowPosition, new(200, 200), "vulkan", new(&OnWindowClosed));
             window.ClearColor = Vector4.Lerp(new(0f, 0f, 0f, 1f), color, 0.3f);

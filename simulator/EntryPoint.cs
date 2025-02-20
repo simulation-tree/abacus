@@ -19,7 +19,7 @@ using (World world = new(schema))
 {
     using (Simulator simulator = new(world))
     {
-        using (Program<ControlsTest> program = new(world))
+        using (Program<VoxelGameProgram> program = new(world))
         {
             while (!program.IsFinished(out statusCode))
             {

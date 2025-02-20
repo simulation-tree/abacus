@@ -28,8 +28,8 @@ namespace Abacus
         {
             this.world = world;
 
-            LayerMask firstLayer = new LayerMask().Set(1);
-            LayerMask secondLayer = new LayerMask().Set(2);
+            LayerMask firstLayer = new(1);
+            LayerMask secondLayer = new(2);
 
             firstWindow = new(world, "First Window", new(200, 200), new(300, 300), "vulkan", new(&OnWindowClosed));
             firstWindow.ClearColor = new(0.2f, 0.2f, 0.4f, 1.0f);

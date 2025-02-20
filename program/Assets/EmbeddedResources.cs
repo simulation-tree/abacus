@@ -22,6 +22,12 @@ namespace Abacus
             register.Invoke("Assets/Textures/Spaceman/Skid.png");
             register.Invoke("Assets/Textures/Spaceman/Walk.png");
             register.Invoke("Assets/Textures/Spaceman/Walk2.png");
+            register.Invoke("Assets/Skyboxes/Clouds/clouds1_down.bmp");
+            register.Invoke("Assets/Skyboxes/Clouds/clouds1_east.bmp");
+            register.Invoke("Assets/Skyboxes/Clouds/clouds1_north.bmp");
+            register.Invoke("Assets/Skyboxes/Clouds/clouds1_south.bmp");
+            register.Invoke("Assets/Skyboxes/Clouds/clouds1_up.bmp");
+            register.Invoke("Assets/Skyboxes/Clouds/clouds1_west.bmp");
         }
     }
 }

@@ -83,7 +83,7 @@ namespace Abacus
             window.ClearColor = new(0, 0, 0, 0);
 
             Settings settings = new(world);
-            camera = new(world, window, CameraSettings.CreatePerspectiveDegrees(60));
+            camera = new(world, window, CameraSettings.CreatePerspectiveDegrees(60), new LayerMask(1));
             Transform cameraTransform = camera.Become<Transform>();
             cameraTransform.LocalPosition = new(0, 0, -1);
 
@@ -129,7 +129,7 @@ namespace Abacus
             MeshRenderer playerRenderer = playerBody.Become<MeshRenderer>();
             playerRenderer.Mesh = quadMesh;
             playerRenderer.Material = playerMaterial;
-            playerRenderer.RenderMask = new LayerMask().Set(1);
+            playerRenderer.RenderMask = new(1);
 
             playerBody.AddComponent(Color.White);
             playerBody.AddComponent(new GroundedState());

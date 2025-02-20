@@ -28,6 +28,12 @@
 
     <ItemGroup>
         <None Remove="Assets\Cav.world" />
+        <None Remove="Assets\Skyboxes\Clouds\clouds1_down.bmp" />
+        <None Remove="Assets\Skyboxes\Clouds\clouds1_east.bmp" />
+        <None Remove="Assets\Skyboxes\Clouds\clouds1_north.bmp" />
+        <None Remove="Assets\Skyboxes\Clouds\clouds1_south.bmp" />
+        <None Remove="Assets\Skyboxes\Clouds\clouds1_up.bmp" />
+        <None Remove="Assets\Skyboxes\Clouds\clouds1_west.bmp" />
         <None Remove="Assets\Textures\Blocks\Cobblestone.png" />
         <None Remove="Assets\Textures\Blocks\Dirt.png" />
         <None Remove="Assets\Textures\Blocks\Grass.png" />
@@ -48,6 +54,12 @@
         <EmbeddedResource Include="Assets\Cav.world">
             <CopyToOutputDirectory>Never</CopyToOutputDirectory>
         </EmbeddedResource>
+        <EmbeddedResource Include="Assets\Skyboxes\Clouds\clouds1_down.bmp" />
+        <EmbeddedResource Include="Assets\Skyboxes\Clouds\clouds1_east.bmp" />
+        <EmbeddedResource Include="Assets\Skyboxes\Clouds\clouds1_north.bmp" />
+        <EmbeddedResource Include="Assets\Skyboxes\Clouds\clouds1_south.bmp" />
+        <EmbeddedResource Include="Assets\Skyboxes\Clouds\clouds1_up.bmp" />
+        <EmbeddedResource Include="Assets\Skyboxes\Clouds\clouds1_west.bmp" />
         <EmbeddedResource Include="Assets\Textures\Blocks\Dirt.png">
             <CopyToOutputDirectory>Never</CopyToOutputDirectory>
         </EmbeddedResource>
@@ -95,6 +107,7 @@
     <ItemGroup>
         <ProjectReference Include="..\..\file-dialog\source\FileDialogs.csproj" />
         <ProjectReference Include="..\..\meshes-9s\source\Meshes.NineSliced.csproj" />
+        <ProjectReference Include="..\..\skybox\source\Skybox.csproj" />
         <ProjectReference Include="..\..\worlds\core\Worlds.Core.csproj" />
         <ProjectReference Include="..\..\automations\source\Automations.csproj" />
         <ProjectReference Include="..\..\cameras\source\Cameras.csproj" />

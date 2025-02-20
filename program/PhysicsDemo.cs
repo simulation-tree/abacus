@@ -70,7 +70,7 @@ namespace Abacus
             MeshRenderer ballRenderer = ballEntity.Become<MeshRenderer>();
             ballRenderer.Mesh = sphereMesh;
             ballRenderer.Material = unlitMaterial;
-            ballRenderer.RenderMask = new LayerMask().Set(1);
+            ballRenderer.RenderMask = new LayerMask(1);
 
             ballEntity.AddComponent(Color.Red);
             Transform ballTransform = ballEntity.Become<Transform>();
@@ -82,7 +82,7 @@ namespace Abacus
             MeshRenderer floorRenderer = floorEntity.Become<MeshRenderer>();
             floorRenderer.Mesh = cubeMesh;
             floorRenderer.Material = unlitMaterial;
-            floorRenderer.RenderMask = new LayerMask().Set(1);
+            floorRenderer.RenderMask = new LayerMask(1);
 
             floorEntity.AddComponent(Color.Green);
 
@@ -96,7 +96,7 @@ namespace Abacus
             MeshRenderer quadRenderer = quadEntity.Become<MeshRenderer>();
             quadRenderer.Mesh = quadMesh;
             quadRenderer.Material = unlitMaterial;
-            quadRenderer.RenderMask = new LayerMask().Set(1);
+            quadRenderer.RenderMask = new LayerMask(1);
 
             quadEntity.AddComponent(Color.Blue);
             Transform quadTransform = quadEntity.Become<Transform>();
@@ -231,7 +231,7 @@ namespace Abacus
                     MeshRenderer projectileRenderer = projectileEntity.Become<MeshRenderer>();
                     projectileRenderer.Mesh = sphereMesh;
                     projectileRenderer.Material = unlitMaterial;
-                    projectileRenderer.RenderMask = new LayerMask().Set(1);
+                    projectileRenderer.RenderMask = new LayerMask(1);
 
                     projectileEntity.AddComponent(Color.White);
                     projectileEntity.AddComponent(new DestroyAfterTime(5f));

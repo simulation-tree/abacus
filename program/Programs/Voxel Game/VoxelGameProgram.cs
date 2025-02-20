@@ -19,13 +19,14 @@ using Transforms.Components;
 using Unmanaged;
 using Windows;
 using Worlds;
+using Shaders;
 
 namespace VoxelGame
 {
     public partial struct VoxelGameProgram : IProgram
     {
-        public static readonly LayerMask worldMask = new LayerMask().Set(0);
-        public static readonly LayerMask uiMask = new LayerMask().Set(1);
+        public static readonly LayerMask worldMask = new(0);
+        public static readonly LayerMask uiMask = new(1);
 
         private readonly Window window;
         private readonly Camera camera;
@@ -104,6 +105,16 @@ namespace VoxelGame
             controlsLabel.Anchor = Anchor.TopLeft;
             controlsLabel.Pivot = new(0f, 1f, 0f);
             controlsLabel.Position = new(0f, -100f);
+
+            Texture skyboxDown = new(world, "Assets/Skyboxes/Clouds/clouds1_down.bmp");
+            Texture skyboxEast = new(world, "Assets/Skyboxes/Clouds/clouds1_east.bmp");
+            Texture skyboxNorth = new(world, "Assets/Skyboxes/Clouds/clouds1_north.bmp");
+            Texture skyboxSouth = new(world, "Assets/Skyboxes/Clouds/clouds1_south.bmp");
+            Texture skyboxUp = new(world, "Assets/Skyboxes/Clouds/clouds1_up.bmp");
+            Texture skyboxWest = new(world, "Assets/Skyboxes/Clouds/clouds1_west.bmp");
+            simulator.UpdateSystems(TimeSpan.MinValue, world);
+            CubemapTexture cubemap = new(world, skyboxEast, skyboxWest, skyboxUp, skyboxDown, skyboxNorth, skyboxSouth);
+            CubemapSkybox skybox = new(world, camera, cubemap, worldMask);
 
             SharedFunctions.AddLabelProcessors(world);
         }
