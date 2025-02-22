@@ -10,6 +10,7 @@ using Meshes;
 using Physics;
 using Physics.Events;
 using Rendering;
+using Shapes.Types;
 using Simulation;
 using System;
 using System.Numerics;

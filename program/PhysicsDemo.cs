@@ -9,6 +9,7 @@ using Models;
 using Physics;
 using Physics.Events;
 using Rendering;
+using Shapes.Types;
 using Simulation;
 using System;
 using System.Numerics;
@@ -41,12 +42,14 @@ namespace Abacus
 
         private unsafe PhysicsDemo(Simulator simulator, World world)
         {
+            LayerMask firstLayer = new(0);
+
             this.simulator = simulator;
             window = new(world, "Physics Demo", new Vector2(400, 200), new(900, 720), "vulkan", new(&WindowClosed));
             window.IsResizable = true;
             window.CursorState = CursorState.HiddenAndConfined;
 
-            camera = new(world, window, CameraSettings.CreatePerspectiveDegrees(90f));
+            camera = new(world, window, CameraSettings.CreatePerspectiveDegrees(90f), firstLayer);
             cameraTransform = camera.Become<Transform>();
             cameraTransform.LocalPosition = new(-1f, 2f, -10f);
             cameraPosition = cameraTransform.LocalPosition;
@@ -70,7 +73,7 @@ namespace Abacus
             MeshRenderer ballRenderer = ballEntity.Become<MeshRenderer>();
             ballRenderer.Mesh = sphereMesh;
             ballRenderer.Material = unlitMaterial;
-            ballRenderer.RenderMask = new LayerMask(1);
+            ballRenderer.RenderMask = firstLayer;
 
             ballEntity.AddComponent(Color.Red);
             Transform ballTransform = ballEntity.Become<Transform>();
@@ -82,7 +85,7 @@ namespace Abacus
             MeshRenderer floorRenderer = floorEntity.Become<MeshRenderer>();
             floorRenderer.Mesh = cubeMesh;
             floorRenderer.Material = unlitMaterial;
-            floorRenderer.RenderMask = new LayerMask(1);
+            floorRenderer.RenderMask = firstLayer;
 
             floorEntity.AddComponent(Color.Green);
 
@@ -96,7 +99,7 @@ namespace Abacus
             MeshRenderer quadRenderer = quadEntity.Become<MeshRenderer>();
             quadRenderer.Mesh = quadMesh;
             quadRenderer.Material = unlitMaterial;
-            quadRenderer.RenderMask = new LayerMask(1);
+            quadRenderer.RenderMask = firstLayer;
 
             quadEntity.AddComponent(Color.Blue);
             Transform quadTransform = quadEntity.Become<Transform>();
