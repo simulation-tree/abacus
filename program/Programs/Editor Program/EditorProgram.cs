@@ -50,7 +50,7 @@ namespace Editor
                 {
                     Trace.WriteLine($"Loaded world from `{firstArg}`");
 
-                    using BinaryReader reader = new(data);
+                    using ByteReader reader = new(data);
                     using World loadedWorld = reader.ReadObject<World>();
                     editorState.LoadWorld(loadedWorld);
                 }
