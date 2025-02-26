@@ -1,4 +1,4 @@
-﻿using Collections;
+﻿using Collections.Generic;
 using Materials;
 using Meshes;
 using Meshes.Components;
@@ -84,10 +84,10 @@ namespace VoxelGame
             USpan<Vector2> meshUVs = mesh.ResizeUVs(generation.verticeIndex);
             USpan<Vector4> meshColors = mesh.ResizeColors(generation.verticeIndex);
             USpan<uint> meshTriangles = mesh.ResizeIndices(generation.triangleIndex);
-            vertices.AsSpan(0, generation.verticeIndex).CopyTo(meshPositions);
-            uvs.AsSpan(0, generation.verticeIndex).CopyTo(meshUVs);
-            colors.AsSpan(0, generation.verticeIndex).CopyTo(meshColors);
-            triangles.AsSpan(0, generation.triangleIndex).CopyTo(meshTriangles);
+            vertices.GetSpan(generation.verticeIndex).CopyTo(meshPositions);
+            uvs.GetSpan(generation.verticeIndex).CopyTo(meshUVs);
+            colors.GetSpan(generation.verticeIndex).CopyTo(meshColors);
+            triangles.GetSpan(generation.triangleIndex).CopyTo(meshTriangles);
             mesh.IncrementVersion();
         }
 

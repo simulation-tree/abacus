@@ -1,4 +1,4 @@
-﻿using Collections;
+﻿using Collections.Generic;
 using System;
 using System.Globalization;
 using System.IO;
@@ -87,7 +87,7 @@ namespace Abacus.Manager
             using List<Text> foundRepositories = new();
             while (stack.TryPop(out Text currentDirectory))
             {
-                foreach (string directory in Directory.GetDirectories(currentDirectory, "*", SearchOption.TopDirectoryOnly))
+                foreach (string directory in Directory.GetDirectories(currentDirectory.ToString(), "*", SearchOption.TopDirectoryOnly))
                 {
                     if (directory.EndsWith("/.git") || directory.EndsWith("\\.git"))
                     {
@@ -106,7 +106,7 @@ namespace Abacus.Manager
             for (uint i = 0; i < foundRepositories.Count; i++)
             {
                 Text repositoryPath = foundRepositories[i];
-                USpan<char> remote = Terminal.Execute(repositoryPath, "git remote get-url origin");
+                USpan<char> remote = Terminal.Execute(repositoryPath.ToString(), "git remote get-url origin");
                 remote = remote.TrimEnd('\n');
                 remote = remote.TrimEnd('\r');
                 repositories[i] = new(repositoryPath.AsSpan(), remote);
@@ -124,12 +124,12 @@ namespace Abacus.Manager
             using Dictionary<Text, Project> projectFiles = new();
             while (stack.TryPop(out Text currentDirectory))
             {
-                foreach (string directory in Directory.GetDirectories(currentDirectory))
+                foreach (string directory in Directory.GetDirectories(currentDirectory.ToString()))
                 {
                     stack.Push(new(directory));
                 }
 
-                foreach (string filePath in Directory.GetFiles(currentDirectory))
+                foreach (string filePath in Directory.GetFiles(currentDirectory.ToString()))
                 {
                     if (Path.GetExtension(filePath) == ".csproj")
                     {

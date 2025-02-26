@@ -1,4 +1,4 @@
-﻿using Collections;
+﻿using Collections.Generic;
 using System;
 using Unmanaged;
 
@@ -44,7 +44,7 @@ namespace Abacus.Manager
             this.path = new(path);
             this.remote = new(remote);
             this.name = new(System.IO.Path.GetFileNameWithoutExtension(path));
-            string[] projectPaths = System.IO.Directory.GetFiles(this.path, "*.csproj", System.IO.SearchOption.AllDirectories);
+            string[] projectPaths = System.IO.Directory.GetFiles(this.path.ToString(), "*.csproj", System.IO.SearchOption.AllDirectories);
             USpan<uint> projectPathIndicesBuffer = stackalloc uint[projectPaths.Length];
             uint projectCount = 0;
             for (uint i = 0; i < projectPaths.Length; i++)

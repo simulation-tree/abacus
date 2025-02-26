@@ -1,4 +1,4 @@
-﻿using Collections;
+﻿using Collections.Generic;
 using Serialization.XML;
 using System;
 using Unmanaged;
@@ -71,8 +71,8 @@ namespace Abacus.Manager
             this.name = new(System.IO.Path.GetFileNameWithoutExtension(path));
             this.packageId = new();
 
-            using System.IO.FileStream fileStream = System.IO.File.OpenRead(this.path);
-            using BinaryReader reader = new(fileStream);
+            using System.IO.FileStream fileStream = System.IO.File.OpenRead(this.path.ToString());
+            using ByteReader reader = new(fileStream);
             using XMLNode rootNode = reader.ReadObject<XMLNode>();
             using Stack<XMLNode> stack = new();
             stack.Push(rootNode);
@@ -139,7 +139,7 @@ namespace Abacus.Manager
 
         public override string ToString()
         {
-            return path;
+            return path.ToString();
         }
 
         public readonly void Dispose()

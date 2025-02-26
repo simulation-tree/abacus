@@ -1,4 +1,4 @@
-﻿using Collections;
+﻿using Collections.Generic;
 using System.IO;
 
 namespace Abacus.Manager.Commands

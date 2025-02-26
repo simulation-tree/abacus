@@ -1,6 +1,5 @@
 ﻿using Cameras;
 using Cameras.Components;
-using Collections;
 using Data;
 using DefaultPresentationAssets;
 using InputDevices;
@@ -20,6 +19,7 @@ using Unmanaged;
 using Windows;
 using Worlds;
 using Shaders;
+using Collections.Generic;
 
 namespace VoxelGame
 {
