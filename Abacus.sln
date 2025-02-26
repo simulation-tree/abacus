@@ -205,9 +205,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Skybox", "..\skybox\source\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Skybox.Tests", "..\skybox\tests\Skybox.Tests.csproj", "{F54C99FE-CAB7-2B14-BBE5-22570E974E6F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Particle.Systems", "..\particle-systems\source\Particle.Systems.csproj", "{1E94D267-FB2F-EA27-2786-0B2DEC8A8840}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Particles.Systems", "..\particle-systems\source\Particles.Systems.csproj", "{1E94D267-FB2F-EA27-2786-0B2DEC8A8840}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Particle.Systems.Tests", "..\particle-systems\tests\Particle.Systems.Tests.csproj", "{7118A05C-CE72-AC6A-5552-ACF22EDE62A1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Particles.Systems.Tests", "..\particle-systems\tests\Particles.Systems.Tests.csproj", "{7118A05C-CE72-AC6A-5552-ACF22EDE62A1}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Particles", "..\particles\source\Particles.csproj", "{40E819B6-9FE0-AEC0-6C74-60E341E10301}"
 EndProject
