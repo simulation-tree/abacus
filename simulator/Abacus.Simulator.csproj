@@ -9,14 +9,6 @@
 		<ProduceReferenceAssembly>False</ProduceReferenceAssembly>
 		<PublishAot>True</PublishAot>
 		<PublishTrimmed>True</PublishTrimmed>
-	</PropertyGroup>
-
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-		<TreatWarningsAsErrors>True</TreatWarningsAsErrors>
-		<WarningLevel>8</WarningLevel>
-	</PropertyGroup>
-
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
 		<TreatWarningsAsErrors>True</TreatWarningsAsErrors>
 		<WarningLevel>8</WarningLevel>
 	</PropertyGroup>
@@ -26,6 +18,10 @@
 		<EmbeddedResource Remove="Assets\**" />
 		<None Remove="Assets\**" />
 	</ItemGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+		<DefineConstants></DefineConstants>
+	</PropertyGroup>
 
 	<ItemGroup>
 		<PackageReference Include="Alimer.Bindings.SDL" Version="3.9.6" />
