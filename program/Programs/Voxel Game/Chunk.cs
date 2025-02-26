@@ -19,7 +19,7 @@ namespace VoxelGame
         private const uint TrianglesPerFace = 6;
         private const uint FacesPerBlock = 6;
 
-        public unsafe readonly USpan<uint> Blocks => GetArray<BlockID>().As<uint>();
+        public unsafe readonly USpan<uint> Blocks => GetArray<BlockID>().AsSpan<uint>();
         public readonly uint Capacity => GetArrayLength<BlockID>();
         public readonly ref uint this[uint index] => ref Blocks[index];
         public readonly ref uint this[byte x, byte y, byte z] => ref this[MeshGenerator.GetIndex(x, y, z, ChunkSize)];
@@ -37,7 +37,7 @@ namespace VoxelGame
             mesh.CreateColors(0);
             mesh.CreateUVs(0);
 
-            USpan<BlockID> blocks = mesh.CreateArray<BlockID>(capacity);
+            USpan<BlockID> blocks = mesh.CreateArray<BlockID>(capacity).AsSpan();
             blocks.Clear();
 
             MeshRenderer chunkRenderer = mesh.Become<MeshRenderer>();
@@ -113,7 +113,7 @@ namespace VoxelGame
                         if (chunkX == cx && chunkY == cy && chunkZ == cz)
                         {
                             uint entity = entities[i];
-                            return world.GetArray<BlockID>(entity).As<uint>();
+                            return world.GetArray<BlockID>(entity).AsSpan<uint>();
                         }
                     }
                 }
