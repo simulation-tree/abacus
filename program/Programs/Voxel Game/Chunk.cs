@@ -94,8 +94,8 @@ namespace VoxelGame
         public static USpan<uint> GetBlocks(World world, int cx, int cy, int cz)
         {
             byte chunkSize = world.GetFirstComponent<VoxelSettings>().chunkSize;
-            TagType chunkType = world.Schema.GetTag<IsChunk>();
-            ComponentType positionType = world.Schema.GetComponent<Position>();
+            TagType chunkType = world.Schema.GetTagType<IsChunk>();
+            ComponentType positionType = world.Schema.GetComponentType<Position>();
             foreach (Worlds.Chunk chunk in world.Chunks)
             {
                 Definition key = chunk.Definition;
