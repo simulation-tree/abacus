@@ -2,6 +2,7 @@
 using Rendering;
 using System;
 using System.Numerics;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Transforms;
 using UI;
@@ -306,16 +307,16 @@ public static class SharedFunctions
         new LabelProcessor(world, new(&TryHandleAverageFPS));
     }
 
-    [UnmanagedCallersOnly]
+    [UnmanagedCallersOnly, SkipLocalsInit]
     private static UI.Boolean TryHandleCurrentFPS(TryProcessLabel.Input input)
     {
         const string CurrentFPS = "{{currentFps}}";
         if (input.OriginalText.Contains(CurrentFPS.AsSpan()))
         {
-            USpan<char> replacement = stackalloc char[128];
+            USpan<char> replacement = stackalloc char[32];
             uint replacementLength = currentFps.ToString(replacement);
             replacementLength = Math.Min(replacementLength, 6);
-            uint newLength = input.OriginalText.Length - (uint)CurrentFPS.Length + 64;
+            uint newLength = input.OriginalText.Length - (uint)CurrentFPS.Length + replacementLength + 32;
             USpan<char> destination = stackalloc char[(int)newLength];
             newLength = Text.Replace(input.OriginalText, CurrentFPS.AsSpan(), replacement.Slice(0, replacementLength), destination);
             USpan<char> newText = destination.Slice(0, newLength);
@@ -329,13 +330,13 @@ public static class SharedFunctions
         return false;
     }
 
-    [UnmanagedCallersOnly]
+    [UnmanagedCallersOnly, SkipLocalsInit]
     private static UI.Boolean TryHandleAverageFPS(TryProcessLabel.Input input)
     {
         const string AverageFPS = "{{averageFps}}";
         if (input.OriginalText.Contains(AverageFPS.AsSpan()))
         {
-            USpan<char> replacement = stackalloc char[128];
+            USpan<char> replacement = stackalloc char[32];
             double averageFps = 0;
             for (int i = 0; i < fpsHistory.Count; i++)
             {
@@ -345,7 +346,7 @@ public static class SharedFunctions
             averageFps /= fpsHistory.Count;
             uint replacementLength = averageFps.ToString(replacement);
             replacementLength = Math.Min(replacementLength, 6);
-            uint newLength = input.OriginalText.Length - (uint)AverageFPS.Length + 64;
+            uint newLength = input.OriginalText.Length - (uint)AverageFPS.Length + replacementLength + 32;
             USpan<char> destination = stackalloc char[(int)newLength];
             newLength = Text.Replace(input.OriginalText, AverageFPS.AsSpan(), replacement.Slice(0, replacementLength), destination);
             input.SetResult(destination.Slice(0, newLength));
