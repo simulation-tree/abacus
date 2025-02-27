@@ -99,7 +99,7 @@ namespace VoxelGame
             foreach (Worlds.Chunk chunk in world.Chunks)
             {
                 Definition key = chunk.Definition;
-                if (key.Contains(chunkType) && key.Contains(positionType))
+                if (key.ContainsTag(chunkType) && key.ContainsComponent(positionType))
                 {
                     USpan<uint> entities = chunk.Entities;
                     USpan<Position> components = chunk.GetComponents<Position>(positionType);
