@@ -117,10 +117,10 @@ namespace Abacus
             cameraPosition = cameraTransform.LocalPosition;
 
             Mesh manuallyBuiltMesh = new(world);
-            USpan<Vector3> positions = manuallyBuiltMesh.CreatePositions(4);
-            USpan<Vector2> uvs = manuallyBuiltMesh.CreateUVs(4);
-            USpan<Vector3> normals = manuallyBuiltMesh.CreateNormals(4);
-            USpan<Vector4> colors = manuallyBuiltMesh.CreateColors(4);
+            Mesh.Collection<Vector3> positions = manuallyBuiltMesh.CreatePositions(4);
+            Mesh.Collection<Vector2> uvs = manuallyBuiltMesh.CreateUVs(4);
+            Mesh.Collection<Vector3> normals = manuallyBuiltMesh.CreateNormals(4);
+            Mesh.Collection<Vector4> colors = manuallyBuiltMesh.CreateColors(4);
 
             //simple quad
             positions[0] = new(0, 0, 0);
@@ -152,8 +152,8 @@ namespace Abacus
             //Shader shader = new(world, "Assets/Shaders/unlit.vertex.glsl", "Assets/Shaders/unlit.fragment.glsl");
 
             Material material = new(world, EmbeddedResource.GetAddress<UnlitTexturedMaterial>());
-            material.AddPushBinding<Color>();
-            material.AddPushBinding<LocalToWorld>();
+            material.AddInstanceBinding<Color>();
+            material.AddInstanceBinding<LocalToWorld>();
             material.AddComponentBinding<CameraMatrices>(new(0, 0), camera);
             material.AddTextureBinding(new(1, 0), testImage);
 
@@ -163,15 +163,15 @@ namespace Abacus
 
             waveImage = new(world, "Assets/Textures/wave.png");
             Material testMaterial = new(world, EmbeddedResource.GetAddress<UnlitTexturedMaterial>());
-            testMaterial.AddPushBinding<Color>();
-            testMaterial.AddPushBinding<LocalToWorld>();
+            testMaterial.AddInstanceBinding<Color>();
+            testMaterial.AddInstanceBinding<LocalToWorld>();
             testMaterial.AddComponentBinding<CameraMatrices>(new(0, 0), camera);
             testMaterial.AddTextureBinding(new(1, 0), waveImage);
 
             Texture squareTexture = new(world, EmbeddedResource.GetAddress<SquareTexture>());
             Material defaultSquareMaterial = new(world, EmbeddedResource.GetAddress<UnlitTexturedMaterial>());
-            defaultSquareMaterial.AddPushBinding<Color>();
-            defaultSquareMaterial.AddPushBinding<LocalToWorld>();
+            defaultSquareMaterial.AddInstanceBinding<Color>();
+            defaultSquareMaterial.AddInstanceBinding<LocalToWorld>();
             defaultSquareMaterial.AddComponentBinding<CameraMatrices>(new(0, 0), camera);
             defaultSquareMaterial.AddTextureBinding(new(1, 0), squareTexture);
 
@@ -187,8 +187,8 @@ namespace Abacus
             //material entity (reusable)
             Material textMaterial = new(world, EmbeddedResource.GetAddress<TextMaterial>());
             textMaterial.AddComponentBinding<CameraMatrices>(new(1, 0), camera);
-            textMaterial.AddPushBinding<Color>();
-            textMaterial.AddPushBinding<LocalToWorld>();
+            textMaterial.AddInstanceBinding<Color>();
+            textMaterial.AddInstanceBinding<LocalToWorld>();
 
             //mesh entity (reusable if text is the same)
             exampleTextMesh = new TextMesh(world, "hiii <3", cascadiaMono);
@@ -239,8 +239,8 @@ namespace Abacus
             Texture radialGradient = new(world, EmbeddedResource.GetAddress<RadialGradientAlphaTexture>());
 
             Material glowMaterial = new(world, EmbeddedResource.GetAddress<UnlitTexturedMaterial>());
-            glowMaterial.AddPushBinding<Color>();
-            glowMaterial.AddPushBinding<LocalToWorld>();
+            glowMaterial.AddInstanceBinding<Color>();
+            glowMaterial.AddInstanceBinding<LocalToWorld>();
             glowMaterial.AddComponentBinding<CameraMatrices>(new(0, 0), camera);
             glowMaterial.AddTextureBinding(new(1, 0), radialGradient);
 
@@ -314,7 +314,7 @@ namespace Abacus
                 if (keyboard.IsPressed(Keyboard.Button.O))
                 {
                     Mesh mesh = dummyRenderer.Mesh;
-                    USpan<Vector3> positions = mesh.Positions;
+                    Mesh.Collection<Vector3> positions = mesh.Positions;
                     float revolveSpeed = 2f;
                     float revolveDistance = 0.7f;
                     float x = MathF.Sin((float)time.TotalSeconds * revolveSpeed) * revolveDistance;
@@ -323,7 +323,6 @@ namespace Abacus
                     positions[1] = Vector3.Lerp(positions[1], new(x + 1, y, 0), delta * 4f);
                     positions[2] = Vector3.Lerp(positions[2], new(x + 1, y + 1, 0), delta * 2f);
                     positions[3] = Vector3.Lerp(positions[3], new(x, y + 1, 0), delta * 5f);
-                    mesh.IncrementVersion();
                     //would look a lot lot cooler with many more vertices :o
                 }
 

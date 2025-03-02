@@ -91,17 +91,17 @@ namespace Abacus
             Texture squareTexture = new(world, EmbeddedResource.GetAddress<SquareTexture>());
 
             Mesh quadMesh = new(world);
-            USpan<Vector3> positions = quadMesh.CreatePositions(4);
+            Mesh.Collection<Vector3> positions = quadMesh.CreatePositions(4);
             positions[0] = new(-0.5f, -0.5f, 0);
             positions[1] = new(0.5f, -0.5f, 0);
             positions[2] = new(0.5f, 0.5f, 0);
             positions[3] = new(-0.5f, 0.5f, 0);
-            USpan<Vector2> uvs = quadMesh.CreateUVs(4);
+            Mesh.Collection<Vector2> uvs = quadMesh.CreateUVs(4);
             uvs[0] = new(0, 0);
             uvs[1] = new(1, 0);
             uvs[2] = new(1, 1);
             uvs[3] = new(0, 1);
-            USpan<Vector3> normals = quadMesh.CreateNormals(4);
+            Mesh.Collection<Vector3> normals = quadMesh.CreateNormals(4);
             normals[0] = new(0, 0, 1);
             normals[1] = new(0, 0, 1);
             normals[2] = new(0, 0, 1);
@@ -112,16 +112,16 @@ namespace Abacus
             quadMesh.AddTriangle(0, 3, 2);
 
             Material unlitMaterial = new(world, EmbeddedResource.GetAddress<UnlitTexturedMaterial>());
-            unlitMaterial.AddPushBinding<Color>();
-            unlitMaterial.AddPushBinding<LocalToWorld>();
+            unlitMaterial.AddInstanceBinding<Color>();
+            unlitMaterial.AddInstanceBinding<LocalToWorld>();
             unlitMaterial.AddComponentBinding<CameraMatrices>(new(0, 0), camera);
             unlitMaterial.AddTextureBinding(new(1, 0), squareTexture);
 
             AtlasTexture playerAtlas = GetPlayerAtlas(simulator, world);
 
             Material playerMaterial = new(world, EmbeddedResource.GetAddress<UnlitTexturedMaterial>());
-            playerMaterial.AddPushBinding<Color>();
-            playerMaterial.AddPushBinding<LocalToWorld>();
+            playerMaterial.AddInstanceBinding<Color>();
+            playerMaterial.AddInstanceBinding<LocalToWorld>();
             playerMaterial.AddComponentBinding<CameraMatrices>(new(0, 0), camera);
             playerMaterial.AddTextureBinding(new(1, 0), playerAtlas, TextureFiltering.Nearest);
 

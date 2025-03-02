@@ -80,15 +80,14 @@ namespace VoxelGame
             using Array<uint> triangles = new(capacity * TrianglesPerFace * FacesPerBlock);
             MeshGenerator generation = new(blocks, blocksLeft, blocksRight, blocksDown, blocksUp, blocksBackward, blocksForward, chunkSize, vertices, uvs, colors, triangles, meshRng, capacity, chunkAtlas, blockTextures);
             generation.Generate();
-            USpan<Vector3> meshPositions = mesh.ResizePositions(generation.verticeIndex);
-            USpan<Vector2> meshUVs = mesh.ResizeUVs(generation.verticeIndex);
-            USpan<Vector4> meshColors = mesh.ResizeColors(generation.verticeIndex);
-            USpan<uint> meshTriangles = mesh.ResizeIndices(generation.triangleIndex);
-            vertices.GetSpan(generation.verticeIndex).CopyTo(meshPositions);
-            uvs.GetSpan(generation.verticeIndex).CopyTo(meshUVs);
-            colors.GetSpan(generation.verticeIndex).CopyTo(meshColors);
-            triangles.GetSpan(generation.triangleIndex).CopyTo(meshTriangles);
-            mesh.IncrementVersion();
+            Mesh.Collection<Vector3> meshPositions = mesh.Positions;
+            Mesh.Collection<Vector2> meshUVs = mesh.UVs;
+            Mesh.Collection<Vector4> meshColors = mesh.Colors;
+            Mesh.Collection<uint> meshTriangles = mesh.Indices;
+            meshPositions.CopyFrom(vertices.GetSpan(generation.verticeIndex));
+            meshUVs.CopyFrom(uvs.GetSpan(generation.verticeIndex));
+            meshColors.CopyFrom(colors.GetSpan(generation.verticeIndex));
+            meshTriangles.CopyFrom(triangles.GetSpan(generation.triangleIndex));
         }
 
         public static USpan<uint> GetBlocks(World world, int cx, int cy, int cz)

@@ -57,8 +57,8 @@ namespace Abacus
             Texture squareTexture = new(world, EmbeddedResource.GetAddress<SquareTexture>());
 
             unlitMaterial = new(world, EmbeddedResource.GetAddress<UnlitTexturedMaterial>());
-            unlitMaterial.AddPushBinding<Color>();
-            unlitMaterial.AddPushBinding<LocalToWorld>();
+            unlitMaterial.AddInstanceBinding<Color>();
+            unlitMaterial.AddInstanceBinding<LocalToWorld>();
             unlitMaterial.AddComponentBinding<CameraMatrices>(new(0, 0), camera);
             unlitMaterial.AddTextureBinding(new(1, 0), squareTexture);
 
