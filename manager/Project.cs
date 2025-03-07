@@ -47,17 +47,17 @@ namespace Abacus.Manager
         /// May be empty if unassigned.
         /// </para>
         /// </summary>
-        public readonly Text PackageId => packageId.Content;
+        public readonly Text.Borrowed PackageId => packageId.Content;
 
         /// <summary>
         /// Company name value.
         /// </summary>
-        public readonly Text Company => company.Content;
+        public readonly Text.Borrowed Company => company.Content;
 
         /// <summary>
         /// RepositoryUrl value.
         /// </summary>
-        public readonly Text RepositoryUrl => repositoryUrl.Content;
+        public readonly Text.Borrowed RepositoryUrl => repositoryUrl.Content;
 
         /// <summary>
         /// The directory that the project is in.

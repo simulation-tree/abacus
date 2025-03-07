@@ -353,7 +353,7 @@ namespace Abacus.Manager.Commands
 
             if (source.Contains("{{PackageID}}"))
             {
-                Text packageId = project.PackageId;
+                Text.Borrowed packageId = project.PackageId;
                 if (packageId.IsEmpty)
                 {
                     packageId.CopyFrom(project.Name);
