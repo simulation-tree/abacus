@@ -28,6 +28,7 @@ namespace Abacus.Manager
             Register<Clear>();
             Register<Push>();
             Register<UML>();
+            Register<UpdateOrganizationName>();
         }
 
         public static void Register<T>() where T : unmanaged, ICommand

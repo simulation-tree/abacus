@@ -107,7 +107,7 @@
     <ItemGroup>
         <ProjectReference Include="..\..\file-dialog\source\FileDialogs.csproj" />
         <ProjectReference Include="..\..\meshes-9s\source\Meshes.NineSliced.csproj" />
-        <ProjectReference Include="..\..\skybox\source\Skybox.csproj" />
+        <ProjectReference Include="..\..\skybox\source\Skyboxes.csproj" />
         <ProjectReference Include="..\..\worlds\core\Worlds.Core.csproj" />
         <ProjectReference Include="..\..\automations\source\Automations.csproj" />
         <ProjectReference Include="..\..\cameras\source\Cameras.csproj" />

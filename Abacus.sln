@@ -201,9 +201,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Unmanaged.Core", "..\unmana
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DefaultPresentationAssets.Tests", "..\default-presentation-assets\tests\DefaultPresentationAssets.Tests.csproj", "{EBDBFC91-90E3-64BC-8A08-30502BCF920F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Skybox", "..\skybox\source\Skybox.csproj", "{3C4EAECC-E722-ACC5-C405-9B30A12C14CF}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Skyboxes", "..\skybox\source\Skyboxes.csproj", "{3C4EAECC-E722-ACC5-C405-9B30A12C14CF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Skybox.Tests", "..\skybox\tests\Skybox.Tests.csproj", "{F54C99FE-CAB7-2B14-BBE5-22570E974E6F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Skyboxes.Tests", "..\skybox\tests\Skyboxes.Tests.csproj", "{F54C99FE-CAB7-2B14-BBE5-22570E974E6F}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Particles.Systems", "..\particle-systems\source\Particles.Systems.csproj", "{1E94D267-FB2F-EA27-2786-0B2DEC8A8840}"
 EndProject

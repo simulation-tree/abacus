@@ -11,7 +11,7 @@ namespace Editor
 {
     public readonly struct WorldWindow : IVirtualWindow
     {
-        FixedString IVirtualWindow.Title => "World";
+        ASCIIText256 IVirtualWindow.Title => "World";
         VirtualWindowClose IVirtualWindow.CloseCallback => default;
 
         unsafe void IVirtualWindow.OnCreated(Transform container, Canvas canvas)

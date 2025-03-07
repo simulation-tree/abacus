@@ -6,7 +6,7 @@
 - name: Checkout `{{RepositoryName}}`
   uses: actions/checkout@v4.1.2
   with:
-    repository: game-simulations/{{RepositoryName}}
+    repository: {{OrganizationName}}/{{RepositoryName}}
     token: ${{ secrets.PAT }}
     path: {{RepositoryName}}";
 

@@ -35,8 +35,6 @@ namespace Abacus.Manager.Commands
 
                 project.Dispose();
             }
-
-            projects.Dispose();
         }
     }
 }

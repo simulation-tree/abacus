@@ -40,7 +40,7 @@ namespace Abacus
 
         private readonly World World => window.world;
 
-        void IProgram.Start(in Simulator simulator, in Allocation allocation, in World world)
+        void IProgram.Start(in Simulator simulator, in MemoryAddress allocation, in World world)
         {
             allocation.Write(new DesktopPlatformer(simulator, world));
         }
@@ -169,7 +169,7 @@ namespace Abacus
             playerMaterialAnimator.AddParameter("velocityY", 0f);
             playerMaterialAnimator.AddParameter("isGrounded", 0f);
 
-            FixedString fieldName = "region";
+            ASCIIText256 fieldName = "region";
             playerMaterialAnimator.AddOrSetLinkToArrayElement<TextureBinding>("Idle", idleAnimation, 0, fieldName);
             playerMaterialAnimator.AddOrSetLinkToArrayElement<TextureBinding>("Moving", movingAnimation, 0, fieldName);
             playerMaterialAnimator.AddOrSetLinkToArrayElement<TextureBinding>("JumpingUp", jumpingUpAnimation, 0, fieldName);

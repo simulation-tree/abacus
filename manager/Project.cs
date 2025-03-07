@@ -7,13 +7,26 @@ namespace Abacus.Manager
 {
     public readonly struct Project : IDisposable
     {
+        private const string PackageIdNode = "PackageId";
+        private const string CompanyNode = "Company";
+        private const string RepositoryUrlNode = "RepositoryUrl";
+        private const string TargetFrameworkNode = "TargetFramework";
+        private const string ProjectReferenceNode = "ProjectReference";
+        private const string PackageReferenceNode = "PackageReference";
+        private const string IncludeAttribute = "Include";
+
         public readonly bool isTestProject;
 
+        private readonly XMLNode rootNode;
         private readonly Text path;
         private readonly Text name;
-        private readonly Text packageId;
         private readonly Array<ProjectReference> projectReferences;
         private readonly Array<PackageReference> packageReferences;
+        private readonly XMLNode targetFramework;
+        private readonly XMLNode projectPropertyGroup;
+        private readonly XMLNode packageId;
+        private readonly XMLNode company;
+        private readonly XMLNode repositoryUrl;
 
         /// <summary>
         /// Name of the project based on the file name.
@@ -28,10 +41,23 @@ namespace Abacus.Manager
         /// <summary>
         /// NuGet package ID.
         /// <para>
-        /// Also the name of the generated package.
+        /// Also the name of the generated zip containing the package.
+        /// </para>
+        /// <para>
+        /// May be empty if unassigned.
         /// </para>
         /// </summary>
-        public readonly USpan<char> PackageID => packageId.AsSpan();
+        public readonly Text PackageId => packageId.Content;
+
+        /// <summary>
+        /// Company name value.
+        /// </summary>
+        public readonly Text Company => company.Content;
+
+        /// <summary>
+        /// RepositoryUrl value.
+        /// </summary>
+        public readonly Text RepositoryUrl => repositoryUrl.Content;
 
         /// <summary>
         /// The directory that the project is in.
@@ -65,15 +91,20 @@ namespace Abacus.Manager
         public readonly USpan<ProjectReference> ProjectReferences => projectReferences.AsSpan();
         public readonly USpan<PackageReference> PackageReferences => packageReferences.AsSpan();
 
+        public Project(string path) : this(path.AsSpan())
+        {
+
+        }
+
         public Project(USpan<char> path)
         {
             this.path = new(path);
             this.name = new(System.IO.Path.GetFileNameWithoutExtension(path));
-            this.packageId = new();
 
             using System.IO.FileStream fileStream = System.IO.File.OpenRead(this.path.ToString());
             using ByteReader reader = new(fileStream);
-            using XMLNode rootNode = reader.ReadObject<XMLNode>();
+            rootNode = reader.ReadObject<XMLNode>();
+
             using Stack<XMLNode> stack = new();
             stack.Push(rootNode);
 
@@ -81,34 +112,70 @@ namespace Abacus.Manager
             uint projectReferencesCount = 0;
             USpan<PackageReference> packageReferences = stackalloc PackageReference[128];
             uint packageReferencesCount = 0;
-            while (stack.Count > 0)
+            while (stack.TryPop(out XMLNode node))
             {
-                XMLNode node = stack.Pop();
-                if (node.Name.SequenceEqual("ProjectReference".AsSpan()))
+                if (node.Name.Equals(ProjectReferenceNode))
                 {
-                    if (node.TryGetAttribute("Include", out USpan<char> referencedProjectPath))
+                    if (node.TryGetAttribute(IncludeAttribute, out USpan<char> referencedProjectPath))
                     {
                         projectReferences[projectReferencesCount++] = new(referencedProjectPath);
                     }
                 }
-                else if (node.Name.SequenceEqual("PackageReference".AsSpan()))
+                else if (node.Name.Equals(PackageReferenceNode))
                 {
-                    if (node.TryGetAttribute("Include", out USpan<char> referencedProjectPath) && node.TryGetAttribute("Version", out USpan<char> version))
+                    if (node.TryGetAttribute(IncludeAttribute, out USpan<char> referencedProjectPath) && node.TryGetAttribute("Version", out USpan<char> version))
                     {
                         packageReferences[packageReferencesCount++] = new(referencedProjectPath, version);
                     }
                 }
-                else if (node.Name.SequenceEqual("PackageId".AsSpan()))
+                else if (node.Name.Equals(PackageIdNode))
                 {
-                    packageId.CopyFrom(node.Content);
+                    packageId = node;
+                }
+                else if (node.Name.Equals(CompanyNode))
+                {
+                    company = node;
+                }
+                else if (node.Name.Equals(RepositoryUrlNode))
+                {
+                    repositoryUrl = node;
                 }
                 else
                 {
                     foreach (XMLNode child in node.Children)
                     {
+                        if (child.Name.Equals(TargetFrameworkNode))
+                        {
+                            targetFramework = child;
+                            projectPropertyGroup = node;
+                        }
+
                         stack.Push(child);
                     }
                 }
+            }
+
+            if (targetFramework == default)
+            {
+                throw new InvalidOperationException($"TargetFramework node not found in {path.ToString()}");
+            }
+
+            if (packageId == default)
+            {
+                packageId = new(PackageIdNode);
+                projectPropertyGroup.Add(packageId);
+            }
+
+            if (company == default)
+            {
+                company = new(CompanyNode);
+                projectPropertyGroup.Add(company);
+            }
+
+            if (repositoryUrl == default)
+            {
+                repositoryUrl = new(RepositoryUrlNode);
+                projectPropertyGroup.Add(repositoryUrl);
             }
 
             this.projectReferences = new(projectReferences.Slice(0, projectReferencesCount));
@@ -156,9 +223,20 @@ namespace Abacus.Manager
 
             projectReferences.Dispose();
             packageReferences.Dispose();
-            packageId.Dispose();
             name.Dispose();
             path.Dispose();
+            rootNode.Dispose();
+        }
+
+        /// <summary>
+        /// Writes the state of the project to the .csproj file.
+        /// </summary>
+        public readonly void WriteToFile()
+        {
+            using Text buffer = new(0);
+            ToStringFlags flags = ToStringFlags.CarriageReturn | ToStringFlags.LineFeed | ToStringFlags.RootSpacing;
+            rootNode.ToString(buffer, "    ", flags);
+            System.IO.File.WriteAllText(path.ToString(), buffer.AsSpan());
         }
 
         public readonly struct PackageReference : IDisposable

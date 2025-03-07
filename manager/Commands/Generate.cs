@@ -1,4 +1,5 @@
-﻿using Collections;
+﻿using Abacus.Manager.Constants;
+using Collections;
 using Collections.Generic;
 using System;
 using Unmanaged;
@@ -286,6 +287,7 @@ namespace Abacus.Manager.Commands
                 {
                     string source = GitHubWorkflowTemplate.CheckoutStep;
                     source = source.Replace("{{RepositoryName}}", dependency.Name.ToString());
+                    source = source.Replace("{{OrganizationName}}", Constant.Get<OrganizationName>().ToString());
                     text += source + '\n';
                 }
 
@@ -351,10 +353,10 @@ namespace Abacus.Manager.Commands
 
             if (source.Contains("{{PackageID}}"))
             {
-                USpan<char> packageId = project.PackageID;
+                Text packageId = project.PackageId;
                 if (packageId.IsEmpty)
                 {
-                    packageId = project.Name;
+                    packageId.CopyFrom(project.Name);
                 }
 
                 source = source.Replace("{{PackageID}}", packageId.ToString());

@@ -120,7 +120,7 @@ namespace Abacus.Manager.Commands
                 }
 
                 projectName = projectName.Replace(".", "");
-                if (typesIncluded.TryAdd(FixedString.GetLongHashCode(projectName)))
+                if (typesIncluded.TryAdd(projectName.GetLongHashCode()))
                 {
                     types.Append("class ");
                     types.Append(projectName);
@@ -146,7 +146,7 @@ namespace Abacus.Manager.Commands
                         continue;
                     }
 
-                    long combination = FixedString.GetLongHashCode(projectName) + FixedString.GetLongHashCode(dependencyName);
+                    long combination = projectName.GetLongHashCode() + dependencyName.GetLongHashCode();
                     if (!combinations.TryAdd(combination))
                     {
                         continue;
@@ -157,7 +157,7 @@ namespace Abacus.Manager.Commands
                     dependencies.Append(projectName);
                     dependencies.Append('\n');
 
-                    if (typesIncluded.TryAdd(FixedString.GetLongHashCode(projectName)))
+                    if (typesIncluded.TryAdd(projectName.GetLongHashCode()))
                     {
                         types.Append("class ");
                         types.Append(projectName);

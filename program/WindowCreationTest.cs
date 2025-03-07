@@ -31,7 +31,7 @@ namespace Abacus
         {
         }
 
-        void IProgram.Start(in Simulator simulator, in Allocation allocation, in World world)
+        void IProgram.Start(in Simulator simulator, in MemoryAddress allocation, in World world)
         {
             allocation.Write(new WindowCreationTest(world));
         }
@@ -86,7 +86,7 @@ namespace Abacus
             return StatusCode.Continue;
         }
 
-        private readonly void CreateWindow(FixedString title, Vector2 windowPosition, Vector2 squarePosition, Vector4 color, Layer layer)
+        private readonly void CreateWindow(ASCIIText256 title, Vector2 windowPosition, Vector2 squarePosition, Vector4 color, Layer layer)
         {
             LayerMask layerMask = new(layer);
 

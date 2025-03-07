@@ -11,7 +11,7 @@ namespace Editor
 {
     public readonly struct EntityWindow : IVirtualWindow
     {
-        FixedString IVirtualWindow.Title => "Entity";
+        ASCIIText256 IVirtualWindow.Title => "Entity";
         VirtualWindowClose IVirtualWindow.CloseCallback => default;
 
         unsafe void IVirtualWindow.OnCreated(Transform container, Canvas canvas)

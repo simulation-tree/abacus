@@ -18,7 +18,7 @@ namespace Editor
         {
             LayerMask layerMask = new(layer);
 
-            FixedString title = default(T).Title;
+            ASCIIText256 title = default(T).Title;
             Window window = new(world, title, position, size, "vulkan", new(&CloseFunction.OnWindowClosed));
             window.ClearColor = new(0.5f, 0.5f, 0.5f, 1);
             window.IsResizable = true;

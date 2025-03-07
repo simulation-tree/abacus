@@ -15,7 +15,7 @@ namespace VoxelGame
 
         private readonly FastNoiseLite Noise => (FastNoiseLite)(noise.Target ?? throw new());
 
-        public TerrainGenerator(FixedString seed)
+        public TerrainGenerator(ASCIIText256 seed)
         {
             FastNoiseLite noise = new FastNoiseLite(seed.GetHashCode());
             noise.SetNoiseType(FastNoiseLite.NoiseType.OpenSimplex2);

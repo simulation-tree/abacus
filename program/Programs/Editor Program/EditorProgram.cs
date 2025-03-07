@@ -92,7 +92,7 @@ namespace Editor
             args.Dispose();
         }
 
-        void IProgram.Start(in Simulator simulator, in Allocation allocation, in World world)
+        void IProgram.Start(in Simulator simulator, in MemoryAddress allocation, in World world)
         {
             ref EditorProgram program = ref allocation.Read<EditorProgram>();
             program = new(simulator, world, program.args);

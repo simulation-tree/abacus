@@ -89,7 +89,7 @@ namespace Abacus
             option.rootMenu.IsExpanded = false;
         }
 
-        void IProgram.Start(in Simulator simulator, in Allocation allocation, in World world)
+        void IProgram.Start(in Simulator simulator, in MemoryAddress allocation, in World world)
         {
             allocation.Write(new ControlsTest(world));
         }
@@ -149,7 +149,7 @@ namespace Abacus
 
         public readonly struct ControlsDemoWindow : IVirtualWindow
         {
-            readonly FixedString IVirtualWindow.Title => "Controls Demo";
+            readonly ASCIIText256 IVirtualWindow.Title => "Controls Demo";
             readonly unsafe VirtualWindowClose IVirtualWindow.CloseCallback => new(&Closed);
 
             readonly unsafe void IVirtualWindow.OnCreated(Transform container, Canvas canvas)
@@ -263,12 +263,12 @@ namespace Abacus
                     World world = canvas.world;
                     world.Schema.RegisterComponent<bool>();
                     world.Schema.RegisterComponent<float>();
-                    world.Schema.RegisterComponent<FixedString>();
+                    world.Schema.RegisterComponent<ASCIIText256>();
 
                     Entity dataEntity = new(world);
                     dataEntity.AddComponent(true);
                     dataEntity.AddComponent(0f);
-                    dataEntity.AddComponent(new FixedString("babash"));
+                    dataEntity.AddComponent(new ASCIIText256("babash"));
 
                     ControlField numberField = ControlField.Create<float, NumberTextEditor>(canvas, "Number", dataEntity);
                     numberField.LabelColor = new(0, 0, 0, 1);
@@ -280,7 +280,7 @@ namespace Abacus
 
                     y -= singleLineHeight + gap;
 
-                    ControlField textField = ControlField.Create<FixedString, TextEditor>(canvas, "Text", dataEntity);
+                    ControlField textField = ControlField.Create<ASCIIText256, TextEditor>(canvas, "Text", dataEntity);
                     textField.LabelColor = new(0, 0, 0, 1);
                     textField.SetParent(container);
                     textField.Anchor = Anchor.TopLeft;
@@ -398,7 +398,7 @@ namespace Abacus
                         }
 
                         uint countTextLength = countValue.ToString(countText);
-                        FixedString textValue = new(text);
+                        ASCIIText256 textValue = new(text);
                         textValue.Length = (byte)(startIndex + 1);
                         textValue.Append(countText.Slice(0, countTextLength));
                         label.SetText(textValue);

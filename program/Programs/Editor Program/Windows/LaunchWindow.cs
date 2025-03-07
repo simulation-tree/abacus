@@ -11,7 +11,7 @@ namespace Editor
 {
     public readonly struct LaunchWindow : IVirtualWindow
     {
-        FixedString IVirtualWindow.Title => "Launch";
+        ASCIIText256 IVirtualWindow.Title => "Launch";
         VirtualWindowClose IVirtualWindow.CloseCallback => default;
 
         unsafe void IVirtualWindow.OnCreated(Transform container, Canvas canvas)

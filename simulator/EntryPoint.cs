@@ -29,7 +29,6 @@ using (World world = new(schema))
     }
 }
 
-Allocations.ThrowIfAny();
 if (statusCode.IsSuccess)
 {
     Trace.WriteLine($"Program finished successfully with status code {statusCode.Code}");

@@ -17,7 +17,7 @@ namespace Abacus
 
         private readonly World World => window.world;
 
-        void IProgram.Start(in Simulator simulator, in Allocation allocation, in World world)
+        void IProgram.Start(in Simulator simulator, in MemoryAddress allocation, in World world)
         {
             allocation.Write(new SelectionTest(world));
         }

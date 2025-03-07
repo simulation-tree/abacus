@@ -1,6 +1,5 @@
 ﻿using Collections.Generic;
 using System;
-using System.Globalization;
 using System.IO;
 using Unmanaged;
 
@@ -133,7 +132,17 @@ namespace Abacus.Manager
                 {
                     if (Path.GetExtension(filePath) == ".csproj")
                     {
-                        Project project = new(new(filePath));
+                        Project project;
+                        try
+                        {
+                            project = new(filePath);
+                        }
+                        catch (Exception ex)
+                        {
+                            WriteErrorLine($"Error reading project file `{filePath}`: {ex.Message}");
+                            continue;
+                        }
+
                         Text projectName = new(project.Name);
                         projectFiles.Add(projectName, project);
                     }
@@ -158,7 +167,8 @@ namespace Abacus.Manager
                         }
                         else
                         {
-                            throw new Exception($"Project `{projectName}` references project `{referencedProjectName}` which does not exist");
+                            WriteErrorLine($"Project `{projectName}` references project `{referencedProjectName}` which does not exist");
+                            continue;
                         }
                     }
 

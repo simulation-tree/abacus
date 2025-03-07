@@ -4,10 +4,10 @@ namespace VoxelGame
 {
     public readonly struct BlockTexture
     {
-        public readonly FixedString name;
+        public readonly ASCIIText256 name;
         public readonly Rotation rotation;
 
-        public BlockTexture(FixedString name, Rotation rotation = Rotation.Random)
+        public BlockTexture(ASCIIText256 name, Rotation rotation = Rotation.Random)
         {
             this.name = name;
             this.rotation = rotation;
