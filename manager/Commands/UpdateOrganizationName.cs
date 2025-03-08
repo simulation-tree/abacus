@@ -1,5 +1,6 @@
 ﻿using Abacus.Manager.Constants;
 using Collections.Generic;
+using System;
 using Unmanaged;
 
 namespace Abacus.Manager.Commands
@@ -47,11 +48,19 @@ namespace Abacus.Manager.Commands
         private void RenameInFiles(Runner runner, USpan<char> repositoryPath)
         {
             const string URLStart = "https://github.com/";
+            const string RepositoryStart = "repository: ";
+            const string CopyrightStart = "Copyright (c) ";
             ASCIIText256 organizationName = Constant.Get<OrganizationName>();
             string[] markdownFiles = System.IO.Directory.GetFiles(repositoryPath.ToString(), "*.md", System.IO.SearchOption.AllDirectories);
-            foreach (string markdownFile in markdownFiles)
+            string[] yamlFiles = System.IO.Directory.GetFiles(repositoryPath.ToString(), "*.yml", System.IO.SearchOption.AllDirectories);
+            string[] allFiles = new string[markdownFiles.Length + yamlFiles.Length];
+            markdownFiles.CopyTo(allFiles, 0);
+            yamlFiles.CopyTo(allFiles, markdownFiles.Length);
+            foreach (string filePath in allFiles)
             {
-                string[] lines = System.IO.File.ReadAllLines(markdownFile);
+                bool isYaml = filePath.EndsWith(".yml");
+                bool isLicense = System.IO.Path.GetFileNameWithoutExtension(filePath) == "LICENSE";
+                string[] lines = System.IO.File.ReadAllLines(filePath);
                 bool changed = false;
                 for (int i = 0; i < lines.Length; i++)
                 {
@@ -64,12 +73,41 @@ namespace Abacus.Manager.Commands
                         if (endIndex != -1)
                         {
                             string currentOrganization = line.Substring(startIndex, endIndex - startIndex);
-                            if (currentOrganization == organizationName.ToString())
-                            {
-                                continue;
-                            }
-
                             string newLine = line.Replace(currentOrganization, organizationName.ToString());
+                            if (newLine != line)
+                            {
+                                lines[i] = newLine;
+                                changed = true;
+                            }
+                        }
+                    }
+
+                    if (isYaml)
+                    {
+                        int repositoryIndex = line.IndexOf(RepositoryStart);
+                        if (repositoryIndex != -1)
+                        {
+                            int startIndex = repositoryIndex + RepositoryStart.Length;
+                            int endIndex = line.IndexOf('/', startIndex);
+                            if (endIndex != -1)
+                            {
+                                string currentOrganization = line.Substring(startIndex, endIndex - startIndex);
+                                string newLine = line.Replace(currentOrganization, organizationName.ToString());
+                                if (newLine != line)
+                                {
+                                    lines[i] = newLine;
+                                    changed = true;
+                                }
+                            }
+                        }
+                    }
+                    else if (isLicense)
+                    {
+                        int copyrightStart = line.IndexOf(CopyrightStart);
+                        if (copyrightStart != -1)
+                        {
+                            int currentYear = DateTime.Now.Year;
+                            string newLine = $"{CopyrightStart}{currentYear} {organizationName}";
                             if (newLine != line)
                             {
                                 lines[i] = newLine;
@@ -81,8 +119,8 @@ namespace Abacus.Manager.Commands
 
                 if (changed)
                 {
-                    System.IO.File.WriteAllLines(markdownFile, lines);
-                    runner.WriteInfoLine($"Updated {markdownFile}");
+                    System.IO.File.WriteAllLines(filePath, lines);
+                    runner.WriteInfoLine($"Updated {filePath}");
                 }
             }
         }
