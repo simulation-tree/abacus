@@ -16,6 +16,8 @@ namespace Abacus.Manager.Commands
             using Array<Repository> repositories = runner.GetRepositories();
             foreach (Repository repository in repositories)
             {
+                RenameInFiles(runner, repository.Path);
+
                 foreach (Project project in repository.Projects)
                 {
                     bool changed = false;
@@ -39,6 +41,49 @@ namespace Abacus.Manager.Commands
                 }
 
                 repository.Dispose();
+            }
+        }
+
+        private void RenameInFiles(Runner runner, USpan<char> repositoryPath)
+        {
+            const string URLStart = "https://github.com/";
+            ASCIIText256 organizationName = Constant.Get<OrganizationName>();
+            string[] markdownFiles = System.IO.Directory.GetFiles(repositoryPath.ToString(), "*.md", System.IO.SearchOption.AllDirectories);
+            foreach (string markdownFile in markdownFiles)
+            {
+                string[] lines = System.IO.File.ReadAllLines(markdownFile);
+                bool changed = false;
+                for (int i = 0; i < lines.Length; i++)
+                {
+                    string line = lines[i];
+                    int httpIndex = line.IndexOf(URLStart);
+                    if (httpIndex != -1)
+                    {
+                        int startIndex = httpIndex + URLStart.Length;
+                        int endIndex = line.IndexOf('/', startIndex);
+                        if (endIndex != -1)
+                        {
+                            string currentOrganization = line.Substring(startIndex, endIndex - startIndex);
+                            if (currentOrganization == organizationName.ToString())
+                            {
+                                continue;
+                            }
+
+                            string newLine = line.Replace(currentOrganization, organizationName.ToString());
+                            if (newLine != line)
+                            {
+                                lines[i] = newLine;
+                                changed = true;
+                            }
+                        }
+                    }
+                }
+
+                if (changed)
+                {
+                    System.IO.File.WriteAllLines(markdownFile, lines);
+                    runner.WriteInfoLine($"Updated {markdownFile}");
+                }
             }
         }
     }
