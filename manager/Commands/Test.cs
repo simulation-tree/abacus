@@ -1,8 +1,6 @@
 ﻿using Collections;
 using System;
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
-using Unmanaged;
 
 namespace Abacus.Manager.Commands
 {
@@ -68,10 +66,10 @@ namespace Abacus.Manager.Commands
                 Terminal.Execute(solutionFolder, "dotnet build -c Debug");
             }
 
-            USpan<char> result = Terminal.Execute(solutionFolder, $"{command} --no-build");
+            ReadOnlySpan<char> result = Terminal.Execute(solutionFolder, $"{command} --no-build");
             if (!result.IsEmpty)
             {
-                if (result.TryIndexOf("Starting test execution".AsSpan(), out uint index))
+                if (result.TryIndexOf("Starting test execution", out int index))
                 {
                     runner.WriteInfoLine(result.Slice(index));
                 }

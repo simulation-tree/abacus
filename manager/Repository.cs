@@ -14,22 +14,22 @@ namespace Abacus.Manager
         /// <summary>
         /// Name of the repository.
         /// </summary>
-        public readonly USpan<char> Name => name.AsSpan();
+        public readonly ReadOnlySpan<char> Name => name.AsSpan();
 
         /// <summary>
         /// The remote URL.
         /// </summary>
-        public readonly USpan<char> Remote => remote.AsSpan();
+        public readonly ReadOnlySpan<char> Remote => remote.AsSpan();
 
         /// <summary>
         /// Path to the repository folder.
         /// </summary>
-        public readonly USpan<char> Path => path.AsSpan();
+        public readonly ReadOnlySpan<char> Path => path.AsSpan();
 
         /// <summary>
         /// Projects part of this repository.
         /// </summary>
-        public readonly USpan<Project> Projects => projects.AsSpan();
+        public readonly ReadOnlySpan<Project> Projects => projects.AsSpan();
 
         public readonly bool IsDisposed => path.IsDisposed;
 
@@ -39,14 +39,14 @@ namespace Abacus.Manager
             throw new NotSupportedException();
         }
 
-        public Repository(USpan<char> path, USpan<char> remote)
+        public Repository(ReadOnlySpan<char> path, ReadOnlySpan<char> remote)
         {
             this.path = new(path);
             this.remote = new(remote);
             this.name = new(System.IO.Path.GetFileNameWithoutExtension(path));
             string[] projectPaths = System.IO.Directory.GetFiles(this.path.ToString(), "*.csproj", System.IO.SearchOption.AllDirectories);
-            USpan<uint> projectPathIndicesBuffer = stackalloc uint[projectPaths.Length];
-            uint projectCount = 0;
+            Span<uint> projectPathIndicesBuffer = stackalloc uint[projectPaths.Length];
+            int projectCount = 0;
             for (uint i = 0; i < projectPaths.Length; i++)
             {
                 string projectPath = projectPaths[i];
@@ -58,10 +58,10 @@ namespace Abacus.Manager
             }
 
             this.projects = new(projectCount);
-            for (uint i = 0; i < projectCount; i++)
+            for (int i = 0; i < projectCount; i++)
             {
                 string projectPath = projectPaths[projectPathIndicesBuffer[i]];
-                projects[i] = new(projectPath.AsSpan());
+                projects[i] = new(projectPath);
             }
         }
 

@@ -231,9 +231,9 @@ namespace Abacus
                 testDropdown.Callback = new(&DropdownOptionChanged);
 
                 [UnmanagedCallersOnly]
-                static void DropdownOptionChanged(Dropdown dropdown, uint previous, uint current)
+                static void DropdownOptionChanged(DropdownCallback.Input input)
                 {
-                    IsMenuOption option = dropdown.Options[current];
+                    IsMenuOption option = input.dropdown.Options[input.currentOption];
                     Trace.WriteLine($"Selected option: {option.text}");
                 }
 
@@ -363,9 +363,9 @@ namespace Abacus
             {
                 World world = buttonEntity.world;
                 Entity containerEntity = buttonEntity.Parent;
-                USpan<uint> children = containerEntity.Children;
+                ReadOnlySpan<uint> children = containerEntity.Children;
                 bool toggleValue = default;
-                for (uint i = 0; i < children.Length; i++)
+                for (int i = 0; i < children.Length; i++)
                 {
                     uint child = children[i];
                     if (world.ContainsComponent<IsToggle>(child))
@@ -377,16 +377,16 @@ namespace Abacus
                 }
 
                 children = buttonEntity.Children;
-                for (uint i = 0; i < children.Length; i++)
+                for (int i = 0; i < children.Length; i++)
                 {
                     uint child = children[i];
                     if (world.ContainsTag<IsLabel>(child))
                     {
                         Label label = new Entity(world, child).As<Label>();
-                        USpan<char> text = label.ProcessedText;
-                        uint startIndex = text.IndexOf(':') + 1;
+                        ReadOnlySpan<char> text = label.ProcessedText;
+                        int startIndex = text.IndexOf(':') + 1;
                         int countValue = int.Parse(text.Slice(startIndex));
-                        USpan<char> countText = stackalloc char[10];
+                        Span<char> countText = stackalloc char[10];
 
                         if (!toggleValue)
                         {
@@ -397,7 +397,7 @@ namespace Abacus
                             countValue--;
                         }
 
-                        uint countTextLength = countValue.ToString(countText);
+                        int countTextLength = countValue.ToString(countText);
                         ASCIIText256 textValue = new(text);
                         textValue.Length = (byte)(startIndex + 1);
                         textValue.Append(countText.Slice(0, countTextLength));

@@ -285,14 +285,14 @@ public static class SharedFunctions
 
     public static void SetPressedCharacters(this World world)
     {
-        USpan<Keyboard.Button> pressedBuffer = stackalloc Keyboard.Button[128];
+        Span<Keyboard.Button> pressedBuffer = stackalloc Keyboard.Button[128];
         Settings settings = world.GetFirst<Settings>();
         ref PressedCharacters pressed = ref settings.PressedCharacters;
         pressed.Clear();
         foreach (Keyboard keyboard in world.GetAll<Keyboard>())
         {
-            uint pressedCount = keyboard.GetPressedControls(pressedBuffer);
-            for (uint i = 0; i < pressedCount; i++)
+            int pressedCount = keyboard.GetPressedControls(pressedBuffer);
+            for (int i = 0; i < pressedCount; i++)
             {
                 Keyboard.Button pressedControl = pressedBuffer[i];
                 char character = pressedControl.GetCharacter();
@@ -311,15 +311,15 @@ public static class SharedFunctions
     private static UI.Boolean TryHandleCurrentFPS(TryProcessLabel.Input input)
     {
         const string CurrentFPS = "{{currentFps}}";
-        if (input.OriginalText.Contains(CurrentFPS.AsSpan()))
+        if (input.OriginalText.IndexOf(CurrentFPS) != -1)
         {
-            USpan<char> replacement = stackalloc char[32];
-            uint replacementLength = currentFps.ToString(replacement);
+            Span<char> replacement = stackalloc char[32];
+            int replacementLength = currentFps.ToString(replacement);
             replacementLength = Math.Min(replacementLength, 6);
-            uint newLength = input.OriginalText.Length - (uint)CurrentFPS.Length + replacementLength + 32;
-            USpan<char> destination = stackalloc char[(int)newLength];
+            int newLength = input.OriginalText.Length - CurrentFPS.Length + replacementLength + 32;
+            Span<char> destination = stackalloc char[newLength];
             newLength = Text.Replace(input.OriginalText, CurrentFPS.AsSpan(), replacement.Slice(0, replacementLength), destination);
-            USpan<char> newText = destination.Slice(0, newLength);
+            Span<char> newText = destination.Slice(0, newLength);
             if (!input.OriginalText.SequenceEqual(newText))
             {
                 input.SetResult(newText);
@@ -334,9 +334,9 @@ public static class SharedFunctions
     private static UI.Boolean TryHandleAverageFPS(TryProcessLabel.Input input)
     {
         const string AverageFPS = "{{averageFps}}";
-        if (input.OriginalText.Contains(AverageFPS.AsSpan()))
+        if (input.OriginalText.IndexOf(AverageFPS) != -1)
         {
-            USpan<char> replacement = stackalloc char[32];
+            Span<char> replacement = stackalloc char[32];
             double averageFps = 0;
             for (int i = 0; i < fpsHistory.Count; i++)
             {
@@ -344,13 +344,13 @@ public static class SharedFunctions
             }
 
             averageFps /= fpsHistory.Count;
-            uint replacementLength = averageFps.ToString(replacement);
+            int replacementLength = averageFps.ToString(replacement);
             replacementLength = Math.Min(replacementLength, 6);
-            uint newLength = input.OriginalText.Length - (uint)AverageFPS.Length + replacementLength + 32;
-            USpan<char> destination = stackalloc char[(int)newLength];
+            int newLength = input.OriginalText.Length - AverageFPS.Length + replacementLength + 32;
+            Span<char> destination = stackalloc char[newLength];
             newLength = Text.Replace(input.OriginalText, AverageFPS.AsSpan(), replacement.Slice(0, replacementLength), destination);
             input.SetResult(destination.Slice(0, newLength));
-            USpan<char> newText = destination.Slice(0, newLength);
+            Span<char> newText = destination.Slice(0, newLength);
             if (!input.OriginalText.SequenceEqual(newText))
             {
                 input.SetResult(newText);

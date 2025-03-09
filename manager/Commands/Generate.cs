@@ -206,10 +206,10 @@ namespace Abacus.Manager.Commands
                     Repository foundRepository = default;
                     foreach (Repository otherRepository in repositories)
                     {
-                        for (uint w = 0; w < otherRepository.Projects.Length; w++)
+                        for (int w = 0; w < otherRepository.Projects.Length; w++)
                         {
                             Project otherProject = otherRepository.Projects[w];
-                            if (otherProject.Name.SequenceEqual(projectName.AsSpan()))
+                            if (otherProject.Name.SequenceEqual(projectName))
                             {
                                 foundRepository = otherRepository;
                                 break;
@@ -243,10 +243,10 @@ namespace Abacus.Manager.Commands
                             Repository foundRepository = default;
                             foreach (Repository otherRepository in repositories)
                             {
-                                for (uint w = 0; w < otherRepository.Projects.Length; w++)
+                                for (int w = 0; w < otherRepository.Projects.Length; w++)
                                 {
                                     Project otherProject = otherRepository.Projects[w];
-                                    if (otherProject.Name.SequenceEqual(projectName.AsSpan()))
+                                    if (otherProject.Name.SequenceEqual(projectName))
                                     {
                                         foundRepository = otherRepository;
                                         break;

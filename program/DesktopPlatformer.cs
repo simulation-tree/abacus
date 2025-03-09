@@ -9,6 +9,7 @@ using Materials.Components;
 using Meshes;
 using Physics;
 using Physics.Events;
+using Physics.Functions;
 using Rendering;
 using Shapes.Types;
 using Simulation;
@@ -220,7 +221,7 @@ namespace Abacus
 
             simulator.UpdateSystems(TimeSpan.MinValue, world);
 
-            USpan<AtlasTexture.InputSprite> sprites = stackalloc AtlasTexture.InputSprite[]
+            System.Span<AtlasTexture.InputSprite> sprites = stackalloc AtlasTexture.InputSprite[]
             {
                 new("Idle.png", idle),
                 new("Idle2.png", idle2),
@@ -395,15 +396,16 @@ namespace Abacus
             }
 
             [UnmanagedCallersOnly]
-            static void GroundHitCallback(World world, RaycastRequest raycast, RaycastHit* hits, uint hitCount)
+            static void GroundHitCallback(RaycastHitCallback.Input input)
             {
-                uint playerEntity = (uint)raycast.userData;
-                for (uint i = 0; i < hitCount; i++)
+                uint playerEntity = (uint)input.request.userData;
+                ReadOnlySpan<RaycastHit> hits = input.Hits;
+                for (int i = 0; i < hits.Length; i++)
                 {
                     RaycastHit hit = hits[i];
                     if (hit.entity != playerEntity)
                     {
-                        world.SetComponent(playerEntity, new GroundedState(true));
+                        input.world.SetComponent(playerEntity, new GroundedState(true));
                         break;
                     }
                 }

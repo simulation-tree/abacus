@@ -1,18 +1,19 @@
-﻿using Unmanaged;
+﻿using System;
+using Unmanaged;
 
 namespace Abacus.Manager
 {
     public readonly struct LogMessage
     {
         public readonly Category category;
-        public readonly URange range;
+        public readonly Range range;
         public readonly bool appendLine;
 
         private readonly Text text;
 
-        public readonly USpan<char> Message => text.AsSpan().Slice(range);
+        public readonly ReadOnlySpan<char> Message => text.AsSpan()[range];
 
-        public LogMessage(Text text, Category category, URange range, bool appendLine)
+        public LogMessage(Text text, Category category, Range range, bool appendLine)
         {
             this.category = category;
             this.range = range;

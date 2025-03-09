@@ -172,8 +172,8 @@ namespace Abacus
         private static void DestroyAllLabels(Canvas canvas)
         {
             World world = canvas.world;
-            USpan<uint> toDestroy = stackalloc uint[256];
-            uint count = 0;
+            Span<uint> toDestroy = stackalloc uint[256];
+            int count = 0;
             foreach (Label label in world.GetAll<Label>())
             {
                 Canvas labelCanvas = label.GetCanvas();
@@ -183,7 +183,7 @@ namespace Abacus
                 }
             }
 
-            for (uint i = 0; i < count; i++)
+            for (int i = 0; i < count; i++)
             {
                 world.DestroyEntity(toDestroy[i]);
             }

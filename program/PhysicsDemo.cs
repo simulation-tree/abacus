@@ -8,6 +8,7 @@ using Meshes;
 using Models;
 using Physics;
 using Physics.Events;
+using Physics.Functions;
 using Rendering;
 using Shapes.Types;
 using Simulation;
@@ -254,10 +255,11 @@ namespace Abacus
         }
 
         [UnmanagedCallersOnly]
-        private unsafe static void RaycastHitCallback(World world, RaycastRequest raycast, RaycastHit* hitsPointer, uint hitCount)
+        private unsafe static void RaycastHitCallback(RaycastHitCallback.Input input)
         {
-            TimeSpan delta = new((long)raycast.userData);
-            USpan<RaycastHit> hits = new(hitsPointer, hitCount);
+            World world = input.world;
+            TimeSpan delta = new((long)input.request.userData);
+            ReadOnlySpan<RaycastHit> hits = input.Hits;
             foreach (RaycastHit hit in hits)
             {
                 uint entityHit = hit.entity;

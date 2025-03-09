@@ -1,6 +1,5 @@
 ﻿using Collections.Generic;
 using System;
-using Unmanaged;
 
 namespace Abacus.Manager.Commands
 {
@@ -23,8 +22,8 @@ namespace Abacus.Manager.Commands
                 return;
             }
 
-            USpan<char> tag = arguments[0];
-            USpan<char> branchName = arguments[1];
+            ReadOnlySpan<char> tag = arguments[0];
+            ReadOnlySpan<char> branchName = arguments[1];
             using Array<Repository> repositories = runner.GetRepositories();
             foreach (Repository repository in repositories)
             {

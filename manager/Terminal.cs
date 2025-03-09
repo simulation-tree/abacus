@@ -2,28 +2,27 @@
 using System.Diagnostics;
 using System.Text;
 using System.Threading;
-using Unmanaged;
 
 namespace Abacus.Manager
 {
     public static class Terminal
     {
-        public static USpan<char> Execute(string workingDirectory, string command)
+        public static ReadOnlySpan<char> Execute(string workingDirectory, string command)
         {
             return Execute(workingDirectory.AsSpan(), command.AsSpan());
         }
 
-        public static USpan<char> Execute(string workingDirectory, USpan<char> command)
+        public static ReadOnlySpan<char> Execute(string workingDirectory, ReadOnlySpan<char> command)
         {
             return Execute(workingDirectory.AsSpan(), command);
         }
 
-        public static USpan<char> Execute(USpan<char> workingDirectory, string command)
+        public static ReadOnlySpan<char> Execute(ReadOnlySpan<char> workingDirectory, string command)
         {
             return Execute(workingDirectory, command.AsSpan());
         }
 
-        public static USpan<char> Execute(USpan<char> workingDirectory, USpan<char> command)
+        public static ReadOnlySpan<char> Execute(ReadOnlySpan<char> workingDirectory, ReadOnlySpan<char> command)
         {
             ProcessStartInfo startInfo = new();
             if (OperatingSystem.IsWindows())

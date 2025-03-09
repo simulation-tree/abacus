@@ -1,5 +1,5 @@
 ﻿using Collections.Generic;
-using Unmanaged;
+using System;
 
 namespace Abacus.Manager.Commands
 {
@@ -17,7 +17,7 @@ namespace Abacus.Manager.Commands
             }
 
 
-            USpan<char> message = arguments.RawText;
+            ReadOnlySpan<char> message = arguments.RawText;
             if (message.StartsWith('"') && message.EndsWith('"'))
             {
                 message = message.Slice(1, message.Length - 2);

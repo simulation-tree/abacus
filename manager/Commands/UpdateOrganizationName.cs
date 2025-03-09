@@ -45,7 +45,7 @@ namespace Abacus.Manager.Commands
             }
         }
 
-        private void RenameInFiles(Runner runner, USpan<char> repositoryPath)
+        private void RenameInFiles(Runner runner, ReadOnlySpan<char> repositoryPath)
         {
             const string URLStart = "https://github.com/";
             const string RepositoryStart = "repository: ";

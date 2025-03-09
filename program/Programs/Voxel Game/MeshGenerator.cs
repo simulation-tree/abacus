@@ -8,27 +8,27 @@ namespace VoxelGame
 {
     public ref struct MeshGenerator
     {
-        private readonly USpan<uint> blocks;
-        private readonly USpan<uint> blocksLeft;
-        private readonly USpan<uint> blocksRight;
-        private readonly USpan<uint> blocksDown;
-        private readonly USpan<uint> blocksUp;
-        private readonly USpan<uint> blocksBackward;
-        private readonly USpan<uint> blocksForward;
+        private readonly Span<uint> blocks;
+        private readonly Span<uint> blocksLeft;
+        private readonly Span<uint> blocksRight;
+        private readonly Span<uint> blocksDown;
+        private readonly Span<uint> blocksUp;
+        private readonly Span<uint> blocksBackward;
+        private readonly Span<uint> blocksForward;
         private readonly byte chunkSize;
         private readonly Array<Vector3> vertices;
         private readonly Array<Vector2> uvs;
         private readonly Array<Vector4> colors;
         private readonly Array<uint> triangles;
         private readonly RandomGenerator rng;
-        private readonly uint capacity;
+        private readonly int capacity;
         private readonly AtlasTexture chunkAtlas;
         private readonly Dictionary<BlockTextureKey, BlockTexture> blockTextures;
 
-        public uint verticeIndex;
-        public uint triangleIndex;
+        public int verticeIndex;
+        public int triangleIndex;
 
-        public MeshGenerator(USpan<uint> blocks, USpan<uint> blocksLeft, USpan<uint> blocksRight, USpan<uint> blocksDown, USpan<uint> blocksUp, USpan<uint> blocksBackward, USpan<uint> blocksForward, byte chunkSize, Array<Vector3> vertices, Array<Vector2> uvs, Array<Vector4> colors, Array<uint> triangles, RandomGenerator rng, uint capacity, AtlasTexture chunkAtlas, Dictionary<BlockTextureKey, BlockTexture> blockTextures)
+        public MeshGenerator(Span<uint> blocks, Span<uint> blocksLeft, Span<uint> blocksRight, Span<uint> blocksDown, Span<uint> blocksUp, Span<uint> blocksBackward, Span<uint> blocksForward, byte chunkSize, Array<Vector3> vertices, Array<Vector2> uvs, Array<Vector4> colors, Array<uint> triangles, RandomGenerator rng, int capacity, AtlasTexture chunkAtlas, Dictionary<BlockTextureKey, BlockTexture> blockTextures)
         {
             this.blocks = blocks;
             this.blocksLeft = blocksLeft;
@@ -48,13 +48,13 @@ namespace VoxelGame
             this.blockTextures = blockTextures;
         }
 
-        private readonly bool ShouldGenerateFace(uint index, Direction direction)
+        private readonly bool ShouldGenerateFace(int index, Direction direction)
         {
             uint neighbourBlock = GetNeighbourBlock(index, direction);
             return neighbourBlock == default;
         }
 
-        private readonly uint GetNeighbourBlock(uint index, Direction direction)
+        private readonly uint GetNeighbourBlock(int index, Direction direction)
         {
             if (direction == Direction.Left)
             {
@@ -124,7 +124,7 @@ namespace VoxelGame
             {
                 if (index / (chunkSize * chunkSize) % chunkSize != 0)
                 {
-                    return blocks[(uint)(index - chunkSize * chunkSize)];
+                    return blocks[index - chunkSize * chunkSize];
                 }
                 else if (blocksBackward.Length > 0)
                 {
@@ -140,7 +140,7 @@ namespace VoxelGame
             {
                 if (index / (chunkSize * chunkSize) % chunkSize != chunkSize - 1)
                 {
-                    return blocks[(uint)(index + chunkSize * chunkSize)];
+                    return blocks[index + chunkSize * chunkSize];
                 }
                 else if (blocksForward.Length > 0)
                 {
@@ -160,18 +160,18 @@ namespace VoxelGame
 
         private void AddTriangles()
         {
-            uint startIndex = verticeIndex - 4;
-            triangles[triangleIndex++] = startIndex + 2;
-            triangles[triangleIndex++] = startIndex + 1;
-            triangles[triangleIndex++] = startIndex;
-            triangles[triangleIndex++] = startIndex;
-            triangles[triangleIndex++] = startIndex + 3;
-            triangles[triangleIndex++] = startIndex + 2;
+            int startIndex = verticeIndex - 4;
+            triangles[triangleIndex++] = (uint)startIndex + 2;
+            triangles[triangleIndex++] = (uint)startIndex + 1;
+            triangles[triangleIndex++] = (uint)startIndex;
+            triangles[triangleIndex++] = (uint)startIndex;
+            triangles[triangleIndex++] = (uint)startIndex + 3;
+            triangles[triangleIndex++] = (uint)startIndex + 2;
         }
 
         private readonly void AddUVs(uint blockId, Direction direction, RandomGenerator rng)
         {
-            uint startIndex = verticeIndex - 4;
+            int startIndex = verticeIndex - 4;
             int rotation;
             AtlasSprite sprite;
 
@@ -230,7 +230,7 @@ namespace VoxelGame
 
         public void Generate()
         {
-            for (uint i = 0; i < capacity; i++)
+            for (int i = 0; i < capacity; i++)
             {
                 uint blockId = blocks[i];
                 if (blockId != default)
@@ -305,12 +305,12 @@ namespace VoxelGame
             }
         }
 
-        public static uint GetIndex(byte x, byte y, byte z, byte chunkSize)
+        public static int GetIndex(byte x, byte y, byte z, byte chunkSize)
         {
-            return (uint)(x + y * chunkSize + z * chunkSize * chunkSize);
+            return x + y * chunkSize + z * chunkSize * chunkSize;
         }
 
-        public static (byte x, byte y, byte z) GetXYZ(uint index, byte chunkSize)
+        public static (byte x, byte y, byte z) GetXYZ(int index, byte chunkSize)
         {
             byte x = (byte)(index % chunkSize);
             byte y = (byte)((index / chunkSize) % chunkSize);

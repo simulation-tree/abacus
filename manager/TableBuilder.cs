@@ -9,7 +9,7 @@ namespace Abacus.Manager
     {
         private readonly List<Row> rows;
 
-        public readonly USpan<Row> Rows => rows.AsSpan();
+        public readonly ReadOnlySpan<Row> Rows => rows.AsSpan();
 
         [Obsolete("Default constructor not supported", true)]
         public TableBuilder()
@@ -67,14 +67,14 @@ namespace Abacus.Manager
         {
             const string Separator = " | ";
             Row header = rows[0];
-            using Array<uint> columnLengths = new(header.Columns);
-            for (uint y = 0; y < rows.Count; y++)
+            using Array<int> columnLengths = new(header.Columns);
+            for (int y = 0; y < rows.Count; y++)
             {
                 Row row = rows[y];
-                for (uint x = 0; x < row.Columns; x++)
+                for (int x = 0; x < row.Columns; x++)
                 {
-                    USpan<char> column = row[x];
-                    ref uint columnLength = ref columnLengths[x];
+                    ReadOnlySpan<char> column = row[x];
+                    ref int columnLength = ref columnLengths[x];
                     if (column.Length > columnLength)
                     {
                         columnLength = column.Length;
@@ -83,37 +83,37 @@ namespace Abacus.Manager
             }
 
             using Text builder = new();
-            for (uint x = 0; x < header.Columns; x++)
+            for (int x = 0; x < header.Columns; x++)
             {
-                USpan<char> column = header[x];
-                uint columnLength = columnLengths[x];
-                uint remainingLength = columnLength - column.Length;
+                ReadOnlySpan<char> column = header[x];
+                int columnLength = columnLengths[x];
+                int remainingLength = columnLength - column.Length;
                 builder.Append(column);
                 builder.Append(' ', remainingLength);
                 builder.Append(Separator);
             }
 
-            builder.SetLength(builder.Length - (uint)Separator.Length);
-            uint headerLength = builder.Length;
+            builder.SetLength(builder.Length - Separator.Length);
+            int headerLength = builder.Length;
             builder.Append('\n');
             builder.Append('-', headerLength);
             builder.Append('\n');
             if (Rows.Length > 1)
             {
-                for (uint y = 1; y < rows.Count; y++)
+                for (int y = 1; y < rows.Count; y++)
                 {
                     Row row = rows[y];
-                    for (uint x = 0; x < row.Columns; x++)
+                    for (int x = 0; x < row.Columns; x++)
                     {
-                        USpan<char> column = row[x];
-                        uint columnLength = columnLengths[x];
-                        uint remainingLength = columnLength - column.Length;
+                        ReadOnlySpan<char> column = row[x];
+                        int columnLength = columnLengths[x];
+                        int remainingLength = columnLength - column.Length;
                         builder.Append(column);
                         builder.Append(' ', remainingLength);
                         builder.Append(Separator);
                     }
 
-                    builder.SetLength(builder.Length - (uint)Separator.Length);
+                    builder.SetLength(builder.Length - Separator.Length);
                     builder.Append('\n');
                 }
 
@@ -215,13 +215,13 @@ namespace Abacus.Manager
         {
             private readonly List<Text> row;
 
-            public readonly uint Columns => row.Count;
+            public readonly int Columns => row.Count;
 
-            public readonly uint Length
+            public readonly int Length
             {
                 get
                 {
-                    uint length = 0;
+                    int length = 0;
                     foreach (Text cell in row)
                     {
                         length += cell.Length;
@@ -231,7 +231,7 @@ namespace Abacus.Manager
                 }
             }
 
-            public readonly USpan<char> this[uint index] => row[index].AsSpan();
+            public readonly ReadOnlySpan<char> this[int index] => row[index].AsSpan();
 
             public Row()
             {
@@ -248,7 +248,7 @@ namespace Abacus.Manager
                 row.Dispose();
             }
 
-            public readonly void Add(USpan<char> cell)
+            public readonly void Add(ReadOnlySpan<char> cell)
             {
                 row.Add(new(cell));
             }

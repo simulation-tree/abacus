@@ -15,19 +15,19 @@ namespace VoxelGame
 {
     public readonly partial struct Chunk : IEntity
     {
-        private const uint VerticesPerFace = 4;
-        private const uint TrianglesPerFace = 6;
-        private const uint FacesPerBlock = 6;
+        private const int VerticesPerFace = 4;
+        private const int TrianglesPerFace = 6;
+        private const int FacesPerBlock = 6;
 
-        public unsafe readonly USpan<uint> Blocks => GetArray<BlockID>().AsSpan<uint>();
-        public readonly uint Capacity => GetArrayLength<BlockID>();
-        public readonly ref uint this[uint index] => ref Blocks[index];
+        public unsafe readonly Span<uint> Blocks => GetArray<BlockID>().AsSpan<uint>();
+        public readonly int Capacity => GetArrayLength<BlockID>();
+        public readonly ref uint this[int index] => ref Blocks[index];
         public readonly ref uint this[byte x, byte y, byte z] => ref this[MeshGenerator.GetIndex(x, y, z, ChunkSize)];
         public readonly byte ChunkSize => world.GetFirstComponent<VoxelSettings>().chunkSize;
 
         public Chunk(World world, int cx, int cy, int cz, byte chunkSize, Material unlitMaterial)
         {
-            uint capacity = (uint)(chunkSize * chunkSize * chunkSize);
+            int capacity = chunkSize * chunkSize * chunkSize;
             this.world = world;
             Mesh mesh = new(world);
             value = mesh.value;
@@ -37,7 +37,7 @@ namespace VoxelGame
             mesh.CreateColors(0);
             mesh.CreateUVs(0);
 
-            USpan<BlockID> blocks = mesh.CreateArray<BlockID>(capacity).AsSpan();
+            System.Span<BlockID> blocks = mesh.CreateArray<BlockID>(capacity).AsSpan();
             blocks.Clear();
 
             MeshRenderer chunkRenderer = mesh.Become<MeshRenderer>();
@@ -66,14 +66,14 @@ namespace VoxelGame
             int cx = (int)MathF.Floor(chunkPosition.X / chunkSize);
             int cy = (int)MathF.Floor(chunkPosition.Y / chunkSize);
             int cz = (int)MathF.Floor(chunkPosition.Z / chunkSize);
-            USpan<uint> blocks = Blocks;
-            USpan<uint> blocksLeft = GetBlocks(world, cx - 1, cy, cz);
-            USpan<uint> blocksRight = GetBlocks(world, cx + 1, cy, cz);
-            USpan<uint> blocksDown = GetBlocks(world, cx, cy - 1, cz);
-            USpan<uint> blocksUp = GetBlocks(world, cx, cy + 1, cz);
-            USpan<uint> blocksBackward = GetBlocks(world, cx, cy, cz - 1);
-            USpan<uint> blocksForward = GetBlocks(world, cx, cy, cz + 1);
-            uint capacity = Capacity;
+            Span<uint> blocks = Blocks;
+            Span<uint> blocksLeft = GetBlocks(world, cx - 1, cy, cz);
+            Span<uint> blocksRight = GetBlocks(world, cx + 1, cy, cz);
+            Span<uint> blocksDown = GetBlocks(world, cx, cy - 1, cz);
+            Span<uint> blocksUp = GetBlocks(world, cx, cy + 1, cz);
+            Span<uint> blocksBackward = GetBlocks(world, cx, cy, cz - 1);
+            Span<uint> blocksForward = GetBlocks(world, cx, cy, cz + 1);
+            int capacity = Capacity;
             using Array<Vector3> vertices = new(capacity * VerticesPerFace * FacesPerBlock);
             using Array<Vector2> uvs = new(capacity * VerticesPerFace * FacesPerBlock);
             using Array<Vector4> colors = new(capacity * VerticesPerFace * FacesPerBlock);
@@ -84,13 +84,13 @@ namespace VoxelGame
             Mesh.Collection<Vector2> meshUVs = mesh.UVs;
             Mesh.Collection<Vector4> meshColors = mesh.Colors;
             Mesh.Collection<uint> meshTriangles = mesh.Indices;
-            meshPositions.CopyFrom(vertices.GetSpan(generation.verticeIndex));
-            meshUVs.CopyFrom(uvs.GetSpan(generation.verticeIndex));
-            meshColors.CopyFrom(colors.GetSpan(generation.verticeIndex));
-            meshTriangles.CopyFrom(triangles.GetSpan(generation.triangleIndex));
+            meshPositions.CopyFrom(vertices.AsSpan(0, generation.verticeIndex));
+            meshUVs.CopyFrom(uvs.AsSpan(0, generation.verticeIndex));
+            meshColors.CopyFrom(colors.AsSpan(0, generation.verticeIndex));
+            meshTriangles.CopyFrom(triangles.AsSpan(0, generation.triangleIndex));
         }
 
-        public static USpan<uint> GetBlocks(World world, int cx, int cy, int cz)
+        public static System.Span<uint> GetBlocks(World world, int cx, int cy, int cz)
         {
             byte chunkSize = world.GetFirstComponent<VoxelSettings>().chunkSize;
             TagType chunkType = world.Schema.GetTagType<IsChunk>();
@@ -100,9 +100,9 @@ namespace VoxelGame
                 Definition key = chunk.Definition;
                 if (key.ContainsTag(chunkType) && key.ContainsComponent(positionType))
                 {
-                    USpan<uint> entities = chunk.Entities;
-                    USpan<Position> components = chunk.GetComponents<Position>(positionType);
-                    for (uint i = 0; i < components.Length; i++)
+                    ReadOnlySpan<uint> entities = chunk.Entities;
+                    Span<Position> components = chunk.GetComponents<Position>(positionType);
+                    for (int i = 0; i < components.Length; i++)
                     {
                         ref Position position = ref components[i];
                         Vector3 worldPosition = position.value;

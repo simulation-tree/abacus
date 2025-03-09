@@ -1,12 +1,12 @@
-﻿using Data;
-using UI;
+﻿using Collections.Generic;
+using Data;
 using Simulation;
 using System;
 using System.Diagnostics;
+using UI;
 using Unmanaged;
 using Windows;
 using Worlds;
-using Collections.Generic;
 
 namespace Editor
 {
@@ -46,7 +46,7 @@ namespace Editor
                 Text firstArg = args[0];
                 DataRequest request = new(world, firstArg);
                 simulator.UpdateSystems(TimeSpan.MinValue, world);
-                if (request.TryGetData(out USpan<byte> data))
+                if (request.TryGetData(out Span<byte> data))
                 {
                     Trace.WriteLine($"Loaded world from `{firstArg}`");
 
@@ -67,8 +67,8 @@ namespace Editor
 
         public EditorProgram(string[] args)
         {
-            this.args = new((uint)args.Length);
-            for (uint i = 0; i < args.Length; i++)
+            this.args = new(args.Length);
+            for (int i = 0; i < args.Length; i++)
             {
                 this.args[i] = new(args[i]);
             }

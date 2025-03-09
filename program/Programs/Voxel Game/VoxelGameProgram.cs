@@ -100,7 +100,7 @@ namespace VoxelGame
             fpsLabel.Anchor = Anchor.TopLeft;
             fpsLabel.Pivot = new(0f, 1f, 0f);
 
-            USpan<char> infoLabel = "F3 = Invert mouse\nWASD, Space, Control = Move".AsSpan();
+            ReadOnlySpan<char> infoLabel = "F3 = Invert mouse\nWASD, Space, Control = Move";
             Label controlsLabel = new(canvas, infoLabel);
             controlsLabel.Anchor = Anchor.TopLeft;
             controlsLabel.Pivot = new(0f, 1f, 0f);
@@ -166,7 +166,7 @@ namespace VoxelGame
 
             simulator.UpdateSystems(TimeSpan.MinValue, world);
 
-            USpan<AtlasTexture.InputSprite> sprites = stackalloc AtlasTexture.InputSprite[]
+            System.Span<AtlasTexture.InputSprite> sprites = stackalloc AtlasTexture.InputSprite[]
             {
                 new("Dirt", dirt),
                 new("Grass", grass),

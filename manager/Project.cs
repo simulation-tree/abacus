@@ -31,12 +31,12 @@ namespace Abacus.Manager
         /// <summary>
         /// Name of the project based on the file name.
         /// </summary>
-        public readonly USpan<char> Name => name.AsSpan();
+        public readonly ReadOnlySpan<char> Name => name.AsSpan();
 
         /// <summary>
         /// Path to the .csproj file.
         /// </summary>
-        public readonly USpan<char> Path => path.AsSpan();
+        public readonly ReadOnlySpan<char> Path => path.AsSpan();
 
         /// <summary>
         /// NuGet package ID.
@@ -62,22 +62,21 @@ namespace Abacus.Manager
         /// <summary>
         /// The directory that the project is in.
         /// </summary>
-        public readonly USpan<char> Directory
+        public readonly ReadOnlySpan<char> Directory
         {
             get
             {
-                USpan<char> buffer = stackalloc char[(int)path.Length];
+                Span<char> buffer = stackalloc char[(int)path.Length];
                 path.CopyTo(buffer);
-                for (uint i = 0; i < buffer.Length; i++)
+                for (int i = 0; i < buffer.Length; i++)
                 {
-                    ref char c = ref buffer[i];
-                    if (c == '\\')
+                    if (buffer[i] == '\\')
                     {
-                        c = '/';
+                        buffer[i] = '/';
                     }
                 }
 
-                if (buffer.TryLastIndexOf('/', out uint index))
+                if (buffer.TryLastIndexOf('/', out int index))
                 {
                     return path.AsSpan().Slice(0, index);
                 }
@@ -88,15 +87,10 @@ namespace Abacus.Manager
             }
         }
 
-        public readonly USpan<ProjectReference> ProjectReferences => projectReferences.AsSpan();
-        public readonly USpan<PackageReference> PackageReferences => packageReferences.AsSpan();
+        public readonly ReadOnlySpan<ProjectReference> ProjectReferences => projectReferences.AsSpan();
+        public readonly ReadOnlySpan<PackageReference> PackageReferences => packageReferences.AsSpan();
 
-        public Project(string path) : this(path.AsSpan())
-        {
-
-        }
-
-        public Project(USpan<char> path)
+        public Project(ReadOnlySpan<char> path)
         {
             this.path = new(path);
             this.name = new(System.IO.Path.GetFileNameWithoutExtension(path));
@@ -108,22 +102,22 @@ namespace Abacus.Manager
             using Stack<XMLNode> stack = new();
             stack.Push(rootNode);
 
-            USpan<ProjectReference> projectReferences = stackalloc ProjectReference[128];
-            uint projectReferencesCount = 0;
-            USpan<PackageReference> packageReferences = stackalloc PackageReference[128];
-            uint packageReferencesCount = 0;
+            Span<ProjectReference> projectReferences = stackalloc ProjectReference[128];
+            int projectReferencesCount = 0;
+            Span<PackageReference> packageReferences = stackalloc PackageReference[128];
+            int packageReferencesCount = 0;
             while (stack.TryPop(out XMLNode node))
             {
                 if (node.Name.Equals(ProjectReferenceNode))
                 {
-                    if (node.TryGetAttribute(IncludeAttribute, out USpan<char> referencedProjectPath))
+                    if (node.TryGetAttribute(IncludeAttribute, out ReadOnlySpan<char> referencedProjectPath))
                     {
                         projectReferences[projectReferencesCount++] = new(referencedProjectPath);
                     }
                 }
                 else if (node.Name.Equals(PackageReferenceNode))
                 {
-                    if (node.TryGetAttribute(IncludeAttribute, out USpan<char> referencedProjectPath) && node.TryGetAttribute("Version", out USpan<char> version))
+                    if (node.TryGetAttribute(IncludeAttribute, out ReadOnlySpan<char> referencedProjectPath) && node.TryGetAttribute("Version", out ReadOnlySpan<char> version))
                     {
                         packageReferences[packageReferencesCount++] = new(referencedProjectPath, version);
                     }
@@ -187,15 +181,15 @@ namespace Abacus.Manager
         {
             foreach (PackageReference packageReference in packageReferences)
             {
-                if (packageReference.Include.Contains("NUnit".AsSpan()))
+                if (packageReference.Include.IndexOf("NUnit") != -1)
                 {
                     return true;
                 }
-                else if (packageReference.Include.Contains("xunit".AsSpan()))
+                else if (packageReference.Include.IndexOf("xunit") != -1)
                 {
                     return true;
                 }
-                else if (packageReference.Include.Contains("Microsoft.NET.Test.Sdk".AsSpan()))
+                else if (packageReference.Include.IndexOf("Microsoft.NET.Test.Sdk") != -1)
                 {
                     return true;
                 }
@@ -211,12 +205,12 @@ namespace Abacus.Manager
 
         public readonly void Dispose()
         {
-            for (uint i = 0; i < projectReferences.Length; i++)
+            for (int i = 0; i < projectReferences.Length; i++)
             {
                 projectReferences[i].Dispose();
             }
 
-            for (uint i = 0; i < packageReferences.Length; i++)
+            for (int i = 0; i < packageReferences.Length; i++)
             {
                 packageReferences[i].Dispose();
             }
@@ -244,10 +238,10 @@ namespace Abacus.Manager
             private readonly Text include;
             private readonly Text version;
 
-            public readonly USpan<char> Include => include.AsSpan();
-            public readonly USpan<char> Version => version.AsSpan();
+            public readonly ReadOnlySpan<char> Include => include.AsSpan();
+            public readonly ReadOnlySpan<char> Version => version.AsSpan();
 
-            public PackageReference(USpan<char> include, USpan<char> version)
+            public PackageReference(ReadOnlySpan<char> include, ReadOnlySpan<char> version)
             {
                 this.include = new Text(include);
                 this.version = new Text(version);
@@ -264,9 +258,9 @@ namespace Abacus.Manager
         {
             private readonly Text include;
 
-            public readonly USpan<char> Include => include.AsSpan();
+            public readonly ReadOnlySpan<char> Include => include.AsSpan();
 
-            public ProjectReference(USpan<char> include)
+            public ProjectReference(ReadOnlySpan<char> include)
             {
                 this.include = new Text(include);
             }

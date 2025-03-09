@@ -10,6 +10,7 @@ using Models;
 using Physics;
 using Physics.Components;
 using Physics.Events;
+using Physics.Functions;
 using Rendering;
 using Shapes.Types;
 using Simulation;
@@ -81,12 +82,13 @@ namespace Abacus
                     simulator.TryHandleMessage(new RaycastRequest(World, ray.origin, ray.direction, new(&OnRaycastHit)));
 
                     [UnmanagedCallersOnly]
-                    static void OnRaycastHit(World world, RaycastRequest raycast, RaycastHit* hits, uint hitsCount)
+                    static void OnRaycastHit(RaycastHitCallback.Input input)
                     {
-                        for (uint i = 0; i < hitsCount; i++)
+                        ReadOnlySpan<RaycastHit> hits = input.Hits;
+                        for (int i = 0; i < hits.Length; i++)
                         {
                             RaycastHit hit = hits[i];
-                            ref Position position = ref world.TryGetComponent<Position>(hit.entity, out bool contains);
+                            ref Position position = ref input.world.TryGetComponent<Position>(hit.entity, out bool contains);
                             if (contains)
                             {
                                 position.value.X += 0.1f;

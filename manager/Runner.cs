@@ -12,11 +12,11 @@ namespace Abacus.Manager
         private readonly Text logText;
         private readonly List<LogMessage> logMessages;
 
-        public readonly USpan<char> WorkingDirectory => workingDirectory.AsSpan();
-        public readonly USpan<char> SolutionPath => solutionPath.AsSpan();
-        public readonly USpan<LogMessage> LogMessages => logMessages.AsSpan();
+        public readonly ReadOnlySpan<char> WorkingDirectory => workingDirectory.AsSpan();
+        public readonly ReadOnlySpan<char> SolutionPath => solutionPath.AsSpan();
+        public readonly ReadOnlySpan<LogMessage> LogMessages => logMessages.AsSpan();
 
-        public Runner(USpan<char> workingDirectory, USpan<char> solutionPath)
+        public Runner(ReadOnlySpan<char> workingDirectory, ReadOnlySpan<char> solutionPath)
         {
             this.workingDirectory = new Text(workingDirectory);
             this.solutionPath = new Text(solutionPath);
@@ -32,41 +32,26 @@ namespace Abacus.Manager
             workingDirectory.Dispose();
         }
 
-        public readonly LogMessage WriteInfoLine(USpan<char> text)
+        public readonly LogMessage WriteInfoLine(ReadOnlySpan<char> text)
         {
             return Write(LogMessage.Category.Info, text, true);
         }
 
-        public readonly LogMessage WriteInfoLine(string text)
-        {
-            return WriteInfoLine(text.AsSpan());
-        }
-
-        public readonly LogMessage WriteInfo(USpan<char> text)
+        public readonly LogMessage WriteInfo(ReadOnlySpan<char> text)
         {
             return Write(LogMessage.Category.Info, text, false);
         }
 
-        public readonly LogMessage WriteInfo(string text)
-        {
-            return WriteInfo(text.AsSpan());
-        }
-
-        public readonly LogMessage WriteErrorLine(USpan<char> text)
+        public readonly LogMessage WriteErrorLine(ReadOnlySpan<char> text)
         {
             return Write(LogMessage.Category.Error, text, true);
         }
 
-        public readonly LogMessage WriteErrorLine(string text)
+        public readonly LogMessage Write(LogMessage.Category category, ReadOnlySpan<char> text, bool appendLine)
         {
-            return WriteErrorLine(text.AsSpan());
-        }
-
-        public readonly LogMessage Write(LogMessage.Category category, USpan<char> text, bool appendLine)
-        {
-            uint start = logText.Length;
+            int start = logText.Length;
             logText.Append(text);
-            uint end = logText.Length;
+            int end = logText.Length;
             LogMessage message = new(logText, category, new(start, end), appendLine);
             logMessages.Add(message);
             return message;
@@ -102,10 +87,10 @@ namespace Abacus.Manager
             }
 
             Array<Repository> repositories = new(foundRepositories.Count);
-            for (uint i = 0; i < foundRepositories.Count; i++)
+            for (int i = 0; i < foundRepositories.Count; i++)
             {
                 Text repositoryPath = foundRepositories[i];
-                USpan<char> remote = Terminal.Execute(repositoryPath.ToString(), "git remote get-url origin");
+                ReadOnlySpan<char> remote = Terminal.Execute(repositoryPath.ToString(), "git remote get-url origin");
                 remote = remote.TrimEnd('\n');
                 remote = remote.TrimEnd('\r');
                 repositories[i] = new(repositoryPath.AsSpan(), remote);
@@ -177,7 +162,7 @@ namespace Abacus.Manager
 
                 using Array<Text> sorted = TopologicalSortItems(projectFiles.Keys, dependencies);
                 Array<Project> projects = new(sorted.Length);
-                for (uint i = 0; i < sorted.Length; i++)
+                for (int i = 0; i < sorted.Length; i++)
                 {
                     projects[i] = projectFiles[sorted[i]];
                 }
@@ -202,15 +187,11 @@ namespace Abacus.Manager
             }
             else
             {
-                uint i = 0;
+                int i = 0;
                 Array<Project> projects = new(projectFiles.Count);
-                foreach (Project project in projectFiles.Values)
+                foreach ((Text key, Project project) in projectFiles)
                 {
                     projects[i++] = project;
-                }
-
-                foreach (Text key in projectFiles.Keys)
-                {
                     key.Dispose();
                 }
 
@@ -222,7 +203,7 @@ namespace Abacus.Manager
         {
             using Dictionary<Text, List<Text>> graph = new();
             using Dictionary<Text, int> inDegree = new();
-            uint itemCount = 0;
+            int itemCount = 0;
             foreach (Text item in items)
             {
                 graph.Add(item, new());
@@ -250,8 +231,8 @@ namespace Abacus.Manager
                 }
             }
 
-            USpan<Text> sortedOrder = stackalloc Text[(int)itemCount * 2];
-            uint sortedOrderCount = 0;
+            Span<Text> sortedOrder = stackalloc Text[itemCount * 2];
+            int sortedOrderCount = 0;
             while (queue.TryDequeue(out Text current))
             {
                 sortedOrder[sortedOrderCount++] = current;
@@ -266,9 +247,9 @@ namespace Abacus.Manager
                 }
             }
 
-            foreach ((Text key, List<Text> value) entry in graph)
+            foreach (List<Text> entry in graph.Values)
             {
-                entry.value.Dispose();
+                entry.Dispose();
             }
 
             if (sortedOrderCount != itemCount)

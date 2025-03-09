@@ -1,12 +1,11 @@
 ﻿using Cameras;
-using UI;
-using UI.Components;
 using Rendering;
 using Simulation;
 using System;
-using System.Diagnostics;
 using System.Numerics;
 using System.Runtime.InteropServices;
+using UI;
+using UI.Components;
 using Unmanaged;
 using Windows;
 using Worlds;
@@ -112,14 +111,14 @@ namespace Abacus
 
         private readonly void DestroyAllWindows()
         {
-            USpan<uint> toDestroy = stackalloc uint[8];
-            uint count = 0;
+            Span<uint> toDestroy = stackalloc uint[8];
+            int count = 0;
             foreach (Window window in world.GetAll<Window>())
             {
                 toDestroy[count++] = window.value;
             }
 
-            for (uint i = 0; i < count; i++)
+            for (int i = 0; i < count; i++)
             {
                 world.DestroyEntity(toDestroy[i]);
             }

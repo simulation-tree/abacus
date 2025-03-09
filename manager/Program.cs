@@ -13,9 +13,9 @@ public static class Program
     private static async Task Main(string[] args)
     {
         CommandsRegistry.RegisterAll();
-        USpan<char> solutionPath = GetSolutionPath();
+        ReadOnlySpan<char> solutionPath = GetSolutionPath();
         string workingDirectory = Path.GetDirectoryName(Path.GetDirectoryName(solutionPath.ToString())) ?? string.Empty;
-        using Runner runner = new(workingDirectory.AsSpan(), solutionPath);
+        using Runner runner = new(workingDirectory, solutionPath);
         string commandInput;
         if (args.Length == 0)
         {
@@ -53,7 +53,7 @@ public static class Program
             {
                 if (CommandsRegistry.TryGet(commandName, out ICommand? command))
                 {
-                    using Arguments arguments = new(commandArguments.AsSpan());
+                    using Arguments arguments = new(commandArguments);
                     await Execute(command, runner, arguments);
                     if (requestExit)
                     {
@@ -148,7 +148,7 @@ public static class Program
         }
     }
 
-    private static USpan<char> GetSolutionPath()
+    private static ReadOnlySpan<char> GetSolutionPath()
     {
         string? path = Environment.CurrentDirectory;
         string? lastSolutionPath = null;
@@ -168,6 +168,6 @@ public static class Program
             throw new Exception("Solution file not found");
         }
 
-        return lastSolutionPath.AsSpan();
+        return lastSolutionPath;
     }
 }

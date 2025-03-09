@@ -8,35 +8,35 @@ namespace Abacus.Manager
     public readonly struct Arguments : IDisposable
     {
         private readonly Text text;
-        private readonly Array<URange> arguments;
+        private readonly Array<Range> arguments;
 
-        public readonly uint Count => arguments.Length;
+        public readonly int Count => arguments.Length;
         public readonly bool IsEmpty => text.IsEmpty;
-        public readonly USpan<char> RawText => text.AsSpan();
+        public readonly ReadOnlySpan<char> RawText => text.AsSpan();
 
-        public readonly USpan<char> this[uint index]
+        public readonly ReadOnlySpan<char> this[int index]
         {
             get
             {
                 ThrowIfOutOfRange(index);
 
-                return text.AsSpan().Slice(arguments[index]);
+                return text.AsSpan()[arguments[index]];
             }
         }
 
-        public Arguments(USpan<char> arguments)
+        public Arguments(ReadOnlySpan<char> arguments)
         {
-            uint start = 0;
-            uint index = 0;
+            int start = 0;
+            int index = 0;
             bool insideQuotes = false;
-            USpan<URange> argumentsBuffer = stackalloc URange[64];
-            uint argumentCount = 0;
+            Span<Range> argumentsBuffer = stackalloc Range[64];
+            int argumentCount = 0;
             while (arguments.Length > 0)
             {
                 bool atEnd = index == arguments.Length - 1;
                 if (atEnd)
                 {
-                    URange range;
+                    Range range;
                     if (insideQuotes)
                     {
                         range = new(start + 1, index);
@@ -46,7 +46,7 @@ namespace Abacus.Manager
                         range = new(start, index + 1);
                     }
 
-                    USpan<char> argument = arguments.Slice(range);
+                    ReadOnlySpan<char> argument = arguments[range];
                     argumentsBuffer[argumentCount++] = range;
                     break;
                 }
@@ -58,8 +58,8 @@ namespace Abacus.Manager
                         insideQuotes = !insideQuotes;
                         if (!insideQuotes)
                         {
-                            URange range = new(start + 1, index);
-                            USpan<char> argument = arguments.Slice(range);
+                            Range range = new(start + 1, index);
+                            ReadOnlySpan<char> argument = arguments[range];
                             argumentsBuffer[argumentCount++] = range;
                         }
 
@@ -81,8 +81,8 @@ namespace Abacus.Manager
                     {
                         if (!insideQuotes)
                         {
-                            URange range = new(start, index);
-                            USpan<char> argument = arguments.Slice(range);
+                            Range range = new(start, index);
+                            ReadOnlySpan<char> argument = arguments[range];
                             argumentsBuffer[argumentCount++] = range;
                             start = index + 1;
                         }
@@ -107,12 +107,12 @@ namespace Abacus.Manager
             arguments.Dispose();
         }
 
-        public readonly bool Contains(USpan<char> argument)
+        public readonly bool Contains(ReadOnlySpan<char> argument)
         {
-            for (uint i = 0; i < Count; i++)
+            for (int i = 0; i < Count; i++)
             {
-                URange range = arguments[i];
-                USpan<char> current = text.AsSpan().Slice(range);
+                Range range = arguments[i];
+                ReadOnlySpan<char> current = text.AsSpan()[range];
                 if (current.SequenceEqual(argument))
                 {
                     return true;
@@ -122,13 +122,8 @@ namespace Abacus.Manager
             return false;
         }
 
-        public readonly bool Contains(string argument)
-        {
-            return Contains(argument.AsSpan());
-        }
-
         [Conditional("DEBUG")]
-        private readonly void ThrowIfOutOfRange(uint index)
+        private readonly void ThrowIfOutOfRange(int index)
         {
             if (index >= Count)
             {
