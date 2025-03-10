@@ -37,7 +37,7 @@ namespace VoxelGame
             mesh.CreateColors(0);
             mesh.CreateUVs(0);
 
-            System.Span<BlockID> blocks = mesh.CreateArray<BlockID>(capacity).AsSpan();
+            Span<BlockID> blocks = mesh.CreateArray<BlockID>(capacity).AsSpan();
             blocks.Clear();
 
             MeshRenderer chunkRenderer = mesh.Become<MeshRenderer>();
@@ -84,13 +84,13 @@ namespace VoxelGame
             Mesh.Collection<Vector2> meshUVs = mesh.UVs;
             Mesh.Collection<Vector4> meshColors = mesh.Colors;
             Mesh.Collection<uint> meshTriangles = mesh.Indices;
-            meshPositions.CopyFrom(vertices.AsSpan(0, generation.verticeIndex));
-            meshUVs.CopyFrom(uvs.AsSpan(0, generation.verticeIndex));
-            meshColors.CopyFrom(colors.AsSpan(0, generation.verticeIndex));
-            meshTriangles.CopyFrom(triangles.AsSpan(0, generation.triangleIndex));
+            meshPositions.CopyFrom(vertices.GetSpan(generation.verticeIndex));
+            meshUVs.CopyFrom(uvs.GetSpan(generation.verticeIndex));
+            meshColors.CopyFrom(colors.GetSpan(generation.verticeIndex));
+            meshTriangles.CopyFrom(triangles.GetSpan(generation.triangleIndex));
         }
 
-        public static System.Span<uint> GetBlocks(World world, int cx, int cy, int cz)
+        public static Span<uint> GetBlocks(World world, int cx, int cy, int cz)
         {
             byte chunkSize = world.GetFirstComponent<VoxelSettings>().chunkSize;
             TagType chunkType = world.Schema.GetTagType<IsChunk>();

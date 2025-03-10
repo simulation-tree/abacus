@@ -221,7 +221,7 @@ namespace Abacus
 
             simulator.UpdateSystems(TimeSpan.MinValue, world);
 
-            System.Span<AtlasTexture.InputSprite> sprites = stackalloc AtlasTexture.InputSprite[]
+            Span<AtlasTexture.InputSprite> sprites = stackalloc AtlasTexture.InputSprite[]
             {
                 new("Idle.png", idle),
                 new("Idle2.png", idle2),

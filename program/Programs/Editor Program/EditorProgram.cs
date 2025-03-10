@@ -46,7 +46,7 @@ namespace Editor
                 Text firstArg = args[0];
                 DataRequest request = new(world, firstArg);
                 simulator.UpdateSystems(TimeSpan.MinValue, world);
-                if (request.TryGetData(out Span<byte> data))
+                if (request.TryGetData(out ReadOnlySpan<byte> data))
                 {
                     Trace.WriteLine($"Loaded world from `{firstArg}`");
 

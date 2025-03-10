@@ -166,7 +166,7 @@ namespace VoxelGame
 
             simulator.UpdateSystems(TimeSpan.MinValue, world);
 
-            System.Span<AtlasTexture.InputSprite> sprites = stackalloc AtlasTexture.InputSprite[]
+            Span<AtlasTexture.InputSprite> sprites = stackalloc AtlasTexture.InputSprite[]
             {
                 new("Dirt", dirt),
                 new("Grass", grass),
