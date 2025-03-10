@@ -363,7 +363,8 @@ namespace Abacus
             {
                 World world = buttonEntity.world;
                 Entity containerEntity = buttonEntity.Parent;
-                ReadOnlySpan<uint> children = containerEntity.Children;
+                Span<uint> children = stackalloc uint[containerEntity.ChildCount];
+                containerEntity.CopyChildrenTo(children);
                 bool toggleValue = default;
                 for (int i = 0; i < children.Length; i++)
                 {
@@ -376,7 +377,8 @@ namespace Abacus
                     }
                 }
 
-                children = buttonEntity.Children;
+                children = stackalloc uint[buttonEntity.ChildCount];
+                buttonEntity.CopyChildrenTo(children);
                 for (int i = 0; i < children.Length; i++)
                 {
                     uint child = children[i];
