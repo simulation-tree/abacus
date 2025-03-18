@@ -22,7 +22,7 @@ using Worlds;
 
 namespace AbacusSimulator
 {
-    public struct AbacusSimulator : IDisposable
+    public readonly struct AbacusSimulator : IDisposable
     {
         private readonly Simulator simulator;
 
@@ -43,8 +43,8 @@ namespace AbacusSimulator
             simulator.AddSystem(new TransformSystem());
             simulator.AddSystem(new Mesh9SliceUpdateSystem());
             simulator.AddSystem(new WindowSystem());
-            simulator.AddSystem(new GlobalKeyboardAndMouseSystem(simulator));
-            simulator.AddSystem(new WindowDevicesSystems(simulator));
+            simulator.AddSystem(new GlobalKeyboardAndMouseSystem());
+            simulator.AddSystem(new WindowDevicesSystems());
             simulator.AddSystem(new MaterialImportSystem());
             simulator.AddSystem(new TextureImportSystem());
             simulator.AddSystem(new ShaderImportSystem());
