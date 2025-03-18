@@ -17,13 +17,12 @@ using Textures;
 using Transforms;
 using Transforms.Components;
 using UI;
-using Unmanaged;
 using Windows;
 using Worlds;
 
 namespace VoxelGame
 {
-    public partial struct VoxelGameProgram : IProgram
+    public partial struct VoxelGameProgram : IProgram<VoxelGameProgram>
     {
         public static readonly LayerMask worldMask = new(0);
         public static readonly LayerMask uiMask = new(1);
@@ -119,12 +118,12 @@ namespace VoxelGame
             SharedFunctions.AddLabelProcessors(world);
         }
 
-        readonly void IProgram.Start(in Simulator simulator, in MemoryAddress allocation, in World world)
+        readonly void IProgram<VoxelGameProgram>.Start(ref VoxelGameProgram program, in Simulator simulator, in World world)
         {
-            allocation.Write(new VoxelGameProgram(simulator, world));
+            program = new VoxelGameProgram(simulator, world);
         }
 
-        StatusCode IProgram.Update(in TimeSpan delta)
+        StatusCode IProgram<VoxelGameProgram>.Update(in TimeSpan delta)
         {
             if (!AnyWindowOpen(world))
             {
@@ -145,7 +144,7 @@ namespace VoxelGame
             return StatusCode.Continue;
         }
 
-        readonly void IProgram.Finish(in StatusCode statusCode)
+        readonly void IProgram<VoxelGameProgram>.Finish(in StatusCode statusCode)
         {
             if (!window.IsDestroyed)
             {

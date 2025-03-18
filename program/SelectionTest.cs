@@ -1,28 +1,27 @@
 ﻿using Cameras;
-using UI;
 using Simulation;
 using System;
 using System.Diagnostics;
 using System.Numerics;
 using System.Runtime.InteropServices;
-using Unmanaged;
+using UI;
 using Windows;
 using Worlds;
 
 namespace Abacus
 {
-    public readonly partial struct SelectionTest : IProgram
+    public readonly partial struct SelectionTest : IProgram<SelectionTest>
     {
         private readonly Window window;
 
         private readonly World World => window.world;
 
-        void IProgram.Start(in Simulator simulator, in MemoryAddress allocation, in World world)
+        void IProgram<SelectionTest>.Start(ref SelectionTest program, in Simulator simulator, in World world)
         {
-            allocation.Write(new SelectionTest(world));
+            program = new SelectionTest(world);
         }
 
-        StatusCode IProgram.Update(in TimeSpan delta)
+        StatusCode IProgram<SelectionTest>.Update(in TimeSpan delta)
         {
             if (!IsAnyWindowOpen(World))
             {
@@ -64,7 +63,7 @@ namespace Abacus
             }
         }
 
-        void IProgram.Finish(in StatusCode statusCode)
+        void IProgram<SelectionTest>.Finish(in StatusCode statusCode)
         {
             if (!window.IsDestroyed)
             {

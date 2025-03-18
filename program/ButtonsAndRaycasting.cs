@@ -23,13 +23,12 @@ using Transforms;
 using Transforms.Components;
 using UI;
 using UI.Components;
-using Unmanaged;
 using Windows;
 using Worlds;
 
 namespace Abacus
 {
-    public partial struct ButtonsAndRaycasting : IProgram
+    public partial struct ButtonsAndRaycasting : IProgram<ButtonsAndRaycasting>
     {
         private readonly Simulator simulator;
         private readonly Window window;
@@ -39,12 +38,12 @@ namespace Abacus
 
         private readonly World World => window.world;
 
-        void IProgram.Start(in Simulator simulator, in MemoryAddress allocation, in World world)
+        void IProgram<ButtonsAndRaycasting>.Start(ref ButtonsAndRaycasting program, in Simulator simulator, in World world)
         {
-            allocation.Write(new ButtonsAndRaycasting(simulator, world));
+            program = new ButtonsAndRaycasting(simulator, world);
         }
 
-        unsafe StatusCode IProgram.Update(in TimeSpan delta)
+        unsafe StatusCode IProgram<ButtonsAndRaycasting>.Update(in TimeSpan delta)
         {
             if (window.IsDestroyed)
             {
@@ -101,7 +100,7 @@ namespace Abacus
             return StatusCode.Continue;
         }
 
-        void IProgram.Finish(in StatusCode statusCode)
+        void IProgram<ButtonsAndRaycasting>.Finish(in StatusCode statusCode)
         {
             if (!window.IsDestroyed)
             {

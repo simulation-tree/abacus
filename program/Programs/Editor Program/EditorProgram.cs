@@ -10,7 +10,7 @@ using Worlds;
 
 namespace Editor
 {
-    public partial struct EditorProgram : IProgram
+    public partial struct EditorProgram : IProgram<EditorProgram>
     {
         private readonly World world;
         private readonly Simulator simulator;
@@ -79,7 +79,7 @@ namespace Editor
             this.args = new(0);
         }
 
-        void IProgram.Finish(in StatusCode statusCode)
+        void IProgram<EditorProgram>.Finish(in StatusCode statusCode)
         {
             ref EditorState editorState = ref settings.GetEditorState();
             editorState.editingWorld.Dispose();
@@ -92,13 +92,12 @@ namespace Editor
             args.Dispose();
         }
 
-        void IProgram.Start(in Simulator simulator, in MemoryAddress allocation, in World world)
+        void IProgram<EditorProgram>.Start(ref EditorProgram program, in Simulator simulator, in World world)
         {
-            ref EditorProgram program = ref allocation.Read<EditorProgram>();
             program = new(simulator, world, program.args);
         }
 
-        StatusCode IProgram.Update(in TimeSpan delta)
+        StatusCode IProgram<EditorProgram>.Update(in TimeSpan delta)
         {
             ref EditorState editorState = ref settings.GetEditorState();
             if (state == State.DestroyingWindows)

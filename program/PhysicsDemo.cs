@@ -24,7 +24,7 @@ using Worlds;
 
 namespace Abacus
 {
-    public partial struct PhysicsDemo : IProgram
+    public partial struct PhysicsDemo : IProgram<PhysicsDemo>
     {
         private readonly Simulator simulator;
         private readonly Window window;
@@ -113,12 +113,12 @@ namespace Abacus
             }
         }
 
-        readonly void IProgram.Start(in Simulator simulator, in MemoryAddress allocation, in World world)
+        readonly void IProgram<PhysicsDemo>.Start(ref PhysicsDemo program, in Simulator simulator, in World world)
         {
-            allocation.Write(new PhysicsDemo(simulator, world));
+            program = new PhysicsDemo(simulator, world);
         }
 
-        StatusCode IProgram.Update(in TimeSpan delta)
+        StatusCode IProgram<PhysicsDemo>.Update(in TimeSpan delta)
         {
             if (window.IsDestroyed)
             {
@@ -250,7 +250,7 @@ namespace Abacus
             return StatusCode.Continue;
         }
 
-        readonly void IProgram.Finish(in StatusCode statusCode)
+        readonly void IProgram<PhysicsDemo>.Finish(in StatusCode statusCode)
         {
         }
 

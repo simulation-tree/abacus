@@ -1,24 +1,23 @@
 ﻿using Simulation;
 using System;
 using System.Runtime.InteropServices;
-using Unmanaged;
 using Windows;
 using Worlds;
 
 namespace Abacus
 {
-    public readonly partial struct JustOneWindow : IProgram
+    public readonly partial struct JustOneWindow : IProgram<JustOneWindow>
     {
         private readonly Window window;
 
         private readonly World World => window.world;
 
-        readonly  void IProgram.Start(in Simulator simulator, in MemoryAddress allocation, in World world)
+        readonly void IProgram<JustOneWindow>.Start(ref JustOneWindow program, in Simulator simulator, in World world)
         {
-            allocation.Write(new JustOneWindow(world));
+            program = new JustOneWindow(world);
         }
 
-        readonly  StatusCode IProgram.Update(in TimeSpan delta)
+        readonly StatusCode IProgram<JustOneWindow>.Update(in TimeSpan delta)
         {
             if (!IsAnyWindowOpen(World))
             {
@@ -28,7 +27,7 @@ namespace Abacus
             return StatusCode.Continue;
         }
 
-        readonly void IProgram.Finish(in StatusCode statusCode)
+        readonly void IProgram<JustOneWindow>.Finish(in StatusCode statusCode)
         {
             if (!window.IsDestroyed)
             {

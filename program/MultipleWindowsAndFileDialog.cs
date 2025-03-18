@@ -2,21 +2,21 @@
 using FileDialogs;
 using FileDialogs.Functions;
 using InputDevices;
-using UI;
-using UI.Components;
 using Rendering;
 using Simulation;
 using System;
 using System.Numerics;
 using System.Runtime.InteropServices;
 using Transforms.Components;
+using UI;
+using UI.Components;
 using Unmanaged;
 using Windows;
 using Worlds;
 
 namespace Abacus
 {
-    public readonly partial struct MultipleWindowsAndFileDialog : IProgram
+    public readonly partial struct MultipleWindowsAndFileDialog : IProgram<MultipleWindowsAndFileDialog>
     {
         private readonly Window firstWindow;
         private readonly Window secondWindow;
@@ -79,12 +79,12 @@ namespace Abacus
             resizable.SelectionMask = secondLayer;
         }
 
-        void IProgram.Start(in Simulator simulator, in MemoryAddress allocation, in World world)
+        void IProgram<MultipleWindowsAndFileDialog>.Start(ref MultipleWindowsAndFileDialog program, in Simulator simulator, in World world)
         {
-            allocation.Write(new MultipleWindowsAndFileDialog(world));
+            program = new MultipleWindowsAndFileDialog(world);
         }
 
-        unsafe StatusCode IProgram.Update(in TimeSpan delta)
+        unsafe StatusCode IProgram<MultipleWindowsAndFileDialog>.Update(in TimeSpan delta)
         {
             if (firstWindow.IsDestroyed && secondWindow.IsDestroyed)
             {
@@ -115,7 +115,7 @@ namespace Abacus
             return StatusCode.Continue;
         }
 
-        void IProgram.Finish(in StatusCode statusCode)
+        void IProgram<MultipleWindowsAndFileDialog>.Finish(in StatusCode statusCode)
         {
         }
 

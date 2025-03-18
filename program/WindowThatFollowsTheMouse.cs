@@ -3,13 +3,12 @@ using Simulation;
 using System;
 using System.Numerics;
 using System.Runtime.InteropServices;
-using Unmanaged;
 using Windows;
 using Worlds;
 
 namespace Abacus
 {
-    public readonly partial struct WindowThatFollowsTheMouse : IProgram
+    public readonly partial struct WindowThatFollowsTheMouse : IProgram<WindowThatFollowsTheMouse>
     {
         private readonly World world;
         private readonly Window followerWindow;
@@ -30,12 +29,12 @@ namespace Abacus
             }
         }
 
-        void IProgram.Start(in Simulator simulator, in MemoryAddress allocation, in World world)
+        void IProgram<WindowThatFollowsTheMouse>.Start(ref WindowThatFollowsTheMouse program, in Simulator simulator, in World world)
         {
-            allocation.Write(new WindowThatFollowsTheMouse(world));
+            program = new WindowThatFollowsTheMouse(world);
         }
 
-        StatusCode IProgram.Update(in TimeSpan delta)
+        StatusCode IProgram<WindowThatFollowsTheMouse>.Update(in TimeSpan delta)
         {
             if (followerWindow.IsDestroyed)
             {
@@ -71,7 +70,7 @@ namespace Abacus
             return StatusCode.Continue;
         }
 
-        void IProgram.Finish(in StatusCode statusCode)
+        readonly void IProgram<WindowThatFollowsTheMouse>.Finish(in StatusCode statusCode)
         {
             if (!followerWindow.IsDestroyed)
             {

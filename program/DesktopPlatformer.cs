@@ -26,7 +26,7 @@ using Worlds;
 
 namespace Abacus
 {
-    public readonly partial struct DesktopPlatformer : IProgram
+    public readonly partial struct DesktopPlatformer : IProgram<DesktopPlatformer>
     {
         private const float Gravity = 14f;
         private const float DisplayScale = 0.01f;
@@ -41,12 +41,12 @@ namespace Abacus
 
         private readonly World World => window.world;
 
-        void IProgram.Start(in Simulator simulator, in MemoryAddress allocation, in World world)
+        void IProgram<DesktopPlatformer>.Start(ref DesktopPlatformer program, in Simulator simulator, in World world)
         {
-            allocation.Write(new DesktopPlatformer(simulator, world));
+            program = new DesktopPlatformer(simulator, world);
         }
 
-        StatusCode IProgram.Update(in TimeSpan delta)
+        StatusCode IProgram<DesktopPlatformer>.Update(in TimeSpan delta)
         {
             if (window.IsDestroyed)
             {
@@ -65,7 +65,7 @@ namespace Abacus
             return StatusCode.Continue;
         }
 
-        void IProgram.Finish(in StatusCode statusCode)
+        void IProgram<DesktopPlatformer>.Finish(in StatusCode statusCode)
         {
             if (!window.IsDestroyed)
             {

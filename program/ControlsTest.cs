@@ -18,7 +18,7 @@ using Worlds;
 
 namespace Abacus
 {
-    public readonly partial struct ControlsTest : IProgram
+    public readonly partial struct ControlsTest : IProgram<ControlsTest>
     {
         private readonly Window window;
         private readonly Menu rightClickMenu;
@@ -89,12 +89,12 @@ namespace Abacus
             option.rootMenu.IsExpanded = false;
         }
 
-        void IProgram.Start(in Simulator simulator, in MemoryAddress allocation, in World world)
+        void IProgram<ControlsTest>.Start(ref ControlsTest program, in Simulator simulator, in World world)
         {
-            allocation.Write(new ControlsTest(world));
+            program = new ControlsTest(world);
         }
 
-        StatusCode IProgram.Update(in TimeSpan delta)
+        StatusCode IProgram<ControlsTest>.Update(in TimeSpan delta)
         {
             if (!IsAnyVirtualWindowOpen(World))
             {
@@ -123,7 +123,7 @@ namespace Abacus
             }
         }
 
-        void IProgram.Finish(in StatusCode statusCode)
+        void IProgram<ControlsTest>.Finish(in StatusCode statusCode)
         {
             if (!window.IsDestroyed)
             {
@@ -363,7 +363,7 @@ namespace Abacus
             {
                 World world = buttonEntity.world;
                 Entity containerEntity = buttonEntity.Parent;
-                Span<uint> children = stackalloc uint[containerEntity.ChildCount];
+                Span<uint> children = stackalloc uint[(int)containerEntity.ChildCount];
                 containerEntity.CopyChildrenTo(children);
                 bool toggleValue = default;
                 for (int i = 0; i < children.Length; i++)
@@ -377,7 +377,7 @@ namespace Abacus
                     }
                 }
 
-                children = stackalloc uint[buttonEntity.ChildCount];
+                children = stackalloc uint[(int)buttonEntity.ChildCount];
                 buttonEntity.CopyChildrenTo(children);
                 for (int i = 0; i < children.Length; i++)
                 {

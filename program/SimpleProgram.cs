@@ -1,19 +1,18 @@
 ﻿using Simulation;
 using System;
-using Unmanaged;
 using Worlds;
 
 namespace Abacus
 {
-    public partial struct SimpleProgram : IProgram
+    public partial struct SimpleProgram : IProgram<SimpleProgram>
     {
         private TimeSpan time;
 
-        void IProgram.Start(in Simulator simulator, in MemoryAddress allocation, in World world)
+        void IProgram<SimpleProgram>.Start(ref SimpleProgram program, in Simulator simulator, in World world)
         {
         }
 
-        StatusCode IProgram.Update(in TimeSpan delta)
+        StatusCode IProgram<SimpleProgram>.Update(in TimeSpan delta)
         {
             time += delta;
             if (time >= TimeSpan.FromSeconds(5f))
@@ -24,7 +23,7 @@ namespace Abacus
             return StatusCode.Continue;
         }
 
-        void IProgram.Finish(in StatusCode statusCode)
+        void IProgram<SimpleProgram>.Finish(in StatusCode statusCode)
         {
         }
     }

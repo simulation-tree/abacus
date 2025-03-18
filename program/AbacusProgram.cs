@@ -25,7 +25,7 @@ using Worlds;
 
 namespace Abacus
 {
-    public partial struct AbacusProgram : IProgram
+    public partial struct AbacusProgram : IProgram<AbacusProgram>
     {
         private TimeSpan time;
         private Vector3 cameraPosition;
@@ -44,12 +44,12 @@ namespace Abacus
 
         private readonly World World => window.world;
 
-        void IProgram.Start(in Simulator simulator, in MemoryAddress allocation, in World world)
+        readonly void IProgram<AbacusProgram>.Start(ref AbacusProgram program, in Simulator simulator, in World world)
         {
-            allocation.Write(new AbacusProgram(world));
+            program = new(world);
         }
 
-        StatusCode IProgram.Update(in TimeSpan delta)
+        StatusCode IProgram<AbacusProgram>.Update(in TimeSpan delta)
         {
             time += delta;
             if (time.TotalSeconds > 120f || window.IsDestroyed)
@@ -74,7 +74,7 @@ namespace Abacus
             return StatusCode.Continue;
         }
 
-        void IProgram.Finish(in StatusCode statusCode)
+        readonly void IProgram<AbacusProgram>.Finish(in StatusCode statusCode)
         {
             if (!window.IsDestroyed)
             {

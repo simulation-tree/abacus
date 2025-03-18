@@ -21,8 +21,8 @@ namespace VoxelGame
 
         public unsafe readonly Span<uint> Blocks => GetArray<BlockID>().AsSpan<uint>();
         public readonly int Capacity => GetArrayLength<BlockID>();
-        public readonly ref uint this[int index] => ref Blocks[index];
-        public readonly ref uint this[byte x, byte y, byte z] => ref this[MeshGenerator.GetIndex(x, y, z, ChunkSize)];
+        public readonly ref BlockID this[int index] => ref GetArrayElement<BlockID>(index);
+        public readonly ref BlockID this[byte x, byte y, byte z] => ref this[MeshGenerator.GetIndex(x, y, z, ChunkSize)];
         public readonly byte ChunkSize => world.GetFirstComponent<VoxelSettings>().chunkSize;
 
         public Chunk(World world, int cx, int cy, int cz, byte chunkSize, Material unlitMaterial)
@@ -47,7 +47,7 @@ namespace VoxelGame
 
             chunkRenderer.AddComponent(Color.White);
             Transform chunkTransform = chunkRenderer.Become<Transform>();
-            chunkTransform.LocalPosition = new Vector3(cx, cy, cz) * chunkSize;
+            chunkTransform.LocalPosition = new(cx * chunkSize, cy * chunkSize, cz * chunkSize);
         }
 
         readonly void IEntity.Describe(ref Archetype archetype)
@@ -93,16 +93,16 @@ namespace VoxelGame
         public static Span<uint> GetBlocks(World world, int cx, int cy, int cz)
         {
             byte chunkSize = world.GetFirstComponent<VoxelSettings>().chunkSize;
-            TagType chunkType = world.Schema.GetTagType<IsChunk>();
-            ComponentType positionType = world.Schema.GetComponentType<Position>();
+            int chunkType = world.Schema.GetTagType<IsChunk>();
+            int positionType = world.Schema.GetComponentType<Position>();
             foreach (Worlds.Chunk chunk in world.Chunks)
             {
                 Definition key = chunk.Definition;
                 if (key.ContainsTag(chunkType) && key.ContainsComponent(positionType))
                 {
                     ReadOnlySpan<uint> entities = chunk.Entities;
-                    Span<Position> components = chunk.GetComponents<Position>(positionType);
-                    for (int i = 0; i < components.Length; i++)
+                    ComponentEnumerator<Position> components = chunk.GetComponents<Position>(positionType);
+                    for (int i = 0; i < components.length; i++)
                     {
                         ref Position position = ref components[i];
                         Vector3 worldPosition = position.value;

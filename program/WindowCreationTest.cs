@@ -12,7 +12,7 @@ using Worlds;
 
 namespace Abacus
 {
-    public unsafe partial struct WindowCreationTest : IProgram
+    public unsafe partial struct WindowCreationTest : IProgram<WindowCreationTest>
     {
         private readonly World world;
         private readonly Settings settings;
@@ -26,16 +26,16 @@ namespace Abacus
             time = TimeSpan.FromSeconds(0.5f);
         }
 
-        void IProgram.Finish(in StatusCode statusCode)
+        void IProgram<WindowCreationTest>.Finish(in StatusCode statusCode)
         {
         }
 
-        void IProgram.Start(in Simulator simulator, in MemoryAddress allocation, in World world)
+        void IProgram<WindowCreationTest>.Start(ref WindowCreationTest program, in Simulator simulator, in World world)
         {
-            allocation.Write(new WindowCreationTest(world));
+            program = new WindowCreationTest(world);
         }
 
-        StatusCode IProgram.Update(in TimeSpan delta)
+        StatusCode IProgram<WindowCreationTest>.Update(in TimeSpan delta)
         {
             time -= delta;
             if (time.TotalSeconds <= 0f)
