@@ -37,7 +37,7 @@ namespace VoxelGame
             mesh.CreateColors(0);
             mesh.CreateUVs(0);
 
-            Span<BlockID> blocks = mesh.CreateArray<BlockID>(capacity).AsSpan();
+            Span<BlockID> blocks = mesh.CreateArray<BlockID>(capacity);
             blocks.Clear();
 
             MeshRenderer chunkRenderer = mesh.Become<MeshRenderer>();
