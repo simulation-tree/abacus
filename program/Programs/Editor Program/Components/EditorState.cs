@@ -1,4 +1,5 @@
-﻿using Worlds;
+﻿using Unmanaged;
+using Worlds;
 
 namespace Editor
 {
@@ -14,8 +15,8 @@ namespace Editor
 
         public void LoadWorld(World loadedWorld)
         {
-            editingWorld.Clear();
-            editingWorld.Schema.CopyFrom(loadedWorld.Schema);
+            editingWorld.Dispose();
+            editingWorld = new(loadedWorld.Schema.Clone());
             editingWorld.Append(loadedWorld);
             loaded = true;
         }
