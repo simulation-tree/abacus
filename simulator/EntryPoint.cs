@@ -3,11 +3,13 @@ using Abacus.Simulator;
 using Simulation;
 using System;
 using System.Diagnostics;
+using System.Runtime;
 using Unmanaged;
 using VoxelGame;
 using Worlds;
 using Simulator = AbacusSimulator.AbacusSimulator;
 
+InitializeGarbageCollector();
 InitializeTraceListeners();
 InitializeRegistries();
 
@@ -38,6 +40,11 @@ else
 {
     Trace.WriteLine($"Program failed with status code {statusCode.Code}");
     return statusCode.Code;
+}
+
+static void InitializeGarbageCollector()
+{
+    GCSettings.LatencyMode = GCLatencyMode.SustainedLowLatency;
 }
 
 static void InitializeTraceListeners()
