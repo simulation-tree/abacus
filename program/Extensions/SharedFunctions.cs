@@ -308,7 +308,7 @@ public static class SharedFunctions
     }
 
     [UnmanagedCallersOnly, SkipLocalsInit]
-    private static UI.Boolean TryHandleCurrentFPS(TryProcessLabel.Input input)
+    private static Bool TryHandleCurrentFPS(TryProcessLabel.Input input)
     {
         const string CurrentFPS = "{{currentFps}}";
         if (input.OriginalText.IndexOf(CurrentFPS) != -1)
@@ -331,7 +331,7 @@ public static class SharedFunctions
     }
 
     [UnmanagedCallersOnly, SkipLocalsInit]
-    private static UI.Boolean TryHandleAverageFPS(TryProcessLabel.Input input)
+    private static Bool TryHandleAverageFPS(TryProcessLabel.Input input)
     {
         const string AverageFPS = "{{averageFps}}";
         if (input.OriginalText.IndexOf(AverageFPS) != -1)
