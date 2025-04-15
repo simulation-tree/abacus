@@ -28,7 +28,7 @@ namespace VoxelGame
         public static readonly LayerMask uiMask = new(1);
 
         private readonly Window window;
-        private readonly Camera camera;
+        private readonly Camera worldCamera;
         private readonly Material chunkMaterial;
         private readonly Mesh quadMesh;
         private readonly AtlasTexture chunkAtlas;
@@ -42,17 +42,18 @@ namespace VoxelGame
         {
             this.world = world;
             terrainGenerator = new("goomba");
-            window = new(world, "Voxel Game", new Vector2(400, 200), new(900, 720), "vulkan", new(&WindowClosed));
+            Vector2 windowSize = new(900, 720);
+            Vector2 windowAnchor = new(0.5f, 0.5f);
+            Vector2 windowPosition = windowSize * -0.5f;
+            window = new(world, "Voxel Game", windowPosition, windowSize, windowAnchor, "vulkan");
 
-            [UnmanagedCallersOnly]
-            static void WindowClosed(Window window)
-            {
-                window.Dispose();
-            }
+            Camera uiCamera = Camera.CreateOrthographic(world, window, 1f);
+            uiCamera.Order = 1;
+            uiCamera.RenderMask = uiMask;
 
-            camera = new(world, window, CameraSettings.CreatePerspectiveDegrees(90f));
-            camera.RenderMask = worldMask;
-            Transform cameraTransform = camera.Become<Transform>();
+            worldCamera = new(world, window, CameraSettings.CreatePerspectiveDegrees(90f));
+            worldCamera.RenderMask = worldMask;
+            Transform cameraTransform = worldCamera.Become<Transform>();
             cameraTransform.LocalPosition = new(0f, 1f, -10f);
             cameraPosition = cameraTransform.LocalPosition;
 
@@ -61,7 +62,7 @@ namespace VoxelGame
             chunkMaterial = new(world, EmbeddedResource.GetAddress<UnlitTexturedMaterial>());
             chunkMaterial.AddInstanceBinding<Color>();
             chunkMaterial.AddInstanceBinding<LocalToWorld>();
-            chunkMaterial.AddComponentBinding<CameraMatrices>(new(0, 0), camera);
+            chunkMaterial.AddComponentBinding<CameraMatrices>(new(0, 0), worldCamera);
             chunkMaterial.AddTextureBinding(new(1, 0), chunkAtlas, TextureFiltering.Nearest);
 
             Model quadModel = new(world, EmbeddedResource.GetAddress<QuadModel>());
@@ -91,16 +92,14 @@ namespace VoxelGame
             }
 
             Settings settings = new(world);
-            Camera uiCamera = Camera.CreateOrthographic(world, window, 1f);
-            uiCamera.RenderMask = uiMask;
             Canvas canvas = new(settings, uiCamera, uiMask, LayerMask.All);
 
-            Label fpsLabel = new(canvas, "Current FPS: {{currentFps}}\nAverage FPS: {{averageFps}}");
+            Label fpsLabel = new(canvas, "Current FPS: {{currentFps}}\nAverage FPS: {{averageFps}}", default, 32);
             fpsLabel.Anchor = Anchor.TopLeft;
             fpsLabel.Pivot = new(0f, 1f, 0f);
 
             ReadOnlySpan<char> infoLabel = "F3 = Invert mouse\nWASD, Space, Control = Move";
-            Label controlsLabel = new(canvas, infoLabel);
+            Label controlsLabel = new(canvas, infoLabel, default, 32);
             controlsLabel.Anchor = Anchor.TopLeft;
             controlsLabel.Pivot = new(0f, 1f, 0f);
             controlsLabel.Position = new(0f, -100f);
@@ -112,8 +111,9 @@ namespace VoxelGame
             Texture skyboxUp = new(world, "Assets/Skyboxes/Clouds/clouds1_up.bmp");
             Texture skyboxWest = new(world, "Assets/Skyboxes/Clouds/clouds1_west.bmp");
             simulator.UpdateSystems(TimeSpan.MinValue, world);
+
             CubemapTexture cubemap = new(world, skyboxEast, skyboxWest, skyboxUp, skyboxDown, skyboxNorth, skyboxSouth);
-            CubemapSkybox skybox = new(world, camera, cubemap, worldMask);
+            CubemapSkybox skybox = new(world, worldCamera, cubemap, worldMask);
 
             SharedFunctions.AddLabelProcessors(world);
         }
@@ -138,7 +138,7 @@ namespace VoxelGame
                 }
             }
 
-            Transform cameraTransform = camera.As<Transform>();
+            Transform cameraTransform = worldCamera.As<Transform>();
             SharedFunctions.TrackFramesPerSecond();
             SharedFunctions.MoveCameraAround(world, cameraTransform, delta, ref cameraPosition, ref cameraPitchYaw, new(1f, 1f));
             return StatusCode.Continue;

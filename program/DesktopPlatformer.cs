@@ -91,24 +91,8 @@ namespace Abacus
 
             Texture squareTexture = new(world, EmbeddedResource.GetAddress<SquareTexture>());
 
-            Mesh quadMesh = new(world);
-            Mesh.Collection<Vector3> positions = quadMesh.CreatePositions(4);
-            positions[0] = new(-0.5f, -0.5f, 0);
-            positions[1] = new(0.5f, -0.5f, 0);
-            positions[2] = new(0.5f, 0.5f, 0);
-            positions[3] = new(-0.5f, 0.5f, 0);
-            Mesh.Collection<Vector2> uvs = quadMesh.CreateUVs(4);
-            uvs[0] = new(0, 0);
-            uvs[1] = new(1, 0);
-            uvs[2] = new(1, 1);
-            uvs[3] = new(0, 1);
-            Mesh.Collection<Vector3> normals = quadMesh.CreateNormals(4);
-            normals[0] = new(0, 0, 1);
-            normals[1] = new(0, 0, 1);
-            normals[2] = new(0, 0, 1);
-            normals[3] = new(0, 0, 1);
-            quadMesh.AddTriangle(0, 1, 2);
-            quadMesh.AddTriangle(2, 3, 0);
+            //double sided quad
+            Mesh quadMesh = Mesh.CreateCenteredQuad(world);
             quadMesh.AddTriangle(2, 1, 0);
             quadMesh.AddTriangle(0, 3, 2);
 
@@ -392,12 +376,13 @@ namespace Abacus
                 Entity player = new(world, playerEntity);
                 Transform playerTransform = player.As<Transform>();
                 player.SetComponent(new GroundedState(false));
-                simulator.TryHandleMessage(new RaycastRequest(world, playerTransform.WorldPosition, -Vector3.UnitY, new(&GroundHitCallback), 0.5f, player.value));
+                float raycastDistance = 3f;
+                simulator.TryHandleMessage(new RaycastRequest(world, playerTransform.WorldPosition, -Vector3.UnitY, new(&GroundHitCallback), raycastDistance, player.value));
             }
 
             [UnmanagedCallersOnly]
             static void GroundHitCallback(RaycastHitCallback.Input input)
-            {
+            { 
                 uint playerEntity = (uint)input.request.userData;
                 ReadOnlySpan<RaycastHit> hits = input.Hits;
                 for (int i = 0; i < hits.Length; i++)

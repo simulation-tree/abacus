@@ -15,6 +15,7 @@ namespace Abacus.Manager.Commands
             {
                 using TableBuilder table = new("Name", "Remote", "Projects", "Commits?", "Changes?");
                 using Array<Repository> repositories = runner.GetRepositories();
+                runner.WriteInfoLine($"Found {repositories.Length} repositories");
                 foreach (Repository repository in repositories)
                 {
                     string name = repository.Name.ToString();
@@ -47,6 +48,7 @@ namespace Abacus.Manager.Commands
             {
                 using TableBuilder table = new("Name", "Is Test?");
                 using Array<Project> projects = runner.GetProjects();
+                runner.WriteInfoLine($"Found {projects.Length} projects");
                 foreach (Project project in projects)
                 {
                     string name = project.Name.ToString();

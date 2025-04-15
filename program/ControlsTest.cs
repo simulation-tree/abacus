@@ -54,7 +54,7 @@ namespace Abacus
             Label anotherLabel = new(canvas, "Hello there\nWith another line\nNice");
             anotherLabel.Position = new(105, 150);
             anotherLabel.Color = new(0, 0, 0, 1);
-            anotherLabel.Z = Settings.ZScale;
+            anotherLabel.Z = Settings.ZScale * 2;
 
             enumDropdown = new Dropdown<DropdownOptions>(canvas, new(180f, settings.SingleLineHeight));
             enumDropdown.Position = new(5, -5);
@@ -78,6 +78,7 @@ namespace Abacus
             rightClickMenu.AddOption("Deep.../Banana");
             rightClickMenu.AddOption("Deep.../Car");
             rightClickMenu.Position = new(200, 300);
+            rightClickMenu.Z = Settings.ZScale * 10f;
             rightClickMenu.Pivot = new(0, 1f, 0f);
             rightClickMenu.IsExpanded = false;
         }
