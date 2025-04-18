@@ -39,7 +39,7 @@ namespace Abacus
             VirtualWindow box = VirtualWindow.Create<ControlsDemoWindow>(world, canvas);
             box.Size = new(300, 300);
             box.Position = new(40, 40);
-            box.Z += Settings.ZScale;
+            box.Z += Settings.ZScale * 2f;
             //box.Anchor = new(new(2f, true), new(2f, true), new(0f, false), new(2f, true), new(2f, true), new(0f, false));
 
             Image image = new(canvas);
@@ -64,7 +64,7 @@ namespace Abacus
             enumDropdown.BackgroundColor = new(0.2f, 0.2f, 0.2f, 1);
             enumDropdown.LabelColor = new(1, 1, 1, 1);
             enumDropdown.TriangleColor = new(1, 1, 1, 1);
-            enumDropdown.Z = Settings.ZScale;
+            enumDropdown.Z = Settings.ZScale * 5f;
 
             Vector2 optionSize = new(100, settings.SingleLineHeight);
             rightClickMenu = new(canvas, optionSize, new(&ChoseMenuOption));
