@@ -303,8 +303,8 @@ public static class SharedFunctions
 
     public unsafe static void AddLabelProcessors(this World world)
     {
-        new LabelProcessor(world, new(&TryHandleCurrentFPS));
-        new LabelProcessor(world, new(&TryHandleAverageFPS));
+        LabelProcessor.Create(world, new(&TryHandleCurrentFPS));
+        LabelProcessor.Create(world, new(&TryHandleAverageFPS));
     }
 
     [UnmanagedCallersOnly, SkipLocalsInit]

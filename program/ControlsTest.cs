@@ -78,7 +78,7 @@ namespace Abacus
             rightClickMenu.AddOption("Deep.../Banana");
             rightClickMenu.AddOption("Deep.../Car");
             rightClickMenu.Position = new(200, 300);
-            rightClickMenu.Z = Settings.ZScale * 10f;
+            rightClickMenu.Z = Settings.ZScale * 20f;
             rightClickMenu.Pivot = new(0, 1f, 0f);
             rightClickMenu.IsExpanded = false;
         }

@@ -55,6 +55,6 @@ static void InitializeTraceListeners()
 
 static void InitializeRegistries()
 {
-    TypeRegistryLoader.Load();
+    MetadataRegistryLoader.Load();
     EmbeddedResourceRegistryLoader.Load();
 }
