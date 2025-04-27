@@ -39,7 +39,7 @@ namespace AbacusSimulator
             simulator.AddSystem(new StateMachineSystem());
             simulator.AddSystem(new StateAutomationSystem());
             simulator.AddSystem(new ModelImportSystem());
-            simulator.AddSystem(new UISystems());
+            simulator.AddSystem(new UISystemsBank());
             simulator.AddSystem(new TransformSystem());
             simulator.AddSystem(new Mesh9SliceUpdateSystem());
             simulator.AddSystem(new WindowSystem());
@@ -74,7 +74,7 @@ namespace AbacusSimulator
             simulator.RemoveSystem<WindowSystem>();
             simulator.RemoveSystem<Mesh9SliceUpdateSystem>();
             simulator.RemoveSystem<TransformSystem>();
-            simulator.RemoveSystem<UISystems>();
+            simulator.RemoveSystem<UISystemsBank>();
             simulator.RemoveSystem<ModelImportSystem>();
             simulator.RemoveSystem<StateAutomationSystem>();
             simulator.RemoveSystem<StateMachineSystem>();
