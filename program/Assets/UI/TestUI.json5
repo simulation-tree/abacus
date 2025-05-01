@@ -1,0 +1,12 @@
+﻿{
+  label: {
+    text: 'Test UI',
+    fontSize: 24,
+    color: '#FFFFFF'
+  },
+  label: {
+    text: 'Another label!',
+    fontSize: 16,
+    color: '#FFFFFF'
+  }
+}

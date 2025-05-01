@@ -28,6 +28,7 @@ namespace Abacus
             register.Invoke("Assets/Skyboxes/Clouds/clouds1_south.bmp");
             register.Invoke("Assets/Skyboxes/Clouds/clouds1_up.bmp");
             register.Invoke("Assets/Skyboxes/Clouds/clouds1_west.bmp");
+            register.Invoke("Assets/UI/TestUI.json5");
         }
     }
 }

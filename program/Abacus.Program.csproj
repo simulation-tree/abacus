@@ -48,6 +48,7 @@
         <None Remove="Assets\Textures\Spaceman\Walk2.png" />
         <None Remove="Assets\Textures\texture.jpg" />
         <None Remove="Assets\Textures\wave.png" />
+        <None Remove="Assets\UI\TestUI.json5" />
     </ItemGroup>
 
     <ItemGroup>
@@ -102,6 +103,7 @@
         <EmbeddedResource Include="Assets\Textures\Blocks\Cobblestone.png">
             <CopyToOutputDirectory>Never</CopyToOutputDirectory>
         </EmbeddedResource>
+        <EmbeddedResource Include="Assets\UI\TestUI.json5" />
     </ItemGroup>
 
     <ItemGroup>
