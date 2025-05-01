@@ -63,27 +63,43 @@ namespace Abacus.Manager
             logText.Clear();
         }
 
-        public readonly Array<Repository> GetRepositories()
+        public readonly Array<Repository> GetRepositories(bool topologicallySorted = true)
         {
             using Stack<Text> stack = new();
-            stack.Push(new(WorkingDirectory));
-
+            using Array<Project> projects = GetProjects(topologicallySorted);
             using List<Text> foundRepositories = new();
-            while (stack.TryPop(out Text currentDirectory))
+            using List<int> foundRepositoryHashes = new();
+            foreach (Project project in projects)
             {
-                foreach (string directory in Directory.GetDirectories(currentDirectory.ToString(), "*", SearchOption.TopDirectoryOnly))
+                //travel up from this directory to find the repo
+                stack.Push(new(project.Directory));
+                while (stack.TryPop(out Text currentDirectory))
                 {
-                    if (directory.EndsWith("/.git") || directory.EndsWith("\\.git"))
+                    int hash = currentDirectory.GetHashCode();
+                    if (foundRepositoryHashes.TryAdd(hash))
                     {
-                        foundRepositories.Add(new(currentDirectory.AsSpan()));
-                    }
-                    else
-                    {
-                        stack.Push(new(directory));
-                    }
-                }
+                        bool found = false;
+                        foreach (string directory in Directory.GetDirectories(currentDirectory.ToString()))
+                        {
+                            if (directory.EndsWith("/.git") || directory.EndsWith("\\.git"))
+                            {
+                                foundRepositories.Add(new(currentDirectory.AsSpan()));
+                                found = true;
+                                break;
+                            }
+                        }
 
-                currentDirectory.Dispose();
+                        if (!found)
+                        {
+                            if (Directory.GetParent(currentDirectory.ToString())?.FullName is string parentDirectory)
+                            {
+                                stack.Push(new(parentDirectory));
+                            }
+                        }
+                    }
+
+                    currentDirectory.Dispose();
+                }
             }
 
             Array<Repository> repositories = new(foundRepositories.Count);
