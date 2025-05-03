@@ -51,7 +51,7 @@ namespace VoxelGame
             uiCamera.Order = 1;
             uiCamera.RenderMask = uiMask;
 
-            worldCamera = new(world, window, CameraSettings.CreatePerspectiveDegrees(90f));
+            worldCamera = Camera.CreatePerspectiveDegrees(world, window, 90f);
             worldCamera.RenderMask = worldMask;
             Transform cameraTransform = worldCamera.Become<Transform>();
             cameraTransform.LocalPosition = new(0f, 1f, -10f);
