@@ -26,12 +26,11 @@ using Worlds;
 
 namespace Abacus
 {
-    public readonly partial struct DesktopPlatformer : IProgram<DesktopPlatformer>
+    public class DesktopPlatformer : Program
     {
         private const float Gravity = 14f;
         private const float DisplayScale = 0.01f;
 
-        private readonly Simulator simulator;
         private readonly Window window;
         private readonly Camera camera;
         private readonly Body floorBody;
@@ -39,44 +38,8 @@ namespace Abacus
         private readonly Body rightWallBody;
         private readonly StatefulAutomationPlayer playerMaterialAnimator;
 
-        private readonly World World => window.world;
-
-        void IProgram<DesktopPlatformer>.Start(ref DesktopPlatformer program, in Simulator simulator, in World world)
+        public unsafe DesktopPlatformer(Simulator simulator) : base(simulator)
         {
-            program = new DesktopPlatformer(simulator, world);
-        }
-
-        StatusCode IProgram<DesktopPlatformer>.Update(in TimeSpan delta)
-        {
-            if (window.IsDestroyed)
-            {
-                return StatusCode.Success(0);
-            }
-
-            UpdateCollidersToMatchDisplay(World);
-            (Vector2 direction, bool jump) = ReadInput(World);
-            MovePlayer(World, direction, jump, (float)delta.TotalSeconds);
-            AnimatePlayerParameters(World);
-            CheckIfPlayersAreGrounded(simulator, World);
-            MakeCameraFollowPlayer(World);
-            MakeWindowFollowCamera(World);
-            TeleportPlayerToMousePosition(World);
-            CloseWindow(World);
-            return StatusCode.Continue;
-        }
-
-        void IProgram<DesktopPlatformer>.Finish(in StatusCode statusCode)
-        {
-            if (!window.IsDestroyed)
-            {
-                window.Dispose();
-            }
-        }
-
-        private unsafe DesktopPlatformer(Simulator simulator, World world)
-        {
-            this.simulator = simulator;
-
             window = new(world, "Fly", default, new(200, 200), "vulkan", new(&WindowClosed));
             window.Position = new(200, 200);
             window.IsTransparent = true;
@@ -93,8 +56,13 @@ namespace Abacus
 
             //double sided quad
             Mesh quadMesh = Mesh.CreateCenteredQuad(world);
-            quadMesh.AddTriangle(2, 1, 0);
-            quadMesh.AddTriangle(0, 3, 2);
+            Span<uint> indices = quadMesh.SetIndexCount(quadMesh.IndexCount * 2);
+            indices[6] = 2;
+            indices[7] = 1;
+            indices[8] = 0;
+            indices[9] = 0;
+            indices[10] = 3;
+            indices[11] = 2;
 
             Material unlitMaterial = new(world, EmbeddedResource.GetAddress<UnlitTexturedMaterial>());
             unlitMaterial.AddInstanceBinding<Color>();
@@ -193,7 +161,34 @@ namespace Abacus
             }
         }
 
-        private readonly AtlasTexture GetPlayerAtlas(Simulator simulator, World world)
+        public override void Dispose()
+        {
+            if (!window.IsDestroyed)
+            {
+                window.Dispose();
+            }
+        }
+
+        public override bool Update(Simulator simulator, double deltaTime)
+        {
+            if (window.IsDestroyed)
+            {
+                return false;
+            }
+
+            UpdateCollidersToMatchDisplay();
+            (Vector2 direction, bool jump) = ReadInput(world);
+            MovePlayer(world, direction, jump, deltaTime);
+            AnimatePlayerParameters(world);
+            CheckIfPlayersAreGrounded(simulator, world);
+            MakeCameraFollowPlayer(world);
+            MakeWindowFollowCamera();
+            TeleportPlayerToMousePosition(world);
+            CloseWindow(world);
+            return true;
+        }
+
+        private AtlasTexture GetPlayerAtlas(Simulator simulator, World world)
         {
             Texture idle = new(world, "Assets/Textures/Spaceman/Idle.png");
             Texture idle2 = new(world, "Assets/Textures/Spaceman/Idle2.png");
@@ -203,7 +198,7 @@ namespace Abacus
             Texture walk = new(world, "Assets/Textures/Spaceman/Walk.png");
             Texture walk2 = new(world, "Assets/Textures/Spaceman/Walk2.png");
 
-            simulator.UpdateSystems(TimeSpan.MinValue, world);
+            simulator.Update();
 
             Span<AtlasTexture.InputSprite> sprites = stackalloc AtlasTexture.InputSprite[]
             {
@@ -220,7 +215,7 @@ namespace Abacus
             return atlasTexture;
         }
 
-        private readonly void CloseWindow(World world)
+        private void CloseWindow(World world)
         {
             if (world.TryGetFirst(out Keyboard keyboard))
             {
@@ -231,7 +226,7 @@ namespace Abacus
             }
         }
 
-        private readonly void TeleportPlayerToMousePosition(World world)
+        private void TeleportPlayerToMousePosition(World world)
         {
             if (world.TryGetFirst(out GlobalMouse mouse))
             {
@@ -309,7 +304,7 @@ namespace Abacus
             return default;
         }
 
-        private readonly void MovePlayer(World world, Vector2 direction, bool jump, float delta)
+        private static void MovePlayer(World world, Vector2 direction, bool jump, double deltaTime)
         {
             Entity player = GetMainPlayer(world);
             if (player == default)
@@ -348,18 +343,18 @@ namespace Abacus
                 if (jump)
                 {
                     ref Jetpack jetpack = ref player.GetComponent<Jetpack>();
-                    jetpack.cooldownTime -= delta;
+                    jetpack.cooldownTime -= (float)deltaTime;
                     if (jetpack.availableTime > 0 && jetpack.cooldownTime < 0)
                     {
-                        playerVelocity.Y += delta * 30f;
-                        jetpack.availableTime -= delta;
+                        playerVelocity.Y += (float)deltaTime * 30f;
+                        jetpack.availableTime -= (float)deltaTime;
                     }
                 }
             }
 
             if (changeVelocity)
             {
-                playerVelocity.X = Lerp(playerVelocity.X, direction.X * moveSpeed, acceleration * delta);
+                playerVelocity.X = float.Lerp(playerVelocity.X, direction.X * moveSpeed, acceleration * (float)deltaTime);
             }
 
             playerBody.LinearVelocity = playerVelocity;
@@ -369,7 +364,7 @@ namespace Abacus
             playerTransform.LocalPosition.Z = 0f;
         }
 
-        private unsafe readonly void CheckIfPlayersAreGrounded(Simulator simulator, World world)
+        private unsafe static void CheckIfPlayersAreGrounded(Simulator simulator, World world)
         {
             foreach (uint playerEntity in world.GetAllContaining<IsPlayer>())
             {
@@ -377,12 +372,12 @@ namespace Abacus
                 Transform playerTransform = player.As<Transform>();
                 player.SetComponent(new GroundedState(false));
                 float raycastDistance = 3f;
-                simulator.TryHandleMessage(new RaycastRequest(world, playerTransform.WorldPosition, -Vector3.UnitY, new(&GroundHitCallback), raycastDistance, player.value));
+                simulator.Broadcast(new RaycastRequest(world, playerTransform.WorldPosition, -Vector3.UnitY, new(&GroundHitCallback), raycastDistance, player.value));
             }
 
             [UnmanagedCallersOnly]
             static void GroundHitCallback(RaycastHitCallback.Input input)
-            { 
+            {
                 uint playerEntity = (uint)input.request.userData;
                 ReadOnlySpan<RaycastHit> hits = input.Hits;
                 for (int i = 0; i < hits.Length; i++)
@@ -397,7 +392,7 @@ namespace Abacus
             }
         }
 
-        private readonly void MakeCameraFollowPlayer(World world)
+        private void MakeCameraFollowPlayer(World world)
         {
             Entity player = GetMainPlayer(world);
             if (player == default)
@@ -412,7 +407,7 @@ namespace Abacus
             cameraTransform.LocalPosition = new(playerPosition.X, playerPosition.Y, cameraPosition.Z);
         }
 
-        private readonly void MakeWindowFollowCamera(World world)
+        private void MakeWindowFollowCamera()
         {
             Transform cameraTransform = camera.Become<Transform>();
             Vector3 cameraPosition = cameraTransform.WorldPosition;
@@ -424,12 +419,12 @@ namespace Abacus
             Vector2 windowSize = window.Size;
             Vector2 windowPosition = default;
             float taskBarSize = 64f;
-            windowPosition.X = Lerp(windowSize.X * 0.5f, width - windowSize.X, (cameraPosition.X / maxWidth) + 0.5f) - windowSize.X * 0.5f;
-            windowPosition.Y = Lerp((windowSize.Y * 0.5f) - taskBarSize, height - windowSize.Y, (cameraPosition.Y / maxHeight) + 0.5f) + windowSize.Y * 0.5f;
+            windowPosition.X = float.Lerp(windowSize.X * 0.5f, width - windowSize.X, (cameraPosition.X / maxWidth) + 0.5f) - windowSize.X * 0.5f;
+            windowPosition.Y = float.Lerp((windowSize.Y * 0.5f) - taskBarSize, height - windowSize.Y, (cameraPosition.Y / maxHeight) + 0.5f) + windowSize.Y * 0.5f;
             window.Position = new(windowPosition.X, height - windowPosition.Y);
         }
 
-        private readonly void UpdateCollidersToMatchDisplay(World world)
+        private void UpdateCollidersToMatchDisplay()
         {
             Display display = window.Display;
             Transform floorTransform = floorBody;
@@ -448,7 +443,7 @@ namespace Abacus
             rightWallTransform.LocalScale = new(2f, height + 1f, 2f);
         }
 
-        private readonly void AnimatePlayerParameters(World world)
+        private void AnimatePlayerParameters(World world)
         {
             foreach (uint playerEntity in world.GetAllContaining<IsPlayer>())
             {
@@ -478,11 +473,6 @@ namespace Abacus
                 playerMaterialAnimator.SetParameter("velocityY", playerVelocity.Y);
                 playerMaterialAnimator.SetParameter("isGrounded", isGrounded ? 1f : 0f);
             }
-        }
-
-        private static float Lerp(float a, float b, float t)
-        {
-            return a + (b - a) * t;
         }
 
         public struct GroundedState

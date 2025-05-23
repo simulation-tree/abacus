@@ -1,45 +1,27 @@
 ﻿using Abacus;
 using Abacus.Simulator;
-using Simulation;
 using System;
 using System.Diagnostics;
 using System.Runtime;
 using VoxelGame;
 using Worlds;
-using Simulator = AbacusSimulator.AbacusSimulator;
 
 InitializeGarbageCollector();
 InitializeTraceListeners();
 InitializeRegistries();
 
 Trace.WriteLine("Starting simulator program");
-StatusCode statusCode = default;
-
 Schema schema = SchemaLoader.Get();
-using (World world = new(schema))
+using Application application = new(schema);
+using VoxelGameProgram program = new(application.Simulator);
+double deltaTime;
+do
 {
-    using (Simulator simulator = new(world))
-    {
-        using (Program<VoxelGameProgram> program = new(world))
-        {
-            while (!program.IsFinished(out statusCode))
-            {
-                simulator.Update();
-            }
-        }
-    }
+    application.Update(out deltaTime);
 }
+while (program.Update(application.Simulator, deltaTime));
 
-if (statusCode.IsSuccess)
-{
-    Trace.WriteLine($"Program finished successfully with status code {statusCode.Code}");
-    return 0;
-}
-else
-{
-    Trace.WriteLine($"Program failed with status code {statusCode.Code}");
-    return statusCode.Code;
-}
+Trace.WriteLine($"Finished simulator program");
 
 static void InitializeGarbageCollector()
 {

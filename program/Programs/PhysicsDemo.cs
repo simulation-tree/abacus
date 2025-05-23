@@ -24,9 +24,8 @@ using Worlds;
 
 namespace Abacus
 {
-    public partial struct PhysicsDemo : IProgram<PhysicsDemo>
+    public class PhysicsDemo : Program
     {
-        private readonly Simulator simulator;
         private readonly Window window;
         private readonly Camera camera;
         private readonly Transform cameraTransform;
@@ -39,13 +38,10 @@ namespace Abacus
         private Vector3 cameraPosition;
         private Vector2 cameraPitchYaw;
 
-        private readonly World World => window.world;
-
-        private unsafe PhysicsDemo(Simulator simulator, World world)
+        public unsafe PhysicsDemo(Simulator simulator) : base(simulator)
         {
             LayerMask firstLayer = new(0);
 
-            this.simulator = simulator;
             window = new(world, "Physics Demo", new Vector2(400, 200), new(900, 720), "vulkan", new(&WindowClosed));
             window.IsResizable = true;
             window.CursorState = CursorState.HiddenAndConfined;
@@ -113,23 +109,22 @@ namespace Abacus
             }
         }
 
-        readonly void IProgram<PhysicsDemo>.Start(ref PhysicsDemo program, in Simulator simulator, in World world)
+        public override void Dispose()
         {
-            program = new PhysicsDemo(simulator, world);
         }
 
-        StatusCode IProgram<PhysicsDemo>.Update(in TimeSpan delta)
+        public override bool Update(Simulator simulator, double deltaTime)
         {
             if (window.IsDestroyed)
             {
-                return StatusCode.Success(0);
+                return false;
             }
 
-            if (World.TryGetFirst(out Keyboard keyboard))
+            if (world.TryGetFirst(out Keyboard keyboard))
             {
                 if (keyboard.WasPressed(Keyboard.Button.Escape))
                 {
-                    return StatusCode.Success(1);
+                    return false;
                 }
 
                 Transform floorTransform = floorBody;
@@ -143,44 +138,44 @@ namespace Abacus
                 float tiltSpeed = 0.2f;
                 if (keyboard.IsPressed(Keyboard.Button.Left))
                 {
-                    floorTransform.LocalRotation *= Quaternion.CreateFromAxisAngle(Vector3.UnitZ, tiltSpeed * (float)delta.TotalSeconds);
+                    floorTransform.LocalRotation *= Quaternion.CreateFromAxisAngle(Vector3.UnitZ, tiltSpeed * (float)deltaTime);
                 }
 
                 if (keyboard.IsPressed(Keyboard.Button.Right))
                 {
-                    floorTransform.LocalRotation *= Quaternion.CreateFromAxisAngle(Vector3.UnitZ, -tiltSpeed * (float)delta.TotalSeconds);
+                    floorTransform.LocalRotation *= Quaternion.CreateFromAxisAngle(Vector3.UnitZ, -tiltSpeed * (float)deltaTime);
                 }
 
                 if (keyboard.IsPressed(Keyboard.Button.Up))
                 {
-                    floorTransform.LocalRotation *= Quaternion.CreateFromAxisAngle(Vector3.UnitX, tiltSpeed * (float)delta.TotalSeconds);
+                    floorTransform.LocalRotation *= Quaternion.CreateFromAxisAngle(Vector3.UnitX, tiltSpeed * (float)deltaTime);
                 }
 
                 if (keyboard.IsPressed(Keyboard.Button.Down))
                 {
-                    floorTransform.LocalRotation *= Quaternion.CreateFromAxisAngle(Vector3.UnitX, -tiltSpeed * (float)delta.TotalSeconds);
+                    floorTransform.LocalRotation *= Quaternion.CreateFromAxisAngle(Vector3.UnitX, -tiltSpeed * (float)deltaTime);
                 }
 
                 //resize floor
                 float sizeChangeSpeed = 4f;
                 if (keyboard.IsPressed(Keyboard.Button.J))
                 {
-                    floorTransform.LocalScale = new(floorTransform.LocalScale.X - sizeChangeSpeed * (float)delta.TotalSeconds, floorTransform.LocalScale.Y, floorTransform.LocalScale.Z);
+                    floorTransform.LocalScale = new(floorTransform.LocalScale.X - sizeChangeSpeed * (float)deltaTime, floorTransform.LocalScale.Y, floorTransform.LocalScale.Z);
                 }
 
                 if (keyboard.IsPressed(Keyboard.Button.L))
                 {
-                    floorTransform.LocalScale = new(floorTransform.LocalScale.X + sizeChangeSpeed * (float)delta.TotalSeconds, floorTransform.LocalScale.Y, floorTransform.LocalScale.Z);
+                    floorTransform.LocalScale = new(floorTransform.LocalScale.X + sizeChangeSpeed * (float)deltaTime, floorTransform.LocalScale.Y, floorTransform.LocalScale.Z);
                 }
 
                 if (keyboard.IsPressed(Keyboard.Button.I))
                 {
-                    floorTransform.LocalScale = new(floorTransform.LocalScale.X, floorTransform.LocalScale.Y, floorTransform.LocalScale.Z + sizeChangeSpeed * (float)delta.TotalSeconds);
+                    floorTransform.LocalScale = new(floorTransform.LocalScale.X, floorTransform.LocalScale.Y, floorTransform.LocalScale.Z + sizeChangeSpeed * (float)deltaTime);
                 }
 
                 if (keyboard.IsPressed(Keyboard.Button.K))
                 {
-                    floorTransform.LocalScale = new(floorTransform.LocalScale.X, floorTransform.LocalScale.Y, floorTransform.LocalScale.Z - sizeChangeSpeed * (float)delta.TotalSeconds);
+                    floorTransform.LocalScale = new(floorTransform.LocalScale.X, floorTransform.LocalScale.Y, floorTransform.LocalScale.Z - sizeChangeSpeed * (float)deltaTime);
                 }
 
                 //reset ball
@@ -200,7 +195,7 @@ namespace Abacus
                 }
             }
 
-            if (World.TryGetFirst(out Mouse mouse))
+            if (world.TryGetFirst(out Mouse mouse))
             {
                 //Vector2 screenPoint = camera.Destination.GetScreenPointFromPosition(mouse.Position);
                 Vector2 screenPoint = new(0.5f, 0.5f);
@@ -208,8 +203,8 @@ namespace Abacus
                 (Vector3 origin, Vector3 direction) = cameraProjection.GetRayFromScreenPoint(screenPoint);
                 unsafe
                 {
-                    RaycastRequest raycast = new(World, origin, direction, new(&RaycastHitCallback), 5f, (ulong)delta.Ticks);
-                    simulator.TryHandleMessage(raycast);
+                    RaycastRequest raycast = new(world, origin, direction, new(&RaycastHitCallback), 5f, (ulong)(deltaTime * 10000));
+                    simulator.Broadcast(raycast);
                 }
 
                 if (mouse.WasPressed(Mouse.Button.RightButton))
@@ -230,7 +225,7 @@ namespace Abacus
                     //debugTransform2.LocalScale = new(0.1f, 0.1f, 0.1f);
 
                     Vector3 launchForce = Vector3.Normalize(cameraTransform.WorldForward + Vector3.UnitY * 0.2f) * 8f;
-                    Body projectile = new(World, new SphereShape(0.5f), BodyType.Dynamic, launchForce);
+                    Body projectile = new(world, new SphereShape(0.5f), BodyType.Dynamic, launchForce);
                     Entity projectileEntity = projectile;
                     MeshRenderer projectileRenderer = projectileEntity.Become<MeshRenderer>();
                     projectileRenderer.Mesh = sphereMesh;
@@ -245,20 +240,16 @@ namespace Abacus
                 }
             }
 
-            SharedFunctions.MoveCameraAround(World, cameraTransform, delta, ref cameraPosition, ref cameraPitchYaw, new(1f, 1f));
-            SharedFunctions.DestroyTemporaryEntities(World, delta);
-            return StatusCode.Continue;
-        }
-
-        readonly void IProgram<PhysicsDemo>.Finish(in StatusCode statusCode)
-        {
+            SharedFunctions.MoveCameraAround(world, cameraTransform, deltaTime, ref cameraPosition, ref cameraPitchYaw, new(1f, 1f));
+            SharedFunctions.DestroyTemporaryEntities(world, deltaTime);
+            return true;
         }
 
         [UnmanagedCallersOnly]
         private unsafe static void RaycastHitCallback(RaycastHitCallback.Input input)
         {
             World world = input.world;
-            TimeSpan delta = new((long)input.request.userData);
+            double deltaTime = input.request.userData / 10000.0;
             ReadOnlySpan<RaycastHit> hits = input.Hits;
             foreach (RaycastHit hit in hits)
             {
@@ -267,7 +258,7 @@ namespace Abacus
                 if (contains)
                 {
                     float hue = color.value.GetHue();
-                    hue += 0.3f * (float)delta.TotalSeconds;
+                    hue += 0.3f * (float)deltaTime;
                     while (hue > 1f)
                     {
                         hue -= 1f;
@@ -280,8 +271,8 @@ namespace Abacus
                 {
                     if (mouse.IsPressed(Mouse.Button.LeftButton))
                     {
-                        Transform transform = new Entity(world, hit.entity).As<Transform>();
-                        transform.LocalPosition -= hit.normal * (float)delta.TotalSeconds * 4f;
+                        Transform transform = Entity.Get<Transform>(world, hit.entity);
+                        transform.LocalPosition -= hit.normal * (float)deltaTime * 4f;
                     }
                 }
             }

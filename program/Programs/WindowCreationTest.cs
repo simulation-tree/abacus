@@ -12,64 +12,57 @@ using Worlds;
 
 namespace Abacus
 {
-    public unsafe partial struct WindowCreationTest : IProgram<WindowCreationTest>
+    public class WindowCreationTest : Program
     {
-        private readonly World world;
         private readonly Settings settings;
-        private TimeSpan time;
+        private double time;
         private byte state;
 
-        private WindowCreationTest(World world)
+        public WindowCreationTest(Simulator simulator) : base(simulator)
         {
-            this.world = world;
             settings = new(world);
-            time = TimeSpan.FromSeconds(0.5f);
+            time = 0.5f;
         }
 
-        void IProgram<WindowCreationTest>.Finish(in StatusCode statusCode)
+        public override void Dispose()
         {
         }
 
-        void IProgram<WindowCreationTest>.Start(ref WindowCreationTest program, in Simulator simulator, in World world)
+        public override bool Update(Simulator simulator, double deltaTime)
         {
-            program = new WindowCreationTest(world);
-        }
-
-        StatusCode IProgram<WindowCreationTest>.Update(in TimeSpan delta)
-        {
-            time -= delta;
-            if (time.TotalSeconds <= 0f)
+            time -= deltaTime;
+            if (time <= 0f)
             {
                 state++;
                 if (state == 1)
                 {
                     CreateWindow("First Window", new(300, 300), new(50, 50), new(1f, 0f, 0f, 1f), 0);
-                    time = TimeSpan.FromSeconds(2f);
+                    time = 2f;
                 }
                 else if (state == 2)
                 {
                     DestroyAllWindows();
-                    time = TimeSpan.FromSeconds(0.5f);
+                    time = 0.5f;
                 }
                 else if (state == 3)
                 {
                     CreateWindow("Second Window", new(200, 300), new(0, 0), new(0f, 1f, 0f, 1f), 1);
                     CreateWindow("Third Window", new(400, 300), new(100, 100), new(0f, 0f, 1f, 1f), 2);
-                    time = TimeSpan.FromSeconds(2f);
+                    time = 2f;
                 }
                 else if (state == 4)
                 {
                     DestroyAllWindows();
-                    time = TimeSpan.FromSeconds(0.5f);
+                    time = 0.5f;
                 }
                 else if (state == 5)
                 {
                     CreateWindow("Fourth Window", new(300, 300), new(50, 50), new(1f, 1f, 0f, 1f), 1);
-                    time = TimeSpan.FromSeconds(2f);
+                    time = 2f;
                 }
                 else if (state == 6)
                 {
-                    return StatusCode.Success(0);
+                    return false;
                 }
             }
 
@@ -77,15 +70,15 @@ namespace Abacus
             {
                 if (world.CountEntities<Window>() == 0)
                 {
-                    return StatusCode.Success(1);
+                    return false;
                 }
             }
 
             SharedFunctions.UpdateUISettings(world);
-            return StatusCode.Continue;
+            return true;
         }
 
-        private readonly void CreateWindow(ASCIIText256 title, Vector2 windowPosition, Vector2 squarePosition, Vector4 color, Layer layer)
+        private unsafe void CreateWindow(ASCIIText256 title, Vector2 windowPosition, Vector2 squarePosition, Vector4 color, Layer layer)
         {
             LayerMask layerMask = new(layer);
 
@@ -109,7 +102,7 @@ namespace Abacus
             resizable.SelectionMask = layerMask;
         }
 
-        private readonly void DestroyAllWindows()
+        private void DestroyAllWindows()
         {
             Span<uint> toDestroy = stackalloc uint[8];
             int count = 0;

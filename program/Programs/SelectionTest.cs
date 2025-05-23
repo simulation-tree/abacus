@@ -1,6 +1,5 @@
 ﻿using Cameras;
 using Simulation;
-using System;
 using System.Diagnostics;
 using System.Numerics;
 using System.Runtime.InteropServices;
@@ -10,29 +9,11 @@ using Worlds;
 
 namespace Abacus
 {
-    public readonly partial struct SelectionTest : IProgram<SelectionTest>
+    public class SelectionTest : Program
     {
         private readonly Window window;
 
-        private readonly World World => window.world;
-
-        void IProgram<SelectionTest>.Start(ref SelectionTest program, in Simulator simulator, in World world)
-        {
-            program = new SelectionTest(world);
-        }
-
-        StatusCode IProgram<SelectionTest>.Update(in TimeSpan delta)
-        {
-            if (!IsAnyWindowOpen(World))
-            {
-                return StatusCode.Success(0);
-            }
-
-            SharedFunctions.UpdateUISettings(World);
-            return StatusCode.Continue;
-        }
-
-        private unsafe SelectionTest(World world)
+        public unsafe SelectionTest(Simulator simulator) : base(simulator)
         {
             window = new(world, "Selection Test", new(200, 200), new(900, 720), "vulkan", new(&OnWindowClosed));
             window.IsResizable = true;
@@ -63,7 +44,18 @@ namespace Abacus
             }
         }
 
-        void IProgram<SelectionTest>.Finish(in StatusCode statusCode)
+        public override bool Update(Simulator simulator, double deltaTime)
+        {
+            if (!IsAnyWindowOpen(world))
+            {
+                return false;
+            }
+
+            SharedFunctions.UpdateUISettings(world);
+            return true;
+        }
+
+        public override void Dispose()
         {
             if (!window.IsDestroyed)
             {

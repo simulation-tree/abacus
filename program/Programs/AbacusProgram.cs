@@ -25,9 +25,9 @@ using Worlds;
 
 namespace Abacus
 {
-    public partial struct AbacusProgram : IProgram<AbacusProgram>
+    public class AbacusProgram : Program
     {
-        private TimeSpan time;
+        private double time;
         private Vector3 cameraPosition;
         private Vector2 cameraPitchYaw;
 
@@ -42,47 +42,7 @@ namespace Abacus
         private readonly Mesh9Sliced glowMesh;
         private readonly MeshRenderer glowRenderer;
 
-        private readonly World World => window.world;
-
-        readonly void IProgram<AbacusProgram>.Start(ref AbacusProgram program, in Simulator simulator, in World world)
-        {
-            program = new(world);
-        }
-
-        StatusCode IProgram<AbacusProgram>.Update(in TimeSpan delta)
-        {
-            time += delta;
-            if (time.TotalSeconds > 120f || window.IsDestroyed)
-            {
-                Trace.WriteLine("Conditions reached for finishing the demo");
-                return StatusCode.Success(0); //source of "shutdown" event
-            }
-
-            float deltaSeconds = (float)delta.TotalSeconds;
-            TestMouseInputs(World);
-            UpdateGlowMeshSize(World);
-            AnimateTestRenderer(World, deltaSeconds);
-            Transform cameraTransform = camera.Become<Transform>();
-            SharedFunctions.MoveCameraAround(World, cameraTransform, delta, ref cameraPosition, ref cameraPitchYaw, new(1f, 1f));
-            ModifyText(World);
-            if (TestWindowEntity(World, deltaSeconds))
-            {
-                //propagating upwards
-                return StatusCode.Success(1);
-            }
-
-            return StatusCode.Continue;
-        }
-
-        readonly void IProgram<AbacusProgram>.Finish(in StatusCode statusCode)
-        {
-            if (!window.IsDestroyed)
-            {
-                window.Dispose();
-            }
-        }
-
-        private unsafe AbacusProgram(World world)
+        public unsafe AbacusProgram(Simulator simulator) : base(simulator)
         {
             //load scene built in unity
             try
@@ -116,11 +76,10 @@ namespace Abacus
             cameraTransform.LocalPosition = new(0f, 0f, -10f);
             cameraPosition = cameraTransform.LocalPosition;
 
-            Mesh manuallyBuiltMesh = new(world);
-            Mesh.Collection<Vector3> positions = manuallyBuiltMesh.CreatePositions(4);
-            Mesh.Collection<Vector2> uvs = manuallyBuiltMesh.CreateUVs(4);
-            Mesh.Collection<Vector3> normals = manuallyBuiltMesh.CreateNormals(4);
-            Mesh.Collection<Vector4> colors = manuallyBuiltMesh.CreateColors(4);
+            Span<Vector3> positions = stackalloc Vector3[4];
+            Span<Vector2> uvs = stackalloc Vector2[4];
+            Span<Vector3> normals = stackalloc Vector3[4];
+            Span<Vector4> colors = stackalloc Vector4[4];
 
             //simple quad
             positions[0] = new(0, 0, 0);
@@ -143,8 +102,15 @@ namespace Abacus
             colors[2] = new(1, 1, 1, 1);
             colors[3] = new(1, 1, 1, 1);
 
-            manuallyBuiltMesh.AddTriangle(0, 1, 2);
-            manuallyBuiltMesh.AddTriangle(2, 3, 0);
+            Span<uint> indices = stackalloc uint[6];
+            indices[0] = 0;
+            indices[1] = 1;
+            indices[2] = 2;
+            indices[3] = 2;
+            indices[4] = 3;
+            indices[5] = 0;
+
+            Mesh manuallyBuiltMesh = new(world, positions, uvs, normals, colors, indices);
 
             Model quadModel = new(world, EmbeddedResource.GetAddress<QuadModel>());
             Mesh quadMesh = new(world, quadModel);
@@ -263,14 +229,46 @@ namespace Abacus
             }
         }
 
-        private readonly void UpdateGlowMeshSize(World world)
+        public override void Dispose()
+        {
+            if (!window.IsDestroyed)
+            {
+                window.Dispose();
+            }
+        }
+
+        public override bool Update(Simulator simulator, double deltaTime)
+        {
+            time += deltaTime;
+            if (time > 120f || window.IsDestroyed)
+            {
+                Trace.WriteLine("Conditions reached for finishing the demo");
+                return false; //source of "shutdown" event
+            }
+
+            TestMouseInputs(world);
+            UpdateGlowMeshSize(world);
+            AnimateTestRenderer(world, deltaTime);
+            Transform cameraTransform = camera.Become<Transform>();
+            SharedFunctions.MoveCameraAround(world, cameraTransform, deltaTime, ref cameraPosition, ref cameraPitchYaw, new(1f, 1f));
+            ModifyText(world);
+            if (TestWindowEntity(world, deltaTime))
+            {
+                //propagating upwards
+                return false;
+            }
+
+            return true;
+        }
+
+        private void UpdateGlowMeshSize(World world)
         {
             Transform glowMeshTransform = glowMesh.As<Transform>();
             Transform glowRendererTransform = glowRenderer.As<Transform>();
             glowMeshTransform.LocalScale = glowRendererTransform.WorldScale;
         }
 
-        private readonly void ModifyText(World world)
+        private void ModifyText(World world)
         {
             if (world.TryGetFirst(out Keyboard keyboard))
             {
@@ -302,7 +300,7 @@ namespace Abacus
             }
         }
 
-        private readonly void AnimateTestRenderer(World world, float delta)
+        private void AnimateTestRenderer(World world, double deltaTime)
         {
             foreach (Keyboard keyboard in world.GetAll<Keyboard>())
             {
@@ -314,15 +312,16 @@ namespace Abacus
                 if (keyboard.IsPressed(Keyboard.Button.O))
                 {
                     Mesh mesh = dummyRenderer.Mesh;
-                    Mesh.Collection<Vector3> positions = mesh.Positions;
+                    Span<Vector3> positions = mesh.Positions;
                     float revolveSpeed = 2f;
                     float revolveDistance = 0.7f;
-                    float x = MathF.Sin((float)time.TotalSeconds * revolveSpeed) * revolveDistance;
-                    float y = MathF.Cos((float)time.TotalSeconds * revolveSpeed) * revolveDistance;
-                    positions[0] = Vector3.Lerp(positions[0], new(x, y, 0), delta * 3f);
-                    positions[1] = Vector3.Lerp(positions[1], new(x + 1, y, 0), delta * 4f);
-                    positions[2] = Vector3.Lerp(positions[2], new(x + 1, y + 1, 0), delta * 2f);
-                    positions[3] = Vector3.Lerp(positions[3], new(x, y + 1, 0), delta * 5f);
+                    float x = MathF.Sin((float)time * revolveSpeed) * revolveDistance;
+                    float y = MathF.Cos((float)time * revolveSpeed) * revolveDistance;
+                    positions[0] = Vector3.Lerp(positions[0], new(x, y, 0), (float)deltaTime * 3f);
+                    positions[1] = Vector3.Lerp(positions[1], new(x + 1, y, 0), (float)deltaTime * 4f);
+                    positions[2] = Vector3.Lerp(positions[2], new(x + 1, y + 1, 0), (float)deltaTime * 2f);
+                    positions[3] = Vector3.Lerp(positions[3], new(x, y + 1, 0), (float)deltaTime * 5f);
+                    mesh.IncrementVersion();
                     //would look a lot lot cooler with many more vertices :o
                 }
 
@@ -344,7 +343,7 @@ namespace Abacus
 
             ref Color color = ref dummyRenderer.GetComponent<Color>();
             float hue = color.value.GetHue();
-            hue += delta * 0.2f;
+            hue += (float)deltaTime * 0.2f;
             while (hue > 1f)
             {
                 hue -= 1f;
@@ -353,7 +352,7 @@ namespace Abacus
             color.value.SetHue(hue);
         }
 
-        private readonly bool TestWindowEntity(World world, float delta)
+        private bool TestWindowEntity(World world, double deltaTime)
         {
             Vector2 windowPosition = window.Position;
             Vector2 windowSize = window.Size;
@@ -457,11 +456,11 @@ namespace Abacus
                     Transform squareBoxTransform = squareBox.As<Transform>();
                     if (alt.IsPressed)
                     {
-                        squareBoxTransform.LocalPosition += new Vector3(direction, 0) * delta * speed;
+                        squareBoxTransform.LocalPosition += new Vector3(direction, 0) * (float)deltaTime * speed;
                     }
                     else
                     {
-                        squareBoxTransform.LocalScale += new Vector3(direction, 0) * delta * speed;
+                        squareBoxTransform.LocalScale += new Vector3(direction, 0) * (float)deltaTime * speed;
                     }
                 }
                 else
@@ -471,12 +470,12 @@ namespace Abacus
                     direction *= speed;
                     if (alt.IsPressed)
                     {
-                        windowSize += direction * delta;
-                        windowPosition -= direction * delta * 0.5f;
+                        windowSize += direction * (float)deltaTime;
+                        windowPosition -= direction * (float)deltaTime * 0.5f;
                     }
                     else
                     {
-                        windowPosition += direction * delta;
+                        windowPosition += direction * (float)deltaTime;
                     }
 
                     //lerp window to a fixed position and size when holding the V key
@@ -488,8 +487,8 @@ namespace Abacus
                             resetSpeed *= 3f;
                         }
 
-                        windowPosition = Vector2.Lerp(windowPosition, new(300, 300), delta * resetSpeed);
-                        windowSize = Vector2.Lerp(windowSize, new(400, 400), delta * resetSpeed);
+                        windowPosition = Vector2.Lerp(windowPosition, new(300, 300), (float)deltaTime * resetSpeed);
+                        windowSize = Vector2.Lerp(windowSize, new(400, 400), (float)deltaTime * resetSpeed);
                     }
                 }
             }
@@ -499,7 +498,7 @@ namespace Abacus
             return false;
         }
 
-        private readonly void TestMouseInputs(World world)
+        private void TestMouseInputs(World world)
         {
             foreach (Mouse mouse in world.GetAll<Mouse>())
             {

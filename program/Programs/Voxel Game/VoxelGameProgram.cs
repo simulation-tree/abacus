@@ -1,4 +1,5 @@
-﻿using Cameras;
+﻿using Abacus;
+using Cameras;
 using Cameras.Components;
 using Collections.Generic;
 using Data;
@@ -12,7 +13,6 @@ using Simulation;
 using Skyboxes;
 using System;
 using System.Numerics;
-using System.Runtime.InteropServices;
 using Textures;
 using Transforms;
 using Transforms.Components;
@@ -22,7 +22,7 @@ using Worlds;
 
 namespace VoxelGame
 {
-    public partial struct VoxelGameProgram : IProgram<VoxelGameProgram>
+    public class VoxelGameProgram : Program
     {
         public static readonly LayerMask worldMask = new(0);
         public static readonly LayerMask uiMask = new(1);
@@ -32,15 +32,13 @@ namespace VoxelGame
         private readonly Material chunkMaterial;
         private readonly Mesh quadMesh;
         private readonly AtlasTexture chunkAtlas;
-        private readonly World world;
         private readonly TerrainGenerator terrainGenerator;
         private readonly Dictionary<BlockTextureKey, BlockTexture> blockTextures;
         private Vector3 cameraPosition;
         private Vector2 cameraPitchYaw;
 
-        private unsafe VoxelGameProgram(Simulator simulator, World world)
+        public VoxelGameProgram(Simulator simulator) : base(simulator)
         {
-            this.world = world;
             terrainGenerator = new("goomba");
             Vector2 windowSize = new(900, 720);
             Vector2 windowAnchor = new(0.5f, 0.5f);
@@ -57,7 +55,7 @@ namespace VoxelGame
             cameraTransform.LocalPosition = new(0f, 1f, -10f);
             cameraPosition = cameraTransform.LocalPosition;
 
-            (chunkAtlas, blockTextures) = GetChunkAtlas(simulator, world);
+            (chunkAtlas, blockTextures) = GetChunkAtlas();
 
             chunkMaterial = new(world, EmbeddedResource.GetAddress<UnlitTexturedMaterial>());
             chunkMaterial.AddInstanceBinding<Color>();
@@ -110,7 +108,7 @@ namespace VoxelGame
             Texture skyboxSouth = new(world, "Assets/Skyboxes/Clouds/clouds1_south.bmp");
             Texture skyboxUp = new(world, "Assets/Skyboxes/Clouds/clouds1_up.bmp");
             Texture skyboxWest = new(world, "Assets/Skyboxes/Clouds/clouds1_west.bmp");
-            simulator.UpdateSystems(TimeSpan.MinValue, world);
+            simulator.Update();
 
             CubemapTexture cubemap = new(world, skyboxEast, skyboxWest, skyboxUp, skyboxDown, skyboxNorth, skyboxSouth);
             CubemapSkybox skybox = new(world, worldCamera, cubemap, worldMask);
@@ -118,33 +116,28 @@ namespace VoxelGame
             SharedFunctions.AddLabelProcessors(world);
         }
 
-        readonly void IProgram<VoxelGameProgram>.Start(ref VoxelGameProgram program, in Simulator simulator, in World world)
+        public override bool Update(Simulator simulator, double deltaTime)
         {
-            program = new VoxelGameProgram(simulator, world);
-        }
-
-        StatusCode IProgram<VoxelGameProgram>.Update(in TimeSpan delta)
-        {
-            if (!AnyWindowOpen(world))
+            if (!AnyWindowOpen())
             {
-                return StatusCode.Success(0);
+                return false;
             }
 
             if (world.TryGetFirst(out Keyboard keyboard))
             {
                 if (keyboard.WasPressed(Keyboard.Button.Escape))
                 {
-                    return StatusCode.Success(1);
+                    return false;
                 }
             }
 
             Transform cameraTransform = worldCamera.As<Transform>();
             SharedFunctions.TrackFramesPerSecond();
-            SharedFunctions.MoveCameraAround(world, cameraTransform, delta, ref cameraPosition, ref cameraPitchYaw, new(1f, 1f));
-            return StatusCode.Continue;
+            SharedFunctions.MoveCameraAround(world, cameraTransform, deltaTime, ref cameraPosition, ref cameraPitchYaw, new(1f, 1f));
+            return true;
         }
 
-        readonly void IProgram<VoxelGameProgram>.Finish(in StatusCode statusCode)
+        public override void Dispose()
         {
             if (!window.IsDestroyed)
             {
@@ -155,7 +148,7 @@ namespace VoxelGame
             blockTextures.Dispose();
         }
 
-        private readonly (AtlasTexture, Dictionary<BlockTextureKey, BlockTexture>) GetChunkAtlas(Simulator simulator, World world)
+        private (AtlasTexture, Dictionary<BlockTextureKey, BlockTexture>) GetChunkAtlas()
         {
             Texture dirt = new(world, "Assets/Textures/Blocks/Dirt.png");
             Texture grass = new(world, "Assets/Textures/Blocks/Grass.png");
@@ -163,7 +156,7 @@ namespace VoxelGame
             Texture grassSide = new(world, "Assets/Textures/Blocks/GrassSide.png");
             Texture cobblestone = new(world, "Assets/Textures/Blocks/Cobblestone.png");
 
-            simulator.UpdateSystems(TimeSpan.MinValue, world);
+            simulator.Update();
 
             Span<AtlasTexture.InputSprite> sprites = stackalloc AtlasTexture.InputSprite[]
             {
@@ -207,7 +200,7 @@ namespace VoxelGame
             return (atlasTexture, blockTextures);
         }
 
-        private static bool AnyWindowOpen(World world)
+        private bool AnyWindowOpen()
         {
             return world.CountEntities<Window>() > 0;
         }

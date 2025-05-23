@@ -18,15 +18,13 @@ using Worlds;
 
 namespace Abacus
 {
-    public readonly partial struct ControlsTest : IProgram<ControlsTest>
+    public class ControlsTest : Program
     {
         private readonly Window window;
         private readonly Menu rightClickMenu;
         private readonly Dropdown enumDropdown;
 
-        private readonly World World => window.world;
-
-        private unsafe ControlsTest(World world)
+        public unsafe ControlsTest(Simulator simulator) : base(simulator)
         {
             window = new(world, "Editor", new(200, 200), new(900, 720), "vulkan", new(&OnWindowClosed));
             window.ClearColor = new(0.5f, 0.5f, 0.5f, 1);
@@ -90,29 +88,24 @@ namespace Abacus
             option.rootMenu.IsExpanded = false;
         }
 
-        void IProgram<ControlsTest>.Start(ref ControlsTest program, in Simulator simulator, in World world)
+        public override bool Update(Simulator simulator, double deltaTime)
         {
-            program = new ControlsTest(world);
-        }
-
-        StatusCode IProgram<ControlsTest>.Update(in TimeSpan delta)
-        {
-            if (!IsAnyVirtualWindowOpen(World))
+            if (!IsAnyVirtualWindowOpen(world))
             {
-                return StatusCode.Success(0);
+                return true;
             }
 
-            if (!IsAnyWindowOpen(World))
+            if (!IsAnyWindowOpen(world))
             {
-                return StatusCode.Success(1);
+                return true;
             }
 
-            ToggleRightClickMenu(World);
-            SharedFunctions.UpdateUISettings(World);
-            return StatusCode.Continue;
+            ToggleRightClickMenu(world);
+            SharedFunctions.UpdateUISettings(world);
+            return false;
         }
 
-        private readonly void ToggleRightClickMenu(World world)
+        private void ToggleRightClickMenu(World world)
         {
             if (world.TryGetFirst(out Mouse mouse))
             {
@@ -124,7 +117,7 @@ namespace Abacus
             }
         }
 
-        void IProgram<ControlsTest>.Finish(in StatusCode statusCode)
+        public override void Dispose()
         {
             if (!window.IsDestroyed)
             {

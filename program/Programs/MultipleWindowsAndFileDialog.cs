@@ -16,26 +16,23 @@ using Worlds;
 
 namespace Abacus
 {
-    public readonly partial struct MultipleWindowsAndFileDialog : IProgram<MultipleWindowsAndFileDialog>
+    public class MultipleWindowsAndFileDialog : Program
     {
         private readonly Window firstWindow;
         private readonly Window secondWindow;
         private readonly Canvas firstCanvas;
         private readonly Canvas secondCanvas;
-        private readonly World world;
 
-        private unsafe MultipleWindowsAndFileDialog(World world)
+        public MultipleWindowsAndFileDialog(Simulator simulator) : base(simulator)
         {
-            this.world = world;
-
             LayerMask firstLayer = new(1);
             LayerMask secondLayer = new(2);
 
-            firstWindow = new(world, "First Window", new(200, 200), new(300, 300), "vulkan", new(&OnWindowClosed));
+            firstWindow = new(world, "First Window", new(200, 200), new(300, 300), "vulkan");
             firstWindow.ClearColor = new(0.2f, 0.2f, 0.4f, 1.0f);
             firstWindow.IsResizable = true;
 
-            secondWindow = new(world, "Second Window", new(500, 200), new(300, 300), "vulkan", new(&OnWindowClosed));
+            secondWindow = new(world, "Second Window", new(500, 200), new(300, 300), "vulkan");
             secondWindow.ClearColor = new(0.4f, 0.2f, 0.2f, 1.0f);
             secondWindow.IsResizable = true;
 
@@ -79,16 +76,15 @@ namespace Abacus
             resizable.SelectionMask = secondLayer;
         }
 
-        void IProgram<MultipleWindowsAndFileDialog>.Start(ref MultipleWindowsAndFileDialog program, in Simulator simulator, in World world)
+        public override void Dispose()
         {
-            program = new MultipleWindowsAndFileDialog(world);
         }
 
-        unsafe StatusCode IProgram<MultipleWindowsAndFileDialog>.Update(in TimeSpan delta)
+        public unsafe override bool Update(Simulator simulator, double deltaTime)
         {
             if (firstWindow.IsDestroyed && secondWindow.IsDestroyed)
             {
-                return StatusCode.Success(0);
+                return false;
             }
 
             foreach (Keyboard keyboard in world.GetAll<Keyboard>())
@@ -112,17 +108,7 @@ namespace Abacus
             }
 
             SharedFunctions.UpdateUISettings(world);
-            return StatusCode.Continue;
-        }
-
-        void IProgram<MultipleWindowsAndFileDialog>.Finish(in StatusCode statusCode)
-        {
-        }
-
-        [UnmanagedCallersOnly]
-        private static void OnWindowClosed(Window window)
-        {
-            window.Dispose();
+            return true;
         }
 
         [UnmanagedCallersOnly]

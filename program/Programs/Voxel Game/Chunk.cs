@@ -29,13 +29,10 @@ namespace VoxelGame
         {
             int capacity = chunkSize * chunkSize * chunkSize;
             this.world = world;
-            Mesh mesh = new(world);
+            Mesh mesh = new(world, MeshChannelMask.Positions | MeshChannelMask.Colors | MeshChannelMask.UVs, 0, 0);
             value = mesh.value;
 
             mesh.AddTag<IsChunk>();
-            mesh.CreatePositions(0);
-            mesh.CreateColors(0);
-            mesh.CreateUVs(0);
 
             Span<BlockID> blocks = mesh.CreateArray<BlockID>(capacity);
             blocks.Clear();
@@ -80,14 +77,14 @@ namespace VoxelGame
             using Array<uint> triangles = new(capacity * TrianglesPerFace * FacesPerBlock);
             MeshGenerator generation = new(blocks, blocksLeft, blocksRight, blocksDown, blocksUp, blocksBackward, blocksForward, chunkSize, vertices, uvs, colors, triangles, meshRng, capacity, chunkAtlas, blockTextures);
             generation.Generate();
-            Mesh.Collection<Vector3> meshPositions = mesh.Positions;
-            Mesh.Collection<Vector2> meshUVs = mesh.UVs;
-            Mesh.Collection<Vector4> meshColors = mesh.Colors;
-            Mesh.Collection<uint> meshTriangles = mesh.Indices;
-            meshPositions.CopyFrom(vertices.GetSpan(generation.verticeIndex));
-            meshUVs.CopyFrom(uvs.GetSpan(generation.verticeIndex));
-            meshColors.CopyFrom(colors.GetSpan(generation.verticeIndex));
-            meshTriangles.CopyFrom(triangles.GetSpan(generation.triangleIndex));
+            Span<uint> meshIndices = mesh.SetVertexAndIndexCount(generation.verticeIndex, generation.triangleIndex);
+            Span<Vector3> meshPositions = mesh.Positions;
+            Span<Vector2> meshUVs = mesh.UVs;
+            Span<Vector4> meshColors = mesh.Colors;
+            vertices.GetSpan(generation.verticeIndex).CopyTo(meshPositions);
+            uvs.GetSpan(generation.verticeIndex).CopyTo(meshUVs);
+            colors.GetSpan(generation.verticeIndex).CopyTo(meshColors);
+            triangles.GetSpan(generation.triangleIndex).CopyTo(meshIndices);
         }
 
         public static Span<uint> GetBlocks(World world, int cx, int cy, int cz)
