@@ -23,34 +23,32 @@ namespace Abacus
 {
     public class Application : IDisposable
     {
-        private Simulation.Simulator simulator;
+        public readonly Simulation.Simulator simulator;
         public readonly World world;
-
-        public Simulation.Simulator Simulator => simulator;
 
         public Application(Schema schema)
         {
             world = new(schema);
             simulator = new(world);
 
-            simulator.Add(new DataImportSystem());
+            simulator.Add(new DataImportSystem(simulator));
             simulator.Add(new AutomationPlayingSystem());
             simulator.Add(new StateMachineSystem());
             simulator.Add(new StateAutomationSystem());
-            simulator.Add(new ModelImportSystem());
+            simulator.Add(new ModelImportSystem(simulator));
             simulator.Add(new UISystemsBank(simulator));
-            simulator.Add(new TransformSystem());
+            simulator.Add(new TransformSystem(simulator));
             simulator.Add(new Mesh9SliceUpdateSystem());
-            simulator.Add(new WindowSystem(world));
-            simulator.Add(new GlobalKeyboardAndMouseSystem());
-            simulator.Add(new WindowDevicesSystems());
-            simulator.Add(new MaterialImportSystem());
-            simulator.Add(new TextureImportSystem());
-            simulator.Add(new ShaderImportSystem());
-            simulator.Add(new FontImportSystem());
-            simulator.Add(new TextMeshGenerationSystem());
+            simulator.Add(new WindowSystem(simulator));
+            simulator.Add(new GlobalKeyboardAndMouseSystem(simulator));
+            simulator.Add(new WindowDevicesSystems(simulator));
+            simulator.Add(new MaterialImportSystem(simulator));
+            simulator.Add(new TextureImportSystem(simulator));
+            simulator.Add(new ShaderImportSystem(simulator));
+            simulator.Add(new FontImportSystem(simulator));
+            simulator.Add(new TextMeshGenerationSystem(simulator));
             simulator.Add(new PhysicsSystem(simulator));
-            simulator.Add(new CameraSystem());
+            simulator.Add(new CameraSystem(simulator));
             simulator.Add(new FileDialogSystem());
 
             RenderingSystems rendering = new(simulator);
@@ -85,13 +83,7 @@ namespace Abacus
             simulator.Remove<AutomationPlayingSystem>();
             simulator.Remove<DataImportSystem>();
 
-            simulator.Dispose();
             world.Dispose();
-        }
-
-        public void Update(out double deltaTime)
-        {
-            simulator.Update(out deltaTime);
         }
     }
 }

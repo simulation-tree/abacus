@@ -1,5 +1,6 @@
 ﻿using Abacus;
 using Abacus.Simulator;
+using Simulation;
 using System;
 using System.Diagnostics;
 using System.Runtime;
@@ -13,13 +14,14 @@ InitializeRegistries();
 Trace.WriteLine("Starting simulator program");
 Schema schema = SchemaLoader.Get();
 using Application application = new(schema);
-using VoxelGameProgram program = new(application.Simulator);
-double deltaTime;
-do
+using VoxelGameProgram program = new(application.simulator);
+UpdateLoop updateLoop = new();
+double deltaTime = 0;
+while (program.Update(application.simulator, deltaTime))
 {
-    application.Update(out deltaTime);
+    deltaTime = updateLoop.GetDeltaTime();
+    application.simulator.Update(deltaTime);
 }
-while (program.Update(application.Simulator, deltaTime));
 
 Trace.WriteLine($"Finished simulator program");
 
