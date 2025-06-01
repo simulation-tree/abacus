@@ -1,4 +1,5 @@
 ﻿using Collections.Generic;
+using Data;
 using Materials;
 using Meshes;
 using Meshes.Components;
@@ -41,8 +42,8 @@ namespace VoxelGame
             chunkRenderer.Mesh = mesh;
             chunkRenderer.Material = unlitMaterial;
             chunkRenderer.RenderMask = VoxelGameProgram.worldMask;
-
             chunkRenderer.AddComponent(Color.White);
+
             Transform chunkTransform = chunkRenderer.Become<Transform>();
             chunkTransform.LocalPosition = new(cx * chunkSize, cy * chunkSize, cz * chunkSize);
         }

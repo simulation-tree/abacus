@@ -3,13 +3,13 @@ using Cameras;
 using Cameras.Components;
 using Collections.Generic;
 using Data;
+using Data.Messages;
 using DefaultPresentationAssets;
 using InputDevices;
 using Materials;
 using Meshes;
 using Models;
 using Rendering;
-using Simulation;
 using Skyboxes;
 using System;
 using System.Numerics;
@@ -37,7 +37,7 @@ namespace VoxelGame
         private Vector3 cameraPosition;
         private Vector2 cameraPitchYaw;
 
-        public VoxelGameProgram(Simulator simulator) : base(simulator)
+        public VoxelGameProgram(Application application) : base(application)
         {
             terrainGenerator = new("goomba");
             Vector2 windowSize = new(900, 720);
@@ -108,15 +108,16 @@ namespace VoxelGame
             Texture skyboxSouth = new(world, "Assets/Skyboxes/Clouds/clouds1_south.bmp");
             Texture skyboxUp = new(world, "Assets/Skyboxes/Clouds/clouds1_up.bmp");
             Texture skyboxWest = new(world, "Assets/Skyboxes/Clouds/clouds1_west.bmp");
-            simulator.Update();
+            simulator.Broadcast(new DataUpdate());
 
             CubemapTexture cubemap = new(world, skyboxEast, skyboxWest, skyboxUp, skyboxDown, skyboxNorth, skyboxSouth);
             CubemapSkybox skybox = new(world, worldCamera, cubemap, worldMask);
+            simulator.Broadcast(new DataUpdate());
 
             SharedFunctions.AddLabelProcessors(world);
         }
 
-        public override bool Update(Simulator simulator, double deltaTime)
+        public override bool Update(double deltaTime)
         {
             if (!AnyWindowOpen())
             {
@@ -156,7 +157,7 @@ namespace VoxelGame
             Texture grassSide = new(world, "Assets/Textures/Blocks/GrassSide.png");
             Texture cobblestone = new(world, "Assets/Textures/Blocks/Cobblestone.png");
 
-            simulator.Update();
+            simulator.Broadcast(new DataUpdate());
 
             Span<AtlasTexture.InputSprite> sprites = stackalloc AtlasTexture.InputSprite[]
             {

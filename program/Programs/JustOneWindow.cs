@@ -8,13 +8,13 @@ namespace Abacus
     {
         private readonly Window window;
 
-        public JustOneWindow(Simulator simulator) : base(simulator)
+        public JustOneWindow(Application application) : base(application)
         {
             window = new(world, "Just One Window", new(200, 200), new(900, 720), "vulkan");
             window.IsResizable = true;
         }
 
-        public override bool Update(Simulator simulator, double deltaTime)
+        public override bool Update(double deltaTime)
         {
             if (!IsAnyWindowOpen(world))
             {

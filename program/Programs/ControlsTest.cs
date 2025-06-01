@@ -1,11 +1,10 @@
 ﻿using Cameras;
+using Data;
 using InputDevices;
-using Simulation;
 using System;
 using System.Diagnostics;
 using System.Numerics;
 using System.Runtime.InteropServices;
-using Textures;
 using Transforms;
 using Transforms.Components;
 using UI;
@@ -24,7 +23,7 @@ namespace Abacus
         private readonly Menu rightClickMenu;
         private readonly Dropdown enumDropdown;
 
-        public unsafe ControlsTest(Simulator simulator) : base(simulator)
+        public unsafe ControlsTest(Application application) : base(application)
         {
             window = new(world, "Editor", new(200, 200), new(900, 720), "vulkan", new(&OnWindowClosed));
             window.ClearColor = new(0.5f, 0.5f, 0.5f, 1);
@@ -88,7 +87,7 @@ namespace Abacus
             option.rootMenu.IsExpanded = false;
         }
 
-        public override bool Update(Simulator simulator, double deltaTime)
+        public override bool Update(double deltaTime)
         {
             if (!IsAnyVirtualWindowOpen(world))
             {
@@ -339,7 +338,10 @@ namespace Abacus
                     box.SetParent(container);
                     box.Size = new(60f, 20f);
                     box.Position = new(200f, i * 26f);
-                    box.Color = new Vector4((i * 0.1f) % 1, 1, 1, 1).FromHSV();
+
+                    Color color = box.Color;
+                    color.Hue = (i * 0.1f) % 1;
+                    box.Color = color;
                 }
 
                 TextField multiLineTextField = new(canvas);

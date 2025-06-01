@@ -9,14 +9,14 @@ namespace Abacus
         public readonly Simulator simulator;
         public readonly World world;
 
-        public Program(Simulator simulator)
+        public Program(Application application)
         {
-            this.simulator = simulator;
-            world = simulator.world;
+            simulator = application.simulator;
+            world = application.world;
         }
 
         public abstract void Dispose();
 
-        public abstract bool Update(Simulator simulator, double deltaTime);
+        public abstract bool Update(double deltaTime);
     }
 }

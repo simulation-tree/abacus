@@ -11,7 +11,6 @@ using Meshes.NineSliced;
 using Models;
 using Rendering;
 using Rendering.Components;
-using Simulation;
 using System;
 using System.Diagnostics;
 using System.Numerics;
@@ -42,7 +41,7 @@ namespace Abacus
         private readonly Mesh9Sliced glowMesh;
         private readonly MeshRenderer glowRenderer;
 
-        public unsafe AbacusProgram(Simulator simulator) : base(simulator)
+        public unsafe AbacusProgram(Application application) : base(application)
         {
             //load scene built in unity
             try
@@ -237,7 +236,7 @@ namespace Abacus
             }
         }
 
-        public override bool Update(Simulator simulator, double deltaTime)
+        public override bool Update(double deltaTime)
         {
             time += deltaTime;
             if (time > 120f || window.IsDestroyed)
@@ -342,14 +341,14 @@ namespace Abacus
             }
 
             ref Color color = ref dummyRenderer.GetComponent<Color>();
-            float hue = color.value.GetHue();
+            float hue = color.Hue;
             hue += (float)deltaTime * 0.2f;
             while (hue > 1f)
             {
                 hue -= 1f;
             }
 
-            color.value.SetHue(hue);
+            color.Hue = hue;
         }
 
         private bool TestWindowEntity(World world, double deltaTime)

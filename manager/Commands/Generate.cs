@@ -9,7 +9,7 @@ namespace Abacus.Manager.Commands
     public readonly struct Generate : ICommand
     {
         readonly string ICommand.Name => "gen";
-        readonly string ICommand.Description => $"Generates files (--gh-test-workflow, --gh-publish-workflow, --clone-script --uml)";
+        readonly string ICommand.Description => $"Generates files (--gh-test-workflow, --gh-publish-workflow, --clone-script)";
 
         readonly void ICommand.Execute(Runner runner, Arguments arguments)
         {

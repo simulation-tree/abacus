@@ -1,9 +1,9 @@
 ﻿using Cameras;
+using Data;
 using FileDialogs;
 using FileDialogs.Functions;
 using InputDevices;
 using Rendering;
-using Simulation;
 using System;
 using System.Numerics;
 using System.Runtime.InteropServices;
@@ -23,7 +23,7 @@ namespace Abacus
         private readonly Canvas firstCanvas;
         private readonly Canvas secondCanvas;
 
-        public MultipleWindowsAndFileDialog(Simulator simulator) : base(simulator)
+        public MultipleWindowsAndFileDialog(Application application) : base(application)
         {
             LayerMask firstLayer = new(1);
             LayerMask secondLayer = new(2);
@@ -80,7 +80,7 @@ namespace Abacus
         {
         }
 
-        public unsafe override bool Update(Simulator simulator, double deltaTime)
+        public unsafe override bool Update(double deltaTime)
         {
             if (firstWindow.IsDestroyed && secondWindow.IsDestroyed)
             {

@@ -9,11 +9,10 @@ using Meshes;
 using Models;
 using Physics;
 using Physics.Components;
-using Physics.Events;
 using Physics.Functions;
+using Physics.Messages;
 using Rendering;
 using Shapes.Types;
-using Simulation;
 using System;
 using System.Diagnostics;
 using System.Numerics;
@@ -35,7 +34,7 @@ namespace Abacus
         private Vector3 cameraPosition;
         private Vector2 cameraPitchYaw;
 
-        public unsafe ButtonsAndRaycasting(Simulator simulator) : base(simulator)
+        public unsafe ButtonsAndRaycasting(Application application) : base(application)
         {
             //window to render everything
             window = new(world, "Fly", default, new(900, 600), "vulkan", new(&WindowClosed));
@@ -124,7 +123,7 @@ namespace Abacus
             }
         }
 
-        public unsafe override bool Update(Simulator simulator, double deltaTime)
+        public unsafe override bool Update(double deltaTime)
         {
             if (window.IsDestroyed)
             {
@@ -159,7 +158,7 @@ namespace Abacus
                 {
                     Vector2 screenPoint = worldCamera.Destination.GetScreenPointFromPosition(mouse.Position);
                     (Vector3 origin, Vector3 direction) ray = worldCamera.Matrices.GetRayFromScreenPoint(screenPoint);
-                    simulator.Broadcast(new RaycastRequest(world, ray.origin, ray.direction, new(&OnRaycastHit)));
+                    simulator.Broadcast(new RaycastRequest(ray.origin, ray.direction, new(&OnRaycastHit)));
 
                     [UnmanagedCallersOnly]
                     static void OnRaycastHit(RaycastHitCallback.Input input)

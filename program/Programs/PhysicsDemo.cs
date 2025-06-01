@@ -7,11 +7,10 @@ using Materials;
 using Meshes;
 using Models;
 using Physics;
-using Physics.Events;
 using Physics.Functions;
+using Physics.Messages;
 using Rendering;
 using Shapes.Types;
-using Simulation;
 using System;
 using System.Numerics;
 using System.Runtime.InteropServices;
@@ -38,7 +37,7 @@ namespace Abacus
         private Vector3 cameraPosition;
         private Vector2 cameraPitchYaw;
 
-        public unsafe PhysicsDemo(Simulator simulator) : base(simulator)
+        public unsafe PhysicsDemo(Application application) : base(application)
         {
             LayerMask firstLayer = new(0);
 
@@ -113,7 +112,7 @@ namespace Abacus
         {
         }
 
-        public override bool Update(Simulator simulator, double deltaTime)
+        public override bool Update(double deltaTime)
         {
             if (window.IsDestroyed)
             {
@@ -203,7 +202,7 @@ namespace Abacus
                 (Vector3 origin, Vector3 direction) = cameraProjection.GetRayFromScreenPoint(screenPoint);
                 unsafe
                 {
-                    RaycastRequest raycast = new(world, origin, direction, new(&RaycastHitCallback), 5f, (ulong)(deltaTime * 10000));
+                    RaycastRequest raycast = new(origin, direction, new(&RaycastHitCallback), 5f, (ulong)(deltaTime * 10000));
                     simulator.Broadcast(raycast);
                 }
 
@@ -257,14 +256,14 @@ namespace Abacus
                 ref Color color = ref world.TryGetComponent<Color>(entityHit, out bool contains);
                 if (contains)
                 {
-                    float hue = color.value.GetHue();
+                    float hue = color.Hue;
                     hue += 0.3f * (float)deltaTime;
                     while (hue > 1f)
                     {
                         hue -= 1f;
                     }
 
-                    color.value.SetHue(hue);
+                    color.Hue = hue;
                 }
 
                 if (world.TryGetFirst(out Mouse mouse))

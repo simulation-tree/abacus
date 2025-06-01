@@ -29,7 +29,7 @@ namespace Abacus
 
         public static void DestroyTemporaryEntities(this World world, double deltaTime)
         {
-            using Operation operation = new();
+            using Operation operation = new(world);
             ComponentQuery<DestroyAfterTime> query = new(world);
             foreach (var e in query)
             {
@@ -37,14 +37,14 @@ namespace Abacus
                 destroy.time -= (float)deltaTime;
                 if (destroy.time <= 0)
                 {
-                    operation.SelectEntity(e.entity);
+                    operation.AppendEntityToSelection(e.entity);
                 }
             }
 
             if (operation.Count > 0)
             {
-                operation.DestroySelected();
-                operation.Perform(world);
+                operation.DestroySelectedEntities();
+                operation.Perform();
             }
         }
 

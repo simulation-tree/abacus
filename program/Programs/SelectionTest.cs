@@ -1,7 +1,5 @@
 ﻿using Cameras;
-using Simulation;
 using System.Diagnostics;
-using System.Numerics;
 using System.Runtime.InteropServices;
 using UI;
 using Windows;
@@ -13,7 +11,7 @@ namespace Abacus
     {
         private readonly Window window;
 
-        public unsafe SelectionTest(Simulator simulator) : base(simulator)
+        public unsafe SelectionTest(Application application) : base(application)
         {
             window = new(world, "Selection Test", new(200, 200), new(900, 720), "vulkan", new(&OnWindowClosed));
             window.IsResizable = true;
@@ -35,7 +33,7 @@ namespace Abacus
             Button buttonC = new(new(&Pressed), canvas);
             buttonC.Position = new(200 + 16, 60 + 16);
             buttonC.Size = new(32, 32);
-            buttonC.Color = new Vector4(0, 0, 1, 0.5f);
+            buttonC.Color = new(0, 0, 1, 0.5f);
 
             [UnmanagedCallersOnly]
             static void Pressed(Entity buttonEntity)
@@ -44,7 +42,7 @@ namespace Abacus
             }
         }
 
-        public override bool Update(Simulator simulator, double deltaTime)
+        public override bool Update(double deltaTime)
         {
             if (!IsAnyWindowOpen(world))
             {

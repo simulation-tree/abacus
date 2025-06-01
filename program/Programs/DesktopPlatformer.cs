@@ -2,14 +2,15 @@
 using Cameras;
 using Cameras.Components;
 using Data;
+using Data.Messages;
 using DefaultPresentationAssets;
 using InputDevices;
 using Materials;
 using Materials.Components;
 using Meshes;
 using Physics;
-using Physics.Events;
 using Physics.Functions;
+using Physics.Messages;
 using Rendering;
 using Shapes.Types;
 using Simulation;
@@ -38,7 +39,7 @@ namespace Abacus
         private readonly Body rightWallBody;
         private readonly StatefulAutomationPlayer playerMaterialAnimator;
 
-        public unsafe DesktopPlatformer(Simulator simulator) : base(simulator)
+        public unsafe DesktopPlatformer(Application application) : base(application)
         {
             window = new(world, "Fly", default, new(200, 200), "vulkan", new(&WindowClosed));
             window.Position = new(200, 200);
@@ -70,7 +71,7 @@ namespace Abacus
             unlitMaterial.AddComponentBinding<CameraMatrices>(new(0, 0), camera);
             unlitMaterial.AddTextureBinding(new(1, 0), squareTexture);
 
-            AtlasTexture playerAtlas = GetPlayerAtlas(simulator, world);
+            AtlasTexture playerAtlas = GetPlayerAtlas();
 
             Material playerMaterial = new(world, EmbeddedResource.GetAddress<UnlitTexturedMaterial>());
             playerMaterial.AddInstanceBinding<Color>();
@@ -169,7 +170,7 @@ namespace Abacus
             }
         }
 
-        public override bool Update(Simulator simulator, double deltaTime)
+        public override bool Update(double deltaTime)
         {
             if (window.IsDestroyed)
             {
@@ -188,7 +189,7 @@ namespace Abacus
             return true;
         }
 
-        private AtlasTexture GetPlayerAtlas(Simulator simulator, World world)
+        private AtlasTexture GetPlayerAtlas()
         {
             Texture idle = new(world, "Assets/Textures/Spaceman/Idle.png");
             Texture idle2 = new(world, "Assets/Textures/Spaceman/Idle2.png");
@@ -198,7 +199,7 @@ namespace Abacus
             Texture walk = new(world, "Assets/Textures/Spaceman/Walk.png");
             Texture walk2 = new(world, "Assets/Textures/Spaceman/Walk2.png");
 
-            simulator.Update();
+            simulator.Broadcast(new DataUpdate());
 
             Span<AtlasTexture.InputSprite> sprites = stackalloc AtlasTexture.InputSprite[]
             {
@@ -372,7 +373,7 @@ namespace Abacus
                 Transform playerTransform = player.As<Transform>();
                 player.SetComponent(new GroundedState(false));
                 float raycastDistance = 3f;
-                simulator.Broadcast(new RaycastRequest(world, playerTransform.WorldPosition, -Vector3.UnitY, new(&GroundHitCallback), raycastDistance, player.value));
+                simulator.Broadcast(new RaycastRequest(playerTransform.WorldPosition, -Vector3.UnitY, new(&GroundHitCallback), raycastDistance, player.value));
             }
 
             [UnmanagedCallersOnly]

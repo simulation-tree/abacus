@@ -1,6 +1,6 @@
 ﻿using Cameras;
+using Data;
 using Rendering;
-using Simulation;
 using System;
 using System.Numerics;
 using System.Runtime.InteropServices;
@@ -18,7 +18,7 @@ namespace Abacus
         private double time;
         private byte state;
 
-        public WindowCreationTest(Simulator simulator) : base(simulator)
+        public WindowCreationTest(Application application) : base(application)
         {
             settings = new(world);
             time = 0.5f;
@@ -28,7 +28,7 @@ namespace Abacus
         {
         }
 
-        public override bool Update(Simulator simulator, double deltaTime)
+        public override bool Update(double deltaTime)
         {
             time -= deltaTime;
             if (time <= 0f)
@@ -78,12 +78,12 @@ namespace Abacus
             return true;
         }
 
-        private unsafe void CreateWindow(ASCIIText256 title, Vector2 windowPosition, Vector2 squarePosition, Vector4 color, Layer layer)
+        private unsafe void CreateWindow(ASCIIText256 title, Vector2 windowPosition, Vector2 squarePosition, Color color, Layer layer)
         {
             LayerMask layerMask = new(layer);
 
             Window window = new(world, title, windowPosition, new(200, 200), "vulkan", new(&OnWindowClosed));
-            window.ClearColor = Vector4.Lerp(new(0f, 0f, 0f, 1f), color, 0.3f);
+            window.ClearColor = Vector4.Lerp(new(0f, 0f, 0f, 1f), color.AsVector4(), 0.3f);
             window.IsResizable = true;
 
             Camera camera = Camera.CreateOrthographic(world, window, 1f, layerMask);

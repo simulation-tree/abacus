@@ -1,17 +1,15 @@
-﻿using Simulation;
-
-namespace Abacus
+﻿namespace Abacus
 {
     public class SimpleProgram : Program
     {
         private double time;
 
-        public SimpleProgram(Simulator simulator) : base(simulator)
+        public SimpleProgram(Application application) : base(application)
         {
             time = 0;
         }
 
-        public override bool Update(Simulator simulator, double deltaTime)
+        public override bool Update(double deltaTime)
         {
             time += deltaTime;
             if (time >= 5f)

@@ -1,5 +1,4 @@
 ﻿using InputDevices;
-using Simulation;
 using System.Numerics;
 using System.Runtime.InteropServices;
 using Windows;
@@ -11,7 +10,7 @@ namespace Abacus
     {
         private readonly Window followerWindow;
 
-        public unsafe WindowThatFollowsTheMouse(Simulator simulator) : base(simulator)
+        public unsafe WindowThatFollowsTheMouse(Application application) : base(application)
         {
             followerWindow = new(world, "Fly", default, new(100, 100), "vulkan", new(&WindowClosed));
             followerWindow.IsBorderless = true;
@@ -34,7 +33,7 @@ namespace Abacus
             }
         }
 
-        public override bool Update(Simulator simulator, double deltaTime)
+        public override bool Update(double deltaTime)
         {
             if (followerWindow.IsDestroyed)
             {
@@ -45,6 +44,10 @@ namespace Abacus
             if (world.TryGetFirst(out Keyboard keyboard))
             {
                 holdingShift = keyboard.IsPressed(Keyboard.Button.LeftShift);
+                if (keyboard.WasPressed(Keyboard.Button.Escape))
+                {
+                    return false;
+                }
             }
 
             if (world.TryGetFirst(out GlobalMouse mouse))
