@@ -24,7 +24,7 @@
 
         public const string PublishStep = @"
 - name: Publish `{{ProjectName}}`
-  run: dotnet nuget push {{PackageID}}.${VERSION}.nupkg --source github --api-key ${NUGET_TOKEN}
+  run: dotnet nuget push {{PackageId}}.${VERSION}.nupkg --source github --api-key ${NUGET_TOKEN}
   env:
     NUGET_TOKEN: ${{ secrets.NUGET_TOKEN }}";
 

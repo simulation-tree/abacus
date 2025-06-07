@@ -8,14 +8,14 @@ namespace Abacus.Manager
 
     <ItemGroup Condition=""'$(Configuration)' == 'Debug'"">
         <Reference Include=""{{ProjectName}}"">
-            <HintPath>$(MSBuildThisFileDirectory)..\tools\debug\{{ProjectName}}.dll</HintPath>
+            <HintPath>$(MSBuildThisFileDirectory)..\tools\debug\{{PackageId}}.dll</HintPath>
             <Private>True</Private>
         </Reference>
     </ItemGroup>
 
     <ItemGroup Condition=""'$(Configuration)' == 'Release'"">
         <Reference Include=""{{ProjectName}}"">
-            <HintPath>$(MSBuildThisFileDirectory)..\tools\release\{{ProjectName}}.dll</HintPath>
+            <HintPath>$(MSBuildThisFileDirectory)..\tools\release\{{PackageId}}.dll</HintPath>
             <Private>True</Private>
         </Reference>
     </ItemGroup>

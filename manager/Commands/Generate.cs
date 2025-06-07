@@ -159,9 +159,17 @@ namespace Abacus.Manager.Commands
                             Directory.CreateDirectory(buildFolder);
                         }
 
-                        string targetsPath = Path.Combine(buildFolder, project.Name.ToString() + ".targets");
+                        string packageId = project.PackageId.ToString();
+                        string projectName = project.Name.ToString();
+                        if (string.IsNullOrEmpty(packageId))
+                        {
+                            packageId = projectName;
+                        }
+
+                        string targetsPath = Path.Combine(buildFolder, packageId + ".targets");
                         string content = TargetsTemplate.Source;
-                        content = content.Replace("{{ProjectName}}", project.Name.ToString());
+                        content = content.Replace("{{ProjectName}}", projectName);
+                        content = content.Replace("{{PackageId}}", packageId);
                         File.WriteAllText(targetsPath, content);
                     }
                 }
@@ -386,7 +394,7 @@ namespace Abacus.Manager.Commands
                 source = source.Replace("{{ProjectFolderName}}", folderName);
             }
 
-            if (source.Contains("{{PackageID}}"))
+            if (source.Contains("{{PackageId}}"))
             {
                 Text.Borrowed packageId = project.PackageId;
                 if (packageId.IsEmpty)
@@ -394,7 +402,7 @@ namespace Abacus.Manager.Commands
                     packageId.CopyFrom(project.Name);
                 }
 
-                source = source.Replace("{{PackageID}}", packageId.ToString());
+                source = source.Replace("{{PackageId}}", packageId.ToString());
             }
 
             return source;
