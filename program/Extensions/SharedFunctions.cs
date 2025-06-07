@@ -205,7 +205,7 @@ namespace Abacus
                 LayerMask resizableMask = r.component1.selectionMask;
                 if (pointerSelectionMask.ContainsAny(resizableMask))
                 {
-                    Resizable resizable = new Entity(world, r.entity).As<Resizable>();
+                    Resizable resizable = Entity.Get<Resizable>(world, r.entity);
                     IsResizable.EdgeMask boundary = resizable.GetBoundary(pointer.Position);
                     if (boundary != default)
                     {

@@ -359,7 +359,7 @@ namespace Abacus
             {
                 World world = buttonEntity.world;
                 Entity containerEntity = buttonEntity.Parent;
-                Span<uint> children = stackalloc uint[(int)containerEntity.ChildCount];
+                Span<uint> children = stackalloc uint[containerEntity.ChildCount];
                 containerEntity.CopyChildrenTo(children);
                 bool toggleValue = default;
                 for (int i = 0; i < children.Length; i++)
@@ -367,20 +367,20 @@ namespace Abacus
                     uint child = children[i];
                     if (world.ContainsComponent<IsToggle>(child))
                     {
-                        Toggle toggle = new Entity(world, child).As<Toggle>();
+                        Toggle toggle = Entity.Get<Toggle>(world, child);
                         toggleValue = toggle.Value;
                         break;
                     }
                 }
 
-                children = stackalloc uint[(int)buttonEntity.ChildCount];
+                children = stackalloc uint[buttonEntity.ChildCount];
                 buttonEntity.CopyChildrenTo(children);
                 for (int i = 0; i < children.Length; i++)
                 {
                     uint child = children[i];
                     if (world.ContainsTag<IsLabel>(child))
                     {
-                        Label label = new Entity(world, child).As<Label>();
+                        Label label = Entity.Get<Label>(world, child);
                         ReadOnlySpan<char> text = label.ProcessedText;
                         int startIndex = text.IndexOf(':') + 1;
                         int countValue = int.Parse(text.Slice(startIndex));

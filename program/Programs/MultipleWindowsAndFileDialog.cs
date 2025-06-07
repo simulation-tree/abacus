@@ -114,7 +114,7 @@ namespace Abacus
         [UnmanagedCallersOnly]
         private static void ChosenFile(Chosen.Input input)
         {
-            Canvas secondCanvas = new Entity(input.world, (uint)input.userData).As<Canvas>();
+            Canvas secondCanvas = Entity.Get<Canvas>(input.world, (uint)input.userData);
 
             DestroyAllLabels(secondCanvas);
 
