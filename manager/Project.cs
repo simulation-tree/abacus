@@ -1,6 +1,7 @@
 ﻿using Collections.Generic;
 using Serialization.XML;
 using System;
+using System.IO;
 using Unmanaged;
 
 namespace Abacus.Manager
@@ -65,6 +66,30 @@ namespace Abacus.Manager
 
         public readonly Text.Borrowed IncludeBuildOutput => includeBuildOutput.Content;
         public readonly Text.Borrowed SuppressDependenciesWhenPacking => suppressDependenciesWhenPacking.Content;
+
+        public readonly int SourceFiles
+        {
+            get
+            {
+                int count = 0;
+                string directory = Directory.ToString();
+                string objDirectory = System.IO.Path.Combine(directory, "obj");
+                string binDirectory = System.IO.Path.Combine(directory, "bin");
+                string[] sourceFiles = System.IO.Directory.GetFiles(directory, "*.cs", SearchOption.AllDirectories);
+                for (int i = 0; i < sourceFiles.Length; i++)
+                {
+                    string filePath = sourceFiles[i];
+                    if (filePath.StartsWith(objDirectory, StringComparison.OrdinalIgnoreCase) || filePath.StartsWith(binDirectory, StringComparison.OrdinalIgnoreCase))
+                    {
+                        continue;
+                    }
+
+                    count++;
+                }
+
+                return count;
+            }
+        }
 
         /// <summary>
         /// The directory that the project is in.

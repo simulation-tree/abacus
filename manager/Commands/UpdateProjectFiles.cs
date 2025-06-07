@@ -23,43 +23,39 @@ namespace Abacus.Manager.Commands
 
                 foreach (Project project in repository.Projects)
                 {
-                    if (!project.isTestProject && !project.Name.Contains("Generator", StringComparison.Ordinal))
+                    if (!project.isTestProject && project.SourceFiles > 0 && !project.Name.Contains("Generator", StringComparison.Ordinal))
                     {
-                        string[] sourceFiles = Directory.GetFiles(project.Directory.ToString(), "*.cs", SearchOption.AllDirectories);
-                        if (sourceFiles.Length > 0)
+                        bool changed = false;
+                        if (!project.Company.IsEmpty)
                         {
-                            bool changed = false;
-                            if (!project.Company.IsEmpty)
-                            {
-                                project.Company.CopyFrom(organizationName);
-                                changed |= true;
-                            }
+                            project.Company.CopyFrom(organizationName);
+                            changed |= true;
+                        }
 
-                            if (!project.RepositoryUrl.IsEmpty)
-                            {
-                                project.RepositoryUrl.CopyFrom($"{repositoryHost}/{organizationName}/{repository.Name}");
-                                changed |= true;
-                            }
+                        if (!project.RepositoryUrl.IsEmpty)
+                        {
+                            project.RepositoryUrl.CopyFrom($"{repositoryHost}/{organizationName}/{repository.Name}");
+                            changed |= true;
+                        }
 
-                            if (!project.IncludeBuildOutput.IsEmpty.Equals("false"))
-                            {
-                                project.IncludeBuildOutput.CopyFrom("false");
-                                changed |= true;
-                            }
+                        if (!project.IncludeBuildOutput.IsEmpty.Equals("false"))
+                        {
+                            project.IncludeBuildOutput.CopyFrom("false");
+                            changed |= true;
+                        }
 
-                            if (!project.SuppressDependenciesWhenPacking.Equals("true"))
-                            {
-                                project.SuppressDependenciesWhenPacking.CopyFrom("true");
-                                changed |= true;
-                            }
+                        if (!project.SuppressDependenciesWhenPacking.Equals("true"))
+                        {
+                            project.SuppressDependenciesWhenPacking.CopyFrom("true");
+                            changed |= true;
+                        }
 
-                            changed |= EnsureBuildOutputsArePacked(project);
+                        changed |= EnsureBuildOutputsArePacked(project);
 
-                            if (changed)
-                            {
-                                project.WriteToFile();
-                                runner.WriteInfoLine($"Updated {project.Path.ToString()}");
-                            }
+                        if (changed)
+                        {
+                            project.WriteToFile();
+                            runner.WriteInfoLine($"Updated {project.Path.ToString()}");
                         }
                     }
                 }

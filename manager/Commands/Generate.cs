@@ -1,5 +1,4 @@
 ﻿using Abacus.Manager.Constants;
-using Collections;
 using Collections.Generic;
 using System;
 using System.IO;
@@ -152,22 +151,18 @@ namespace Abacus.Manager.Commands
             {
                 foreach (Project project in repository.Projects)
                 {
-                    if (!project.isTestProject)
+                    if (!project.isTestProject && project.SourceFiles > 0 && !project.Name.Contains("Generator", StringComparison.Ordinal))
                     {
-                        string[] sourceFiles = Directory.GetFiles(project.Directory.ToString(), "*.cs", SearchOption.AllDirectories);
-                        if (sourceFiles.Length > 0)
+                        string buildFolder = Path.Combine(project.Directory.ToString(), "build");
+                        if (!Directory.Exists(buildFolder))
                         {
-                            string buildFolder = Path.Combine(project.Directory.ToString(), "build");
-                            if (!Directory.Exists(buildFolder))
-                            {
-                                Directory.CreateDirectory(buildFolder);
-                            }
-
-                            string targetsPath = Path.Combine(buildFolder, project.Name.ToString() + ".targets");
-                            string content = TargetsTemplate.Source;
-                            content = content.Replace("{{ProjectName}}", project.Name.ToString());
-                            File.WriteAllText(targetsPath, content);
+                            Directory.CreateDirectory(buildFolder);
                         }
+
+                        string targetsPath = Path.Combine(buildFolder, project.Name.ToString() + ".targets");
+                        string content = TargetsTemplate.Source;
+                        content = content.Replace("{{ProjectName}}", project.Name.ToString());
+                        File.WriteAllText(targetsPath, content);
                     }
                 }
             }
