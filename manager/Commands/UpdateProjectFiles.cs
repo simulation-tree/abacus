@@ -68,15 +68,17 @@ namespace Abacus.Manager.Commands
         {
             bool changed = false;
             string projectName = project.Name.ToString();
-            string debugDllPath = "bin/Debug/net9.0/" + projectName + ".dll";
-            string releaseDllPath = "bin/Release/net9.0/" + projectName + ".dll";
-            string debugXmlPath = "bin/Debug/net9.0/" + projectName + ".xml";
-            string releaseXmlPath = "bin/Release/net9.0/" + projectName + ".xml";
-            string targetsPath = "build/" + projectName + ".targets";
-            string packageDebugDLLpath = "tools/debug/" + projectName + ".dll";
-            string packageReleaseDLLpath = "tools/release/" + projectName + ".dll";
-            string packageDebugXMLpath = "tools/debug/" + projectName + ".xml";
-            string packageReleaseXMLpath = "tools/release/" + projectName + ".xml";
+            string debugDllPath = $"bin/Debug/net9.0/{projectName}.dll";
+            string releaseDllPath = $"bin/Release/net9.0/{projectName}.dll";
+            string debugXmlPath = $"bin/Debug/net9.0/{projectName}.xml";
+            string releaseXmlPath = $"bin/Release/net9.0/{projectName}.xml";
+            string targetsPath = $"build/{projectName}.targets";
+            string packageDebugDllPath = $"tools/debug/{projectName}.dll";
+            string packageReleaseDllPath = $"tools/release/{projectName}.dll";
+            string packageDebugXmlPath = $"tools/debug/{projectName}.xml";
+            string packageReleaseXmlPath = $"tools/release/{projectName}.xml";
+            string debugXmlCondition = $"Exists('{debugXmlPath}')";
+            string releaseXmlCondition = $"Exists('{releaseXmlPath}')";
             XMLNode debugDllPackNode = default;
             XMLNode releaseDllPackNode = default;
             XMLNode debugXmlPackNode = default;
@@ -142,7 +144,7 @@ namespace Abacus.Manager.Commands
 
             changed |= TrySetAttribute(debugDllPackNode, "Include", debugDllPath);
             changed |= TrySetAttribute(debugDllPackNode, "Pack", "true");
-            changed |= TrySetAttribute(debugDllPackNode, "PackagePath", packageDebugDLLpath);
+            changed |= TrySetAttribute(debugDllPackNode, "PackagePath", packageDebugDllPath);
             changed |= TrySetAttribute(debugDllPackNode, "Visible", "false");
 
             if (debugXmlPackNode == default)
@@ -154,8 +156,9 @@ namespace Abacus.Manager.Commands
 
             changed |= TrySetAttribute(debugXmlPackNode, "Include", debugXmlPath);
             changed |= TrySetAttribute(debugXmlPackNode, "Pack", "true");
-            changed |= TrySetAttribute(debugXmlPackNode, "PackagePath", packageDebugXMLpath);
+            changed |= TrySetAttribute(debugXmlPackNode, "PackagePath", packageDebugXmlPath);
             changed |= TrySetAttribute(debugXmlPackNode, "Visible", "false");
+            changed |= TrySetAttribute(debugXmlPackNode, "Condition", debugXmlCondition);
 
             if (releaseDllPackNode == default)
             {
@@ -166,7 +169,7 @@ namespace Abacus.Manager.Commands
 
             changed |= TrySetAttribute(releaseDllPackNode, "Include", releaseDllPath);
             changed |= TrySetAttribute(releaseDllPackNode, "Pack", "true");
-            changed |= TrySetAttribute(releaseDllPackNode, "PackagePath", packageReleaseDLLpath);
+            changed |= TrySetAttribute(releaseDllPackNode, "PackagePath", packageReleaseDllPath);
             changed |= TrySetAttribute(releaseDllPackNode, "Visible", "false");
 
             if (releaseXmlPackNode == default)
@@ -178,8 +181,9 @@ namespace Abacus.Manager.Commands
 
             changed |= TrySetAttribute(releaseXmlPackNode, "Include", releaseXmlPath);
             changed |= TrySetAttribute(releaseXmlPackNode, "Pack", "true");
-            changed |= TrySetAttribute(releaseXmlPackNode, "PackagePath", packageReleaseXMLpath);
+            changed |= TrySetAttribute(releaseXmlPackNode, "PackagePath", packageReleaseXmlPath);
             changed |= TrySetAttribute(releaseXmlPackNode, "Visible", "false");
+            changed |= TrySetAttribute(releaseXmlPackNode, "Condition", releaseXmlCondition);
 
             if (targetsPackNode == default)
             {
