@@ -2,6 +2,7 @@
 using Collections.Generic;
 using Serialization.XML;
 using System;
+using System.IO;
 using Unmanaged;
 
 namespace Abacus.Manager.Commands
@@ -22,39 +23,43 @@ namespace Abacus.Manager.Commands
 
                 foreach (Project project in repository.Projects)
                 {
-                    if (!project.isTestProject)
+                    if (!project.isTestProject && !project.Name.Contains("Generator", StringComparison.Ordinal))
                     {
-                        bool changed = false;
-                        if (!project.Company.IsEmpty)
+                        string[] sourceFiles = Directory.GetFiles(project.Path.ToString(), "*.cs", SearchOption.AllDirectories);
+                        if (sourceFiles.Length > 0)
                         {
-                            project.Company.CopyFrom(organizationName);
-                            changed |= true;
-                        }
+                            bool changed = false;
+                            if (!project.Company.IsEmpty)
+                            {
+                                project.Company.CopyFrom(organizationName);
+                                changed |= true;
+                            }
 
-                        if (!project.RepositoryUrl.IsEmpty)
-                        {
-                            project.RepositoryUrl.CopyFrom($"{repositoryHost}/{organizationName}/{repository.Name}");
-                            changed |= true;
-                        }
+                            if (!project.RepositoryUrl.IsEmpty)
+                            {
+                                project.RepositoryUrl.CopyFrom($"{repositoryHost}/{organizationName}/{repository.Name}");
+                                changed |= true;
+                            }
 
-                        if (!project.IncludeBuildOutput.IsEmpty.Equals("false"))
-                        {
-                            project.IncludeBuildOutput.CopyFrom("false");
-                            changed |= true;
-                        }
+                            if (!project.IncludeBuildOutput.IsEmpty.Equals("false"))
+                            {
+                                project.IncludeBuildOutput.CopyFrom("false");
+                                changed |= true;
+                            }
 
-                        if (!project.SuppressDependenciesWhenPacking.Equals("true"))
-                        {
-                            project.SuppressDependenciesWhenPacking.CopyFrom("true");
-                            changed |= true;
-                        }
+                            if (!project.SuppressDependenciesWhenPacking.Equals("true"))
+                            {
+                                project.SuppressDependenciesWhenPacking.CopyFrom("true");
+                                changed |= true;
+                            }
 
-                        changed |= EnsureBuildOutputsArePacked(project);
+                            changed |= EnsureBuildOutputsArePacked(project);
 
-                        if (changed)
-                        {
-                            project.WriteToFile();
-                            runner.WriteInfoLine($"Updated {project.Path.ToString()}");
+                            if (changed)
+                            {
+                                project.WriteToFile();
+                                runner.WriteInfoLine($"Updated {project.Path.ToString()}");
+                            }
                         }
                     }
                 }
@@ -67,13 +72,19 @@ namespace Abacus.Manager.Commands
         {
             bool changed = false;
             string projectName = project.Name.ToString();
-            string debugDLLpath = "bin/Debug/net9.0/" + projectName + ".dll";
-            string releaseDLLpath = "bin/Release/net9.0/" + projectName + ".dll";
+            string debugDllPath = "bin/Debug/net9.0/" + projectName + ".dll";
+            string releaseDllPath = "bin/Release/net9.0/" + projectName + ".dll";
+            string debugXmlPath = "bin/Debug/net9.0/" + projectName + ".xml";
+            string releaseXmlPath = "bin/Release/net9.0/" + projectName + ".xml";
             string targetsPath = "build/" + projectName + ".targets";
-            string packageDebugPath = "tools/debug/" + projectName + ".dll";
-            string packageReleasePath = "tools/release/" + projectName + ".dll";
-            XMLNode debugPackNode = default;
-            XMLNode releasePackNode = default;
+            string packageDebugDLLpath = "tools/debug/" + projectName + ".dll";
+            string packageReleaseDLLpath = "tools/release/" + projectName + ".dll";
+            string packageDebugXMLpath = "tools/debug/" + projectName + ".xml";
+            string packageReleaseXMLpath = "tools/release/" + projectName + ".xml";
+            XMLNode debugDllPackNode = default;
+            XMLNode releaseDllPackNode = default;
+            XMLNode debugXmlPackNode = default;
+            XMLNode releaseXmlPackNode = default;
             XMLNode targetsPackNode = default;
             XMLNode itemGroupNode = default;
             using Stack<(XMLNode, XMLNode)> stack = new();
@@ -84,19 +95,29 @@ namespace Abacus.Manager.Commands
                 if (current.Name.Equals("Content") && current.TryGetAttribute("Include", out ReadOnlySpan<char> include))
                 {
                     XMLNode parent = entry.parent;
-                    if (include.SequenceEqual(debugDLLpath))
+                    if (include.SequenceEqual(debugDllPath))
                     {
-                        debugPackNode = current;
+                        debugDllPackNode = current;
                         itemGroupNode = parent;
                     }
-                    else if (include.SequenceEqual(releaseDLLpath))
+                    else if (include.SequenceEqual(releaseDllPath))
                     {
-                        releasePackNode = current;
+                        releaseDllPackNode = current;
                         itemGroupNode = parent;
                     }
                     else if (include.SequenceEqual(targetsPath))
                     {
                         targetsPackNode = current;
+                        itemGroupNode = parent;
+                    }
+                    else if (include.SequenceEqual(debugXmlPath))
+                    {
+                        debugXmlPackNode = current;
+                        itemGroupNode = parent;
+                    }
+                    else if (include.SequenceEqual(releaseXmlPath))
+                    {
+                        releaseXmlPackNode = current;
                         itemGroupNode = parent;
                     }
                 }
@@ -116,29 +137,53 @@ namespace Abacus.Manager.Commands
                 changed = true;
             }
 
-            if (debugPackNode == default)
+            if (debugDllPackNode == default)
             {
-                debugPackNode = new("Content");
-                itemGroupNode.Add(debugPackNode);
+                debugDllPackNode = new("Content");
+                itemGroupNode.Add(debugDllPackNode);
                 changed = true;
             }
 
-            changed |= TrySetAttribute(debugPackNode, "Include", debugDLLpath);
-            changed |= TrySetAttribute(debugPackNode, "Pack", "true");
-            changed |= TrySetAttribute(debugPackNode, "PackagePath", packageDebugPath);
-            changed |= TrySetAttribute(debugPackNode, "Visible", "false");
+            changed |= TrySetAttribute(debugDllPackNode, "Include", debugDllPath);
+            changed |= TrySetAttribute(debugDllPackNode, "Pack", "true");
+            changed |= TrySetAttribute(debugDllPackNode, "PackagePath", packageDebugDLLpath);
+            changed |= TrySetAttribute(debugDllPackNode, "Visible", "false");
 
-            if (releasePackNode == default)
+            if (debugXmlPackNode == default)
             {
-                releasePackNode = new("Content");
-                itemGroupNode.Add(releasePackNode);
+                debugXmlPackNode = new("Content");
+                itemGroupNode.Add(debugXmlPackNode);
                 changed = true;
             }
 
-            changed |= TrySetAttribute(releasePackNode, "Include", releaseDLLpath);
-            changed |= TrySetAttribute(releasePackNode, "Pack", "true");
-            changed |= TrySetAttribute(releasePackNode, "PackagePath", packageReleasePath);
-            changed |= TrySetAttribute(releasePackNode, "Visible", "false");
+            changed |= TrySetAttribute(debugXmlPackNode, "Include", debugXmlPath);
+            changed |= TrySetAttribute(debugXmlPackNode, "Pack", "true");
+            changed |= TrySetAttribute(debugXmlPackNode, "PackagePath", packageDebugXMLpath);
+            changed |= TrySetAttribute(debugXmlPackNode, "Visible", "false");
+
+            if (releaseDllPackNode == default)
+            {
+                releaseDllPackNode = new("Content");
+                itemGroupNode.Add(releaseDllPackNode);
+                changed = true;
+            }
+
+            changed |= TrySetAttribute(releaseDllPackNode, "Include", releaseDllPath);
+            changed |= TrySetAttribute(releaseDllPackNode, "Pack", "true");
+            changed |= TrySetAttribute(releaseDllPackNode, "PackagePath", packageReleaseDLLpath);
+            changed |= TrySetAttribute(releaseDllPackNode, "Visible", "false");
+
+            if (releaseXmlPackNode == default)
+            {
+                releaseXmlPackNode = new("Content");
+                itemGroupNode.Add(releaseXmlPackNode);
+                changed = true;
+            }
+
+            changed |= TrySetAttribute(releaseXmlPackNode, "Include", releaseXmlPath);
+            changed |= TrySetAttribute(releaseXmlPackNode, "Pack", "true");
+            changed |= TrySetAttribute(releaseXmlPackNode, "PackagePath", packageReleaseXMLpath);
+            changed |= TrySetAttribute(releaseXmlPackNode, "Visible", "false");
 
             if (targetsPackNode == default)
             {
@@ -171,16 +216,16 @@ namespace Abacus.Manager.Commands
             const string RepositoryStart = "repository: ";
             const string CopyrightStart = "Copyright (c) ";
             ASCIIText256 organizationName = Constant.Get<OrganizationName>();
-            string[] markdownFiles = System.IO.Directory.GetFiles(repositoryPath.ToString(), "*.md", System.IO.SearchOption.AllDirectories);
-            string[] yamlFiles = System.IO.Directory.GetFiles(repositoryPath.ToString(), "*.yml", System.IO.SearchOption.AllDirectories);
+            string[] markdownFiles = Directory.GetFiles(repositoryPath.ToString(), "*.md", SearchOption.AllDirectories);
+            string[] yamlFiles = Directory.GetFiles(repositoryPath.ToString(), "*.yml", SearchOption.AllDirectories);
             string[] allFiles = new string[markdownFiles.Length + yamlFiles.Length];
             markdownFiles.CopyTo(allFiles, 0);
             yamlFiles.CopyTo(allFiles, markdownFiles.Length);
             foreach (string filePath in allFiles)
             {
                 bool isYaml = filePath.EndsWith(".yml");
-                bool isLicense = System.IO.Path.GetFileNameWithoutExtension(filePath) == "LICENSE";
-                string[] lines = System.IO.File.ReadAllLines(filePath);
+                bool isLicense = Path.GetFileNameWithoutExtension(filePath) == "LICENSE";
+                string[] lines = File.ReadAllLines(filePath);
                 bool changed = false;
                 for (int i = 0; i < lines.Length; i++)
                 {
@@ -239,7 +284,7 @@ namespace Abacus.Manager.Commands
 
                 if (changed)
                 {
-                    System.IO.File.WriteAllLines(filePath, lines);
+                    File.WriteAllLines(filePath, lines);
                     runner.WriteInfoLine($"Updated {filePath}");
                 }
             }
