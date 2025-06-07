@@ -14,10 +14,12 @@ namespace Abacus.Manager
         private const string ProjectReferenceNode = "ProjectReference";
         private const string PackageReferenceNode = "PackageReference";
         private const string IncludeAttribute = "Include";
+        private const string IncludeBuildOutputNode = "IncludeBuildOutput";
+        private const string SuppressDependenciesWhenPackingNode = "SuppressDependenciesWhenPacking";
 
         public readonly bool isTestProject;
+        public readonly XMLNode rootNode;
 
-        private readonly XMLNode rootNode;
         private readonly Text path;
         private readonly Text name;
         private readonly Array<ProjectReference> projectReferences;
@@ -27,6 +29,8 @@ namespace Abacus.Manager
         private readonly XMLNode packageId;
         private readonly XMLNode company;
         private readonly XMLNode repositoryUrl;
+        private readonly XMLNode includeBuildOutput;
+        private readonly XMLNode suppressDependenciesWhenPacking;
 
         /// <summary>
         /// Name of the project based on the file name.
@@ -58,6 +62,9 @@ namespace Abacus.Manager
         /// RepositoryUrl value.
         /// </summary>
         public readonly Text.Borrowed RepositoryUrl => repositoryUrl.Content;
+
+        public readonly Text.Borrowed IncludeBuildOutput => includeBuildOutput.Content;
+        public readonly Text.Borrowed SuppressDependenciesWhenPacking => suppressDependenciesWhenPacking.Content;
 
         /// <summary>
         /// The directory that the project is in.
@@ -134,6 +141,14 @@ namespace Abacus.Manager
                 {
                     repositoryUrl = node;
                 }
+                else if (node.Name.Equals(IncludeBuildOutputNode))
+                {
+                    includeBuildOutput = node;
+                }
+                else if (node.Name.Equals(SuppressDependenciesWhenPackingNode))
+                {
+                    suppressDependenciesWhenPacking = node;
+                }
                 else
                 {
                     foreach (XMLNode child in node.Children)
@@ -170,6 +185,18 @@ namespace Abacus.Manager
             {
                 repositoryUrl = new(RepositoryUrlNode);
                 projectPropertyGroup.Add(repositoryUrl);
+            }
+
+            if (includeBuildOutput == default)
+            {
+                includeBuildOutput = new(IncludeBuildOutputNode);
+                projectPropertyGroup.Add(includeBuildOutput);
+            }
+
+            if (suppressDependenciesWhenPacking == default)
+            {
+                suppressDependenciesWhenPacking = new(SuppressDependenciesWhenPackingNode);
+                projectPropertyGroup.Add(suppressDependenciesWhenPacking);
             }
 
             this.projectReferences = new(projectReferences.Slice(0, projectReferencesCount));
@@ -228,8 +255,10 @@ namespace Abacus.Manager
         public readonly void WriteToFile()
         {
             using Text buffer = new(0);
-            ToStringFlags flags = ToStringFlags.CarriageReturn | ToStringFlags.LineFeed | ToStringFlags.RootSpacing;
-            rootNode.ToString(buffer, "    ", flags);
+            SerializationSettings settings = SerializationSettings.PrettyPrinted;
+            settings.flags |= SerializationSettings.Flags.RootSpacing;
+            settings.flags |= SerializationSettings.Flags.SkipEmptyNodes;
+            rootNode.ToString(buffer, settings);
             System.IO.File.WriteAllText(path.ToString(), buffer.AsSpan());
         }
 

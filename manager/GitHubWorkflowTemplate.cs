@@ -20,7 +20,7 @@
 
         public const string PackStep = @"
 - name: Pack `{{ProjectName}}`
-  run: dotnet pack ""${{ github.event.repository.name }}/{{ProjectFolderName}}"" -c {{BuildMode}} /p:Version=${VERSION} --no-build --output .";
+  run: dotnet pack ""${{ github.event.repository.name }}/{{ProjectFolderName}}"" /p:Version=${VERSION} --no-build --output .";
 
         public const string PublishStep = @"
 - name: Publish `{{ProjectName}}`

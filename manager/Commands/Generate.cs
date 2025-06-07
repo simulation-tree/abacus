@@ -2,6 +2,7 @@
 using Collections;
 using Collections.Generic;
 using System;
+using System.IO;
 using Unmanaged;
 
 namespace Abacus.Manager.Commands
@@ -9,7 +10,7 @@ namespace Abacus.Manager.Commands
     public readonly struct Generate : ICommand
     {
         readonly string ICommand.Name => "gen";
-        readonly string ICommand.Description => $"Generates files (--gh-test-workflow, --gh-publish-workflow, --clone-script)";
+        readonly string ICommand.Description => $"Generates files (--gh-test-workflow, --gh-publish-workflow, --clone-script --targets)";
 
         readonly void ICommand.Execute(Runner runner, Arguments arguments)
         {
@@ -29,28 +30,39 @@ namespace Abacus.Manager.Commands
                 branch |= Branch.CloneScript;
             }
 
+            if (arguments.Contains("--targets"))
+            {
+                branch |= Branch.Targets;
+            }
+
             if (branch != default)
             {
                 using Array<Repository> repositories = runner.GetRepositories();
-                foreach (Repository repository in repositories)
+                Span<Repository> repositoriesSpan = repositories.AsSpan();
+                foreach (Repository repository in repositoriesSpan)
                 {
                     if ((branch & Branch.GitHubTestWorkflow) == Branch.GitHubTestWorkflow)
                     {
-                        GenerateGitHubTestWorkflow(repository, repositories);
+                        GenerateGitHubTestWorkflow(repository, repositoriesSpan);
                     }
 
                     if ((branch & Branch.GitHubPublishWorkflow) == Branch.GitHubPublishWorkflow)
                     {
-                        GenerateGitHubPublishWorkflow(repository, repositories);
+                        GenerateGitHubPublishWorkflow(repository, repositoriesSpan);
                     }
                 }
 
                 if ((branch & Branch.CloneScript) == Branch.CloneScript)
                 {
-                    GenerateCloneScript(runner, repositories);
+                    GenerateCloneScript(runner, repositoriesSpan);
                 }
 
-                foreach (Repository repository in repositories)
+                if ((branch & Branch.Targets) == Branch.Targets)
+                {
+                    GenerateTargetsFile(runner, repositoriesSpan);
+                }
+
+                foreach (Repository repository in repositoriesSpan)
                 {
                     repository.Dispose();
                 }
@@ -61,7 +73,7 @@ namespace Abacus.Manager.Commands
             }
         }
 
-        private static void GenerateGitHubTestWorkflow(Repository repository, Array<Repository> repositories)
+        private static void GenerateGitHubTestWorkflow(Repository repository, ReadOnlySpan<Repository> repositories)
         {
             //check if theres any test project present
             bool hasTestProject = false;
@@ -80,47 +92,47 @@ namespace Abacus.Manager.Commands
             }
 
             string rootFolder = repository.Path.ToString();
-            string githubFolder = System.IO.Path.Combine(rootFolder, ".github");
-            if (!System.IO.Directory.Exists(githubFolder))
+            string githubFolder = Path.Combine(rootFolder, ".github");
+            if (!Directory.Exists(githubFolder))
             {
-                System.IO.Directory.CreateDirectory(githubFolder);
+                Directory.CreateDirectory(githubFolder);
             }
 
-            string workflowsFolder = System.IO.Path.Combine(githubFolder, "workflows");
-            if (!System.IO.Directory.Exists(workflowsFolder))
+            string workflowsFolder = Path.Combine(githubFolder, "workflows");
+            if (!Directory.Exists(workflowsFolder))
             {
-                System.IO.Directory.CreateDirectory(workflowsFolder);
+                Directory.CreateDirectory(workflowsFolder);
             }
 
-            string filePath = System.IO.Path.Combine(workflowsFolder, "test.yml");
+            string filePath = Path.Combine(workflowsFolder, "test.yml");
             string source = GetSource(GitHubWorkflowTemplate.TestSource, repository, repositories, false);
-            System.IO.File.WriteAllText(filePath, source);
+            File.WriteAllText(filePath, source);
         }
 
-        private static void GenerateGitHubPublishWorkflow(Repository repository, Array<Repository> repositories)
+        private static void GenerateGitHubPublishWorkflow(Repository repository, ReadOnlySpan<Repository> repositories)
         {
             string rootFolder = repository.Path.ToString();
-            string githubFolder = System.IO.Path.Combine(rootFolder, ".github");
-            if (!System.IO.Directory.Exists(githubFolder))
+            string githubFolder = Path.Combine(rootFolder, ".github");
+            if (!Directory.Exists(githubFolder))
             {
-                System.IO.Directory.CreateDirectory(githubFolder);
+                Directory.CreateDirectory(githubFolder);
             }
 
-            string workflowsFolder = System.IO.Path.Combine(githubFolder, "workflows");
-            if (!System.IO.Directory.Exists(workflowsFolder))
+            string workflowsFolder = Path.Combine(githubFolder, "workflows");
+            if (!Directory.Exists(workflowsFolder))
             {
-                System.IO.Directory.CreateDirectory(workflowsFolder);
+                Directory.CreateDirectory(workflowsFolder);
             }
 
-            string filePath = System.IO.Path.Combine(workflowsFolder, "publish.yml");
+            string filePath = Path.Combine(workflowsFolder, "publish.yml");
             string source = GetSource(GitHubWorkflowTemplate.PublishSource, repository, repositories, true);
-            System.IO.File.WriteAllText(filePath, source);
+            File.WriteAllText(filePath, source);
         }
 
-        private static void GenerateCloneScript(Runner runner, Array<Repository> repositories)
+        private static void GenerateCloneScript(Runner runner, ReadOnlySpan<Repository> repositories)
         {
-            string solutionFolder = System.IO.Path.GetDirectoryName(runner.SolutionPath.ToString()) ?? string.Empty;
-            string cloneScript = System.IO.Path.Combine(solutionFolder, "clone-dependencies.bat");
+            string solutionFolder = Path.GetDirectoryName(runner.SolutionPath.ToString()) ?? string.Empty;
+            string cloneScript = Path.Combine(solutionFolder, "clone-dependencies.bat");
             using Text builder = new();
             builder.Append("cd ..");
             builder.Append('\n');
@@ -131,10 +143,37 @@ namespace Abacus.Manager.Commands
                 builder.Append('\n');
             }
 
-            System.IO.File.WriteAllText(cloneScript, builder.ToString());
+            File.WriteAllText(cloneScript, builder.ToString());
         }
 
-        private static string GetSource(string source, Repository repository, Array<Repository> repositories, bool release)
+        private static void GenerateTargetsFile(Runner runner, ReadOnlySpan<Repository> repositories)
+        {
+            foreach (Repository repository in repositories)
+            {
+                foreach (Project project in repository.Projects)
+                {
+                    if (!project.isTestProject)
+                    {
+                        string[] sourceFiles = Directory.GetFiles(project.Directory.ToString(), "*.cs", SearchOption.AllDirectories);
+                        if (sourceFiles.Length > 0)
+                        {
+                            string buildFolder = Path.Combine(project.Directory.ToString(), "build");
+                            if (!Directory.Exists(buildFolder))
+                            {
+                                Directory.CreateDirectory(buildFolder);
+                            }
+
+                            string targetsPath = Path.Combine(buildFolder, project.Name.ToString() + ".targets");
+                            string content = TargetsTemplate.Source;
+                            content = content.Replace("{{ProjectName}}", project.Name.ToString());
+                            File.WriteAllText(targetsPath, content);
+                        }
+                    }
+                }
+            }
+        }
+
+        private static string GetSource(string source, Repository repository, ReadOnlySpan<Repository> repositories, bool release)
         {
             bool containsTestProject = false;
             foreach (Project project in repository.Projects)
@@ -195,14 +234,14 @@ namespace Abacus.Manager.Commands
             return source;
         }
 
-        private static Array<Repository> GetDependencies(Repository repository, Array<Repository> repositories)
+        private static Array<Repository> GetDependencies(Repository repository, ReadOnlySpan<Repository> repositories)
         {
             using List<Repository> referencedRepositories = new();
             foreach (Project project in repository.Projects)
             {
                 foreach (Project.ProjectReference projectReference in project.ProjectReferences)
                 {
-                    string projectName = System.IO.Path.GetFileNameWithoutExtension(projectReference.Include.ToString());
+                    string projectName = Path.GetFileNameWithoutExtension(projectReference.Include.ToString());
                     Repository foundRepository = default;
                     foreach (Repository otherRepository in repositories)
                     {
@@ -239,7 +278,7 @@ namespace Abacus.Manager.Commands
                     {
                         foreach (Project.ProjectReference currentProjectReference in currentProject.ProjectReferences)
                         {
-                            string projectName = System.IO.Path.GetFileNameWithoutExtension(currentProjectReference.Include.ToString());
+                            string projectName = Path.GetFileNameWithoutExtension(currentProjectReference.Include.ToString());
                             Repository foundRepository = default;
                             foreach (Repository otherRepository in repositories)
                             {
@@ -304,7 +343,8 @@ namespace Abacus.Manager.Commands
             string text = string.Empty;
             foreach (Project project in repository.Projects)
             {
-                text += GetSource(GitHubWorkflowTemplate.BuildStep, project) + '\n';
+                text += GetSource(GitHubWorkflowTemplate.BuildStep, project).Replace("{{BuildMode}}", "Debug") + '\n';
+                text += GetSource(GitHubWorkflowTemplate.BuildStep, project).Replace("{{BuildMode}}", "Release") + '\n';
             }
 
             return text.TrimEnd('\n');
@@ -347,7 +387,7 @@ namespace Abacus.Manager.Commands
 
             if (source.Contains("{{ProjectFolderName}}"))
             {
-                string folderName = System.IO.Path.GetFileNameWithoutExtension(project.Directory.ToString());
+                string folderName = Path.GetFileNameWithoutExtension(project.Directory.ToString());
                 source = source.Replace("{{ProjectFolderName}}", folderName);
             }
 
@@ -404,7 +444,8 @@ namespace Abacus.Manager.Commands
             Unknown = 0,
             GitHubTestWorkflow = 1,
             GitHubPublishWorkflow = 2,
-            CloneScript = 4
+            CloneScript = 4,
+            Targets = 8
         }
     }
 }
