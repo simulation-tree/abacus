@@ -166,7 +166,7 @@ namespace Abacus.Manager.Commands
                             packageId = projectName;
                         }
 
-                        string targetsPath = Path.Combine(buildFolder, packageId + ".targets");
+                        string targetsPath = Path.Combine(buildFolder, projectName + ".targets");
                         string content = TargetsTemplate.Source;
                         content = content.Replace("{{ProjectName}}", projectName);
                         content = content.Replace("{{PackageId}}", packageId);
