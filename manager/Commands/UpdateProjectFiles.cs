@@ -78,7 +78,7 @@ namespace Abacus.Manager.Commands
             string releaseDllPath = $"bin/Release/net9.0/{projectName}.dll";
             string debugXmlPath = $"bin/Debug/net9.0/{projectName}.xml";
             string releaseXmlPath = $"bin/Release/net9.0/{projectName}.xml";
-            string targetsPath = $"build/{projectName}.targets";
+            string targetsPath = $"build/{packageId}.targets";
             string packageDebugDllPath = $"tools/debug/{projectName}.dll";
             string packageReleaseDllPath = $"tools/release/{projectName}.dll";
             string packageDebugXmlPath = $"tools/debug/{projectName}.xml";
