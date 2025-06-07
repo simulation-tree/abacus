@@ -68,20 +68,21 @@ namespace Abacus.Manager.Commands
         {
             bool changed = false;
             string packageId = project.PackageId.ToString();
+            string projectName = project.Name.ToString();
             if (string.IsNullOrEmpty(packageId))
             {
-                packageId = project.Name.ToString();
+                packageId = projectName;
             }
 
-            string debugDllPath = $"bin/Debug/net9.0/{packageId}.dll";
-            string releaseDllPath = $"bin/Release/net9.0/{packageId}.dll";
-            string debugXmlPath = $"bin/Debug/net9.0/{packageId}.xml";
-            string releaseXmlPath = $"bin/Release/net9.0/{packageId}.xml";
-            string targetsPath = $"build/{packageId}.targets";
-            string packageDebugDllPath = $"tools/debug/{packageId}.dll";
-            string packageReleaseDllPath = $"tools/release/{packageId}.dll";
-            string packageDebugXmlPath = $"tools/debug/{packageId}.xml";
-            string packageReleaseXmlPath = $"tools/release/{packageId}.xml";
+            string debugDllPath = $"bin/Debug/net9.0/{projectName}.dll";
+            string releaseDllPath = $"bin/Release/net9.0/{projectName}.dll";
+            string debugXmlPath = $"bin/Debug/net9.0/{projectName}.xml";
+            string releaseXmlPath = $"bin/Release/net9.0/{projectName}.xml";
+            string targetsPath = $"build/{projectName}.targets";
+            string packageDebugDllPath = $"tools/debug/{projectName}.dll";
+            string packageReleaseDllPath = $"tools/release/{projectName}.dll";
+            string packageDebugXmlPath = $"tools/debug/{projectName}.xml";
+            string packageReleaseXmlPath = $"tools/release/{projectName}.xml";
             string debugXmlCondition = $"Exists('{debugXmlPath}')";
             string releaseXmlCondition = $"Exists('{releaseXmlPath}')";
             XMLNode debugDllPackNode = default;
