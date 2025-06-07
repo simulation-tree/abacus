@@ -25,7 +25,7 @@ namespace Abacus.Manager.Commands
                 {
                     if (!project.isTestProject && !project.Name.Contains("Generator", StringComparison.Ordinal))
                     {
-                        string[] sourceFiles = Directory.GetFiles(project.Path.ToString(), "*.cs", SearchOption.AllDirectories);
+                        string[] sourceFiles = Directory.GetFiles(project.Directory.ToString(), "*.cs", SearchOption.AllDirectories);
                         if (sourceFiles.Length > 0)
                         {
                             bool changed = false;
