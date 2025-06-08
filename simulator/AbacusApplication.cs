@@ -18,7 +18,6 @@ using Rendering.Messages;
 using Rendering.Systems;
 using Rendering.Vulkan;
 using Shaders.Systems;
-using System;
 using System.Diagnostics;
 using System.Runtime;
 using TextRendering.Systems;
@@ -118,6 +117,7 @@ namespace Abacus.Simulator
             simulator.Remove<AutomationPlayingSystem>();
             simulator.Remove<DataImportSystem>();
         }
+
         private static void InitializeGarbageCollector()
         {
             GCSettings.LatencyMode = GCLatencyMode.SustainedLowLatency;
