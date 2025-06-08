@@ -12,6 +12,16 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <None Remove="Templates\PlantUML.txt" />
+	  <None Remove="Templates\targets.xml" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <EmbeddedResource Include="Templates\PlantUML.txt" />
+	  <EmbeddedResource Include="Templates\targets.xml" />
+	</ItemGroup>
+
+	<ItemGroup>
 	  <ProjectReference Include="..\..\clipboard\source\Clipboard.csproj" />
 	  <ProjectReference Include="..\..\collections\source\Collections.csproj" />
 	  <ProjectReference Include="..\..\serialization\source\Serialization.csproj" />

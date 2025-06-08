@@ -166,7 +166,7 @@ namespace Abacus.Manager.Commands
                 }
             }
 
-            string source = UMLTemplate.Source;
+            string source = EmbeddedResources.Get("PlantUML.txt") ?? throw new("Template missing");
             source = source.Replace("{{Title}}", "abacus");
             source = source.Replace("{{Types}}", types.ToString());
             source = source.Replace("{{Dependencies}}", dependencies.ToString());

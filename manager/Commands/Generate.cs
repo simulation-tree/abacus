@@ -154,6 +154,12 @@ namespace Abacus.Manager.Commands
                     if (!project.isTestProject && project.SourceFiles > 0 && !project.Name.Contains("Generator", StringComparison.Ordinal))
                     {
                         string buildFolder = Path.Combine(project.Directory.ToString(), "build");
+                        if (Directory.Exists(buildFolder))
+                        {
+                            Directory.Delete(buildFolder, true);
+                        }
+
+                        buildFolder = Path.Combine(project.Directory.ToString(), "buildTransitive");
                         if (!Directory.Exists(buildFolder))
                         {
                             Directory.CreateDirectory(buildFolder);
@@ -167,7 +173,7 @@ namespace Abacus.Manager.Commands
                         }
 
                         string targetsPath = Path.Combine(buildFolder, packageId + ".targets");
-                        string content = TargetsTemplate.Source;
+                        string content = EmbeddedResources.Get("targets.xml") ?? throw new("Targets template is missing");
                         content = content.Replace("{{ProjectName}}", projectName);
                         content = content.Replace("{{PackageId}}", packageId);
                         File.WriteAllText(targetsPath, content);

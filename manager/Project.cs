@@ -17,6 +17,7 @@ namespace Abacus.Manager
         private const string IncludeAttribute = "Include";
         private const string IncludeBuildOutputNode = "IncludeBuildOutput";
         private const string SuppressDependenciesWhenPackingNode = "SuppressDependenciesWhenPacking";
+        private const string OutDirNode = "OutDir";
 
         public readonly bool isTestProject;
         public readonly XMLNode rootNode;
@@ -32,6 +33,7 @@ namespace Abacus.Manager
         private readonly XMLNode repositoryUrl;
         private readonly XMLNode includeBuildOutput;
         private readonly XMLNode suppressDependenciesWhenPacking;
+        private readonly XMLNode outDir;
 
         /// <summary>
         /// Name of the project based on the file name.
@@ -66,6 +68,7 @@ namespace Abacus.Manager
 
         public readonly Text.Borrowed IncludeBuildOutput => includeBuildOutput.Content;
         public readonly Text.Borrowed SuppressDependenciesWhenPacking => suppressDependenciesWhenPacking.Content;
+        public readonly Text.Borrowed OutDir => outDir.Content;
 
         public readonly int SourceFiles
         {
@@ -127,7 +130,7 @@ namespace Abacus.Manager
             this.path = new(path);
             this.name = new(System.IO.Path.GetFileNameWithoutExtension(path));
 
-            using System.IO.FileStream fileStream = System.IO.File.OpenRead(this.path.ToString());
+            using FileStream fileStream = File.OpenRead(this.path.ToString());
             using ByteReader reader = new(fileStream);
             rootNode = reader.ReadObject<XMLNode>();
 
@@ -173,6 +176,10 @@ namespace Abacus.Manager
                 else if (node.Name.Equals(SuppressDependenciesWhenPackingNode))
                 {
                     suppressDependenciesWhenPacking = node;
+                }
+                else if (node.Name.Equals(OutDirNode))
+                {
+                    outDir = node;
                 }
                 else
                 {
@@ -222,6 +229,12 @@ namespace Abacus.Manager
             {
                 suppressDependenciesWhenPacking = new(SuppressDependenciesWhenPackingNode);
                 projectPropertyGroup.Add(suppressDependenciesWhenPacking);
+            }
+
+            if (outDir == default)
+            {
+                outDir = new(OutDirNode);
+                projectPropertyGroup.Add(outDir);
             }
 
             this.projectReferences = new(projectReferences.Slice(0, projectReferencesCount));

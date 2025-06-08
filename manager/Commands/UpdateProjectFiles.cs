@@ -38,15 +38,22 @@ namespace Abacus.Manager.Commands
                             changed |= true;
                         }
 
-                        if (!project.IncludeBuildOutput.IsEmpty.Equals("false"))
+                        if (!project.IncludeBuildOutput.Equals("false"))
                         {
                             project.IncludeBuildOutput.CopyFrom("false");
                             changed |= true;
                         }
 
-                        if (!project.SuppressDependenciesWhenPacking.Equals("true"))
+                        if (!project.SuppressDependenciesWhenPacking.IsEmpty)
                         {
-                            project.SuppressDependenciesWhenPacking.CopyFrom("true");
+                            project.SuppressDependenciesWhenPacking.Clear();
+                            changed |= true;
+                        }
+
+                        const string OutDir = "bin/$(TargetFramework)/$(Configuration)";
+                        if (!project.OutDir.Equals(OutDir))
+                        {
+                            project.OutDir.CopyFrom(OutDir);
                             changed |= true;
                         }
 
@@ -67,29 +74,8 @@ namespace Abacus.Manager.Commands
         private static bool EnsureBuildOutputsArePacked(Project project)
         {
             bool changed = false;
-            string packageId = project.PackageId.ToString();
-            string projectName = project.Name.ToString();
-            if (string.IsNullOrEmpty(packageId))
-            {
-                packageId = projectName;
-            }
-
-            string debugDllPath = $"bin/Debug/net9.0/{projectName}.dll";
-            string releaseDllPath = $"bin/Release/net9.0/{projectName}.dll";
-            string debugXmlPath = $"bin/Debug/net9.0/{projectName}.xml";
-            string releaseXmlPath = $"bin/Release/net9.0/{projectName}.xml";
-            string targetsPath = $"build/{packageId}.targets";
-            string packageDebugDllPath = $"tools/debug/{projectName}.dll";
-            string packageReleaseDllPath = $"tools/release/{projectName}.dll";
-            string packageDebugXmlPath = $"tools/debug/{projectName}.xml";
-            string packageReleaseXmlPath = $"tools/release/{projectName}.xml";
-            string debugXmlCondition = $"Exists('{debugXmlPath}')";
-            string releaseXmlCondition = $"Exists('{releaseXmlPath}')";
-            XMLNode debugDllPackNode = default;
-            XMLNode releaseDllPackNode = default;
-            XMLNode debugXmlPackNode = default;
-            XMLNode releaseXmlPackNode = default;
-            XMLNode targetsPackNode = default;
+            const string BinPath = "bin";
+            const string BuildTransitivePath = "buildTransitive";
             XMLNode itemGroupNode = default;
             using Stack<(XMLNode, XMLNode)> stack = new();
             stack.Push((default, project.rootNode));
@@ -99,29 +85,8 @@ namespace Abacus.Manager.Commands
                 if (current.Name.Equals("Content") && current.TryGetAttribute("Include", out ReadOnlySpan<char> include))
                 {
                     XMLNode parent = entry.parent;
-                    if (include.SequenceEqual(debugDllPath))
+                    if (include.StartsWith(BinPath) || include.StartsWith(BuildTransitivePath))
                     {
-                        debugDllPackNode = current;
-                        itemGroupNode = parent;
-                    }
-                    else if (include.SequenceEqual(releaseDllPath))
-                    {
-                        releaseDllPackNode = current;
-                        itemGroupNode = parent;
-                    }
-                    else if (include.SequenceEqual(targetsPath))
-                    {
-                        targetsPackNode = current;
-                        itemGroupNode = parent;
-                    }
-                    else if (include.SequenceEqual(debugXmlPath))
-                    {
-                        debugXmlPackNode = current;
-                        itemGroupNode = parent;
-                    }
-                    else if (include.SequenceEqual(releaseXmlPath))
-                    {
-                        releaseXmlPackNode = current;
                         itemGroupNode = parent;
                     }
                 }
@@ -140,80 +105,25 @@ namespace Abacus.Manager.Commands
                 project.rootNode.Add(itemGroupNode);
                 changed = true;
             }
-
-            if (debugDllPackNode == default)
+            else
             {
-                debugDllPackNode = new("Content");
-                itemGroupNode.Add(debugDllPackNode);
-                changed = true;
+                changed |= itemGroupNode.Count > 0;
+                itemGroupNode.Clear();
             }
 
-            changed |= TrySetAttribute(debugDllPackNode, "Include", debugDllPath);
-            changed |= TrySetAttribute(debugDllPackNode, "Pack", "true");
-            changed |= TrySetAttribute(debugDllPackNode, "PackagePath", packageDebugDllPath);
-            changed |= TrySetAttribute(debugDllPackNode, "Visible", "false");
+            XMLNode packBin = new("Content");
+            itemGroupNode.Add(packBin);
+            packBin.SetAttribute("Include", BinPath + "/**/*");
+            packBin.SetAttribute("Pack", "true");
+            packBin.SetAttribute("PackagePath", "lib");
+            packBin.SetAttribute("Visible", "false");
 
-            if (debugXmlPackNode == default)
-            {
-                debugXmlPackNode = new("Content");
-                itemGroupNode.Add(debugXmlPackNode);
-                changed = true;
-            }
-
-            changed |= TrySetAttribute(debugXmlPackNode, "Include", debugXmlPath);
-            changed |= TrySetAttribute(debugXmlPackNode, "Pack", "true");
-            changed |= TrySetAttribute(debugXmlPackNode, "PackagePath", packageDebugXmlPath);
-            changed |= TrySetAttribute(debugXmlPackNode, "Visible", "false");
-            changed |= TrySetAttribute(debugXmlPackNode, "Condition", debugXmlCondition);
-
-            if (releaseDllPackNode == default)
-            {
-                releaseDllPackNode = new("Content");
-                itemGroupNode.Add(releaseDllPackNode);
-                changed = true;
-            }
-
-            changed |= TrySetAttribute(releaseDllPackNode, "Include", releaseDllPath);
-            changed |= TrySetAttribute(releaseDllPackNode, "Pack", "true");
-            changed |= TrySetAttribute(releaseDllPackNode, "PackagePath", packageReleaseDllPath);
-            changed |= TrySetAttribute(releaseDllPackNode, "Visible", "false");
-
-            if (releaseXmlPackNode == default)
-            {
-                releaseXmlPackNode = new("Content");
-                itemGroupNode.Add(releaseXmlPackNode);
-                changed = true;
-            }
-
-            changed |= TrySetAttribute(releaseXmlPackNode, "Include", releaseXmlPath);
-            changed |= TrySetAttribute(releaseXmlPackNode, "Pack", "true");
-            changed |= TrySetAttribute(releaseXmlPackNode, "PackagePath", packageReleaseXmlPath);
-            changed |= TrySetAttribute(releaseXmlPackNode, "Visible", "false");
-            changed |= TrySetAttribute(releaseXmlPackNode, "Condition", releaseXmlCondition);
-
-            if (targetsPackNode == default)
-            {
-                targetsPackNode = new("Content");
-                itemGroupNode.Add(targetsPackNode);
-                changed = true;
-            }
-
-            changed |= TrySetAttribute(targetsPackNode, "Include", targetsPath);
-            changed |= TrySetAttribute(targetsPackNode, "Pack", "true");
-            changed |= TrySetAttribute(targetsPackNode, "PackagePath", targetsPath);
-            changed |= TrySetAttribute(targetsPackNode, "Visible", "false");
-            return changed;
-
-            static bool TrySetAttribute(XMLNode node, ReadOnlySpan<char> name, ReadOnlySpan<char> value)
-            {
-                if (!node.TryGetAttribute(name, out ReadOnlySpan<char> currentValue) || !currentValue.SequenceEqual(value))
-                {
-                    node.SetAttribute(name, value);
-                    return true;
-                }
-
-                return false;
-            }
+            XMLNode packBuildTransitive = new("Content");
+            itemGroupNode.Add(packBuildTransitive);
+            packBuildTransitive.SetAttribute("Include", BuildTransitivePath + "/**/*");
+            packBuildTransitive.SetAttribute("Pack", "true");
+            packBuildTransitive.SetAttribute("PackagePath", "buildTransitive");
+            return true;
         }
 
         private static void RenameInFiles(Runner runner, ReadOnlySpan<char> repositoryPath)

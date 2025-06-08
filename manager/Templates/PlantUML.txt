@@ -1,0 +1,11 @@
+﻿@startuml
+
+title {{Title}}
+'https://plantuml.com/smetana02
+!pragma layout smetana
+
+{{Types}}
+
+{{Dependencies}}
+
+@enduml
