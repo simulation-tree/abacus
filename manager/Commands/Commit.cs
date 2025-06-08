@@ -26,7 +26,8 @@ namespace Abacus.Manager.Commands
             using Array<Repository> repositories = runner.GetRepositories();
             foreach (Repository repository in repositories)
             {
-                Terminal.Execute(repository.Path, $"git commit -a -m \"{message.ToString()}\"");
+                Terminal.Execute(repository.Path, "git add .");
+                Terminal.Execute(repository.Path, $"git commit -m \"{message.ToString()}\"");
                 repository.Dispose();
             }
         }
