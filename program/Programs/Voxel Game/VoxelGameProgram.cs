@@ -58,8 +58,8 @@ namespace VoxelGame
             (chunkAtlas, blockTextures) = GetChunkAtlas();
 
             chunkMaterial = new(world, EmbeddedResource.GetAddress<UnlitTexturedMaterial>());
-            chunkMaterial.AddInstanceBinding<Color>();
-            chunkMaterial.AddInstanceBinding<LocalToWorld>();
+            chunkMaterial.AddPushConstant<Color>();
+            chunkMaterial.AddPushConstant<LocalToWorld>();
             chunkMaterial.AddComponentBinding<CameraMatrices>(new(0, 0), worldCamera);
             chunkMaterial.AddTextureBinding(new(1, 0), chunkAtlas, TextureFiltering.Nearest);
 

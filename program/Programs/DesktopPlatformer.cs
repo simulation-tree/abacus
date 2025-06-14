@@ -66,16 +66,16 @@ namespace Abacus
             indices[11] = 2;
 
             Material unlitMaterial = new(world, EmbeddedResource.GetAddress<UnlitTexturedMaterial>());
-            unlitMaterial.AddInstanceBinding<Color>();
-            unlitMaterial.AddInstanceBinding<LocalToWorld>();
+            unlitMaterial.AddPushConstant<Color>();
+            unlitMaterial.AddPushConstant<LocalToWorld>();
             unlitMaterial.AddComponentBinding<CameraMatrices>(new(0, 0), camera);
             unlitMaterial.AddTextureBinding(new(1, 0), squareTexture);
 
             AtlasTexture playerAtlas = GetPlayerAtlas();
 
             Material playerMaterial = new(world, EmbeddedResource.GetAddress<UnlitTexturedMaterial>());
-            playerMaterial.AddInstanceBinding<Color>();
-            playerMaterial.AddInstanceBinding<LocalToWorld>();
+            playerMaterial.AddPushConstant<Color>();
+            playerMaterial.AddPushConstant<LocalToWorld>();
             playerMaterial.AddComponentBinding<CameraMatrices>(new(0, 0), camera);
             playerMaterial.AddTextureBinding(new(1, 0), playerAtlas, TextureFiltering.Nearest);
 

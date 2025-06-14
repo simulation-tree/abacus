@@ -117,8 +117,8 @@ namespace Abacus
             //Shader shader = new(world, "Assets/Shaders/unlit.vertex.glsl", "Assets/Shaders/unlit.fragment.glsl");
 
             Material material = new(world, EmbeddedResource.GetAddress<UnlitTexturedMaterial>());
-            material.AddInstanceBinding<Color>();
-            material.AddInstanceBinding<LocalToWorld>();
+            material.AddPushConstant<Color>();
+            material.AddPushConstant<LocalToWorld>();
             material.AddComponentBinding<CameraMatrices>(new(0, 0), camera);
             material.AddTextureBinding(new(1, 0), testImage);
 
@@ -128,15 +128,15 @@ namespace Abacus
 
             waveImage = new(world, "Assets/Textures/wave.png");
             Material testMaterial = new(world, EmbeddedResource.GetAddress<UnlitTexturedMaterial>());
-            testMaterial.AddInstanceBinding<Color>();
-            testMaterial.AddInstanceBinding<LocalToWorld>();
+            testMaterial.AddPushConstant<Color>();
+            testMaterial.AddPushConstant<LocalToWorld>();
             testMaterial.AddComponentBinding<CameraMatrices>(new(0, 0), camera);
             testMaterial.AddTextureBinding(new(1, 0), waveImage);
 
             Texture squareTexture = new(world, EmbeddedResource.GetAddress<SquareTexture>());
             Material defaultSquareMaterial = new(world, EmbeddedResource.GetAddress<UnlitTexturedMaterial>());
-            defaultSquareMaterial.AddInstanceBinding<Color>();
-            defaultSquareMaterial.AddInstanceBinding<LocalToWorld>();
+            defaultSquareMaterial.AddPushConstant<Color>();
+            defaultSquareMaterial.AddPushConstant<LocalToWorld>();
             defaultSquareMaterial.AddComponentBinding<CameraMatrices>(new(0, 0), camera);
             defaultSquareMaterial.AddTextureBinding(new(1, 0), squareTexture);
 
@@ -152,8 +152,8 @@ namespace Abacus
             //material entity (reusable)
             Material textMaterial = new(world, EmbeddedResource.GetAddress<TextMaterial>());
             textMaterial.AddComponentBinding<CameraMatrices>(new(1, 0), camera);
-            textMaterial.AddInstanceBinding<Color>();
-            textMaterial.AddInstanceBinding<LocalToWorld>();
+            textMaterial.AddPushConstant<Color>();
+            textMaterial.AddPushConstant<LocalToWorld>();
 
             //mesh entity (reusable if text is the same)
             exampleTextMesh = new TextMesh(world, "hiii <3", cascadiaMono);
@@ -204,8 +204,8 @@ namespace Abacus
             Texture radialGradient = new(world, EmbeddedResource.GetAddress<RadialGradientAlphaTexture>());
 
             Material glowMaterial = new(world, EmbeddedResource.GetAddress<UnlitTexturedMaterial>());
-            glowMaterial.AddInstanceBinding<Color>();
-            glowMaterial.AddInstanceBinding<LocalToWorld>();
+            glowMaterial.AddPushConstant<Color>();
+            glowMaterial.AddPushConstant<LocalToWorld>();
             glowMaterial.AddComponentBinding<CameraMatrices>(new(0, 0), camera);
             glowMaterial.AddTextureBinding(new(1, 0), radialGradient);
 

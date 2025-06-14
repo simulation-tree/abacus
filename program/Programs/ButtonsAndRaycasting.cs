@@ -55,8 +55,8 @@ namespace Abacus
             Font robotoFont = new(world, EmbeddedResource.GetAddress<RobotoFont>());
 
             Material unlitWorldMaterial = new(world, EmbeddedResource.GetAddress<UnlitTexturedMaterial>());
-            unlitWorldMaterial.AddInstanceBinding<Color>();
-            unlitWorldMaterial.AddInstanceBinding<LocalToWorld>();
+            unlitWorldMaterial.AddPushConstant<Color>();
+            unlitWorldMaterial.AddPushConstant<LocalToWorld>();
             unlitWorldMaterial.AddComponentBinding<CameraMatrices>(new(0, 0), worldCamera);
             unlitWorldMaterial.AddTextureBinding(new(1, 0), squareTexture);
 
@@ -65,8 +65,8 @@ namespace Abacus
 
             Material textMaterial = new(world, EmbeddedResource.GetAddress<TextMaterial>());
             textMaterial.AddComponentBinding<CameraMatrices>(new(1, 0), uiCamera);
-            textMaterial.AddInstanceBinding<Color>();
-            textMaterial.AddInstanceBinding<LocalToWorld>();
+            textMaterial.AddPushConstant<Color>();
+            textMaterial.AddPushConstant<LocalToWorld>();
 
             //crate test cube
             MeshRenderer waveRenderer = new(world, cubeMesh, unlitWorldMaterial, worldCamera.RenderMask);
