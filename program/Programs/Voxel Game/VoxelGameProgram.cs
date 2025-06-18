@@ -14,6 +14,7 @@ using Skyboxes;
 using System;
 using System.Numerics;
 using Textures;
+using Textures.Components;
 using Transforms;
 using Transforms.Components;
 using UI;
@@ -102,15 +103,16 @@ namespace VoxelGame
             controlsLabel.Pivot = new(0f, 1f, 0f);
             controlsLabel.Position = new(0f, -100f);
 
-            Texture skyboxDown = new(world, "Assets/Skyboxes/Clouds/clouds1_down.bmp");
-            Texture skyboxEast = new(world, "Assets/Skyboxes/Clouds/clouds1_east.bmp");
-            Texture skyboxNorth = new(world, "Assets/Skyboxes/Clouds/clouds1_north.bmp");
-            Texture skyboxSouth = new(world, "Assets/Skyboxes/Clouds/clouds1_south.bmp");
-            Texture skyboxUp = new(world, "Assets/Skyboxes/Clouds/clouds1_up.bmp");
-            Texture skyboxWest = new(world, "Assets/Skyboxes/Clouds/clouds1_west.bmp");
+            IsTextureRequest.Flags flags = IsTextureRequest.Flags.None;
+            Texture skyboxDown = new(world, "Assets/Skyboxes/Clouds/clouds1_down.bmp", flags: flags);
+            Texture skyboxEast = new(world, "Assets/Skyboxes/Clouds/clouds1_east.bmp", flags: flags);
+            Texture skyboxNorth = new(world, "Assets/Skyboxes/Clouds/clouds1_north.bmp", flags: flags);
+            Texture skyboxSouth = new(world, "Assets/Skyboxes/Clouds/clouds1_south.bmp", flags: flags);
+            Texture skyboxUp = new(world, "Assets/Skyboxes/Clouds/clouds1_up.bmp", flags: flags);
+            Texture skyboxWest = new(world, "Assets/Skyboxes/Clouds/clouds1_west.bmp", flags: flags);
             simulator.Broadcast(new DataUpdate());
 
-            CubemapTexture cubemap = new(world, skyboxEast, skyboxWest, skyboxUp, skyboxDown, skyboxNorth, skyboxSouth);
+            CubemapTexture cubemap = new(world, skyboxEast, skyboxWest, skyboxUp, skyboxDown, skyboxNorth, skyboxSouth, flags);
             CubemapSkybox skybox = new(world, worldCamera, cubemap, worldMask);
             simulator.Broadcast(new DataUpdate());
 
