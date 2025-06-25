@@ -199,7 +199,8 @@ namespace VoxelGame
             blockTextures.Add(new(4, Direction.Forward), new("Stone"));
             blockTextures.Add(new(4, Direction.Backward), new("Stone"));
 
-            AtlasTexture atlasTexture = new(world, sprites);
+            IsTextureRequest.Flags flags = IsTextureRequest.Flags.BleedPixels;
+            AtlasTexture atlasTexture = new(world, sprites, 4, flags);
             return (atlasTexture, blockTextures);
         }
 
