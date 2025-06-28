@@ -18,13 +18,13 @@ namespace Abacus
         private static bool invertY;
         private static readonly System.Collections.Generic.List<double> frameTimes = new();
         private static double currentFps;
-        private static readonly DateTime firstTime;
-        private static DateTime nextFpsUpdateTime;
+        private static readonly double firstTime;
+        private static double nextFpsUpdateTime;
         private static readonly System.Collections.Generic.List<double> fpsHistory = new();
 
         static SharedFunctions()
         {
-            firstTime = DateTime.UtcNow;
+            firstTime = DateTime.UtcNow.Ticks / (double)TimeSpan.TicksPerSecond;
         }
 
         public static void DestroyTemporaryEntities(this World world, double deltaTime)
@@ -147,12 +147,12 @@ namespace Abacus
 
         public static void TrackFramesPerSecond()
         {
-            DateTime now = DateTime.UtcNow;
-            frameTimes.Add(now.TimeOfDay.TotalSeconds);
+            double now = DateTime.UtcNow.Ticks / (double)TimeSpan.TicksPerSecond;
+            frameTimes.Add(now);
 
             if (now >= nextFpsUpdateTime)
             {
-                nextFpsUpdateTime = now + TimeSpan.FromSeconds(0.1f);
+                nextFpsUpdateTime = now + 0.1;
                 currentFps = 0f;
                 if (frameTimes.Count > 1)
                 {
@@ -163,11 +163,11 @@ namespace Abacus
                     frameTimes.Clear();
                 }
 
-                TimeSpan timeStartStart = now - firstTime;
-                if (timeStartStart > TimeSpan.FromSeconds(3f))
+                double timeStartStart = now - firstTime;
+                if (timeStartStart > 5)
                 {
                     fpsHistory.Add(currentFps);
-                    if (fpsHistory.Count > 60 * 8)
+                    if (fpsHistory.Count > 60 * 16)
                     {
                         fpsHistory.RemoveAt(0);
                     }
@@ -308,55 +308,36 @@ namespace Abacus
 
         public unsafe static void AddLabelProcessors(this World world)
         {
-            LabelProcessor.Create(world, new(&TryHandleCurrentFPS));
-            LabelProcessor.Create(world, new(&TryHandleAverageFPS));
+            LabelProcessor.Create(world, new(&TryHandleFPS));
         }
 
         [UnmanagedCallersOnly, SkipLocalsInit]
-        private static Bool TryHandleCurrentFPS(TryProcessLabel.Input input)
+        private static Bool TryHandleFPS(TryProcessLabel.Input input)
         {
-            const string CurrentFPS = "{{currentFps}}";
-            if (input.OriginalText.IndexOf(CurrentFPS) != -1)
+            const string Token = "{{fps}}";
+            ReadOnlySpan<char> originalText = input.OriginalText;
+            if (originalText.IndexOf(Token) != -1)
             {
-                Span<char> replacement = stackalloc char[32];
-                int replacementLength = currentFps.ToString(replacement);
-                replacementLength = Math.Min(replacementLength, 6);
-                int newLength = input.OriginalText.Length - CurrentFPS.Length + replacementLength + 32;
-                Span<char> destination = stackalloc char[newLength];
-                newLength = Text.Replace(input.OriginalText, CurrentFPS.AsSpan(), replacement.Slice(0, replacementLength), destination);
-                Span<char> newText = destination.Slice(0, newLength);
-                if (!input.OriginalText.SequenceEqual(newText))
-                {
-                    input.SetResult(newText);
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        [UnmanagedCallersOnly, SkipLocalsInit]
-        private static Bool TryHandleAverageFPS(TryProcessLabel.Input input)
-        {
-            const string AverageFPS = "{{averageFps}}";
-            if (input.OriginalText.IndexOf(AverageFPS) != -1)
-            {
-                Span<char> replacement = stackalloc char[32];
                 double averageFps = 0;
+                double maxFps = 0;
                 for (int i = 0; i < fpsHistory.Count; i++)
                 {
-                    averageFps += fpsHistory[i];
+                    double fps = fpsHistory[i];
+                    averageFps += fps;
+                    if (fps > maxFps)
+                    {
+                        maxFps = fps;
+                    }
                 }
 
                 averageFps /= fpsHistory.Count;
-                int replacementLength = averageFps.ToString(replacement);
-                replacementLength = Math.Min(replacementLength, 6);
-                int newLength = input.OriginalText.Length - AverageFPS.Length + replacementLength + 32;
+
+                string replacement = $"Current: {currentFps:0.00}\nAverage: {averageFps:0.00}\nMax:     {maxFps:0.00}";
+                int newLength = originalText.Length - Token.Length + replacement.Length + 32;
                 Span<char> destination = stackalloc char[newLength];
-                newLength = Text.Replace(input.OriginalText, AverageFPS.AsSpan(), replacement.Slice(0, replacementLength), destination);
-                input.SetResult(destination.Slice(0, newLength));
+                newLength = Text.Replace(originalText, Token.AsSpan(), replacement, destination);
                 Span<char> newText = destination.Slice(0, newLength);
-                if (!input.OriginalText.SequenceEqual(newText))
+                if (!originalText.SequenceEqual(newText))
                 {
                     input.SetResult(newText);
                     return true;

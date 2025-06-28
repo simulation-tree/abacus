@@ -93,7 +93,7 @@ namespace VoxelGame
             Settings settings = new(world);
             Canvas canvas = new(settings, uiCamera, uiMask, LayerMask.All);
 
-            Label fpsLabel = new(canvas, "Current FPS: {{currentFps}}\nAverage FPS: {{averageFps}}", default, 32);
+            Label fpsLabel = new(canvas, "{{fps}}", default, 32);
             fpsLabel.Anchor = Anchor.TopLeft;
             fpsLabel.Pivot = new(0f, 1f, 0f);
 
