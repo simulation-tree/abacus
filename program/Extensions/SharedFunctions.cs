@@ -167,6 +167,10 @@ namespace Abacus
                 if (timeStartStart > TimeSpan.FromSeconds(3f))
                 {
                     fpsHistory.Add(currentFps);
+                    if (fpsHistory.Count > 60 * 8)
+                    {
+                        fpsHistory.RemoveAt(0);
+                    }
                 }
             }
         }
