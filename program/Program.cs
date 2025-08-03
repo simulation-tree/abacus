@@ -17,6 +17,10 @@ namespace Abacus
 
         public abstract void Dispose();
 
+        /// <summary>
+        /// Updates the program forward with the given <paramref name="deltaTime"/>.
+        /// </summary>
+        /// <returns><see langword="true"/> if the program is continuing to run, <see langword="false"/> if it should stop.</returns>
         public abstract bool Update(double deltaTime);
     }
 }

@@ -32,6 +32,8 @@
   <Project Path="../input-device-systems/source/InputDevices.Systems.csproj" />
   <Project Path="../input-devices/source/InputDevices.csproj" />
   <Project Path="../input-devices/tests/InputDevices.Tests.csproj" />
+  <Project Path="../json/source/JSON.csproj" />
+  <Project Path="../json/tests/JSON.Tests.csproj" />
   <Project Path="../material-systems/source/Materials.Systems.csproj" />
   <Project Path="../material-systems/tests/Materials.Systems.Tests.csproj" />
   <Project Path="../materials/source/Materials.csproj" />
@@ -52,14 +54,10 @@
   <Project Path="../physics-systems/tests/Physics.Systems.Tests.csproj" />
   <Project Path="../physics/source/Physics.csproj" />
   <Project Path="../physics/tests/Physics.Tests.csproj" />
-  <Project Path="../rendering-systems/core/Rendering.Systems.Core.csproj" />
-  <Project Path="../rendering-systems/generator/Rendering.Systems.Generator.csproj" />
   <Project Path="../rendering-systems/source/Rendering.Systems.csproj" />
   <Project Path="../rendering-systems/tests/Rendering.Systems.Tests.csproj" />
   <Project Path="../rendering/source/Rendering.csproj" />
   <Project Path="../rendering/tests/Rendering.Tests.csproj" />
-  <Project Path="../serialization/source/Serialization.csproj" />
-  <Project Path="../serialization/tests/Serialization.Tests.csproj" />
   <Project Path="../shader-systems/source/Shaders.Systems.csproj" />
   <Project Path="../shader-systems/tests/Shaders.Systems.Tests.csproj" />
   <Project Path="../shaders/source/Shaders.csproj" />
@@ -67,7 +65,6 @@
   <Project Path="../shapes/source/Shapes.csproj" />
   <Project Path="../shapes/tests/Shapes.Tests.csproj" />
   <Project Path="../simulation/core/Simulation.Core.csproj" />
-  <Project Path="../simulation/generator tests/Simulation.Generator.Tests.csproj" />
   <Project Path="../simulation/generator/Simulation.Generator.csproj" />
   <Project Path="../simulation/source/Simulation.csproj" />
   <Project Path="../simulation/tests/Simulation.Tests.csproj" />
@@ -81,6 +78,8 @@
   <Project Path="../texture-systems/tests/Textures.Systems.Tests.csproj" />
   <Project Path="../textures/source/Textures.csproj" />
   <Project Path="../textures/tests/Textures.Tests.csproj" />
+  <Project Path="../toml/source/TOML.csproj" />
+  <Project Path="../toml/tests/TOML.Tests.csproj" />
   <Project Path="../transform-systems/source/Transforms.Systems.csproj" />
   <Project Path="../transform-systems/tests/Transforms.Systems.Tests.csproj" />
   <Project Path="../transforms/source/Transforms.csproj" />
@@ -107,6 +106,8 @@
   <Project Path="../worlds/source/Worlds.csproj" />
   <Project Path="../worlds/tests/Worlds.Tests.csproj" />
   <Project Path="../worlds/types pregenerator/Worlds.TypesPreGenerator.csproj" />
-  <Project Path="program/Abacus.Program.csproj" />
+  <Project Path="../xml/source/XML.csproj" />
+  <Project Path="../xml/tests/XML.Tests.csproj" />
+  <Project Path="program/Abacus.csproj" />
   <Project Path="simulator/Abacus.Simulator.csproj" />
 </Solution>

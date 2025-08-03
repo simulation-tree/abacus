@@ -35,6 +35,7 @@ namespace VoxelGame
         private readonly AtlasTexture chunkAtlas;
         private readonly TerrainGenerator terrainGenerator;
         private readonly Dictionary<BlockTextureKey, BlockTexture> blockTextures;
+        private readonly Settings settings;
         private Vector3 cameraPosition;
         private Vector2 cameraPitchYaw;
 
@@ -90,7 +91,7 @@ namespace VoxelGame
                 chunk.UpdateMeshToMatchBlocks(chunkAtlas, blockTextures, terrainGenerator.meshRng);
             }
 
-            Settings settings = new(world);
+            settings = new(world);
             Canvas canvas = new(settings, uiCamera, uiMask, LayerMask.All);
 
             Label fpsLabel = new(canvas, "{{fps}}", default, 32);
@@ -142,6 +143,7 @@ namespace VoxelGame
 
         public override void Dispose()
         {
+            settings.Dispose();
             if (!window.IsDestroyed)
             {
                 window.Dispose();

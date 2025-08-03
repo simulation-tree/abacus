@@ -22,6 +22,7 @@ namespace Abacus
         private readonly Window window;
         private readonly Menu rightClickMenu;
         private readonly Dropdown enumDropdown;
+        private readonly Settings settings;
 
         public unsafe ControlsTest(Application application) : base(application)
         {
@@ -29,7 +30,7 @@ namespace Abacus
             window.ClearColor = new(0.5f, 0.5f, 0.5f, 1);
             window.IsResizable = true;
 
-            Settings settings = new(world);
+            settings = new(world);
             Camera camera = Camera.CreateOrthographic(world, window, 1f);
             Canvas canvas = new(settings, camera);
 
@@ -91,17 +92,17 @@ namespace Abacus
         {
             if (!IsAnyVirtualWindowOpen(world))
             {
-                return true;
+                return false;
             }
 
             if (!IsAnyWindowOpen(world))
             {
-                return true;
+                return false;
             }
 
             ToggleRightClickMenu(world);
             SharedFunctions.UpdateUISettings(world);
-            return false;
+            return true;
         }
 
         private void ToggleRightClickMenu(World world)
@@ -118,6 +119,7 @@ namespace Abacus
 
         public override void Dispose()
         {
+            settings.Dispose();
             if (!window.IsDestroyed)
             {
                 window.Dispose();

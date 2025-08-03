@@ -29,7 +29,7 @@
 		<PackageReference Include="Vortice.ShaderCompiler" Version="1.8.0" />
 		<PackageReference Include="Vortice.SPIRV" Version="1.0.4" />
 		<PackageReference Include="Vortice.SpirvCross" Version="1.5.3" />
-		<PackageReference Include="Vortice.Vulkan" Version="2.1.3" />
+		<PackageReference Include="Vortice.Vulkan" Version="2.2.0" />
 		<PackageReference Include="NativeFileDialogSharp" Version="0.6.0-alpha" />
 	</ItemGroup>
 
@@ -73,8 +73,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Using Include="Abacus.Simulator" />
-	  <Using Include="VoxelGame" />
+		<Using Include="Abacus.Simulator" />
+		<Using Include="VoxelGame" />
+		<Using Include="Abacus" />
 	</ItemGroup>
 
 </Project>
