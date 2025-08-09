@@ -5,7 +5,7 @@ git clone https://github.com/simulation-tree/windows.git
 git clone https://github.com/simulation-tree/window-systems.git
 git clone https://github.com/simulation-tree/vulkan-renderer.git
 git clone https://github.com/simulation-tree/unmanaged.git
-git clone https://github.com/game-simulations/interaction-kit.git
+git clone https://github.com/simulation-tree/ui.git
 git clone https://github.com/simulation-tree/ui-systems.git
 git clone https://github.com/simulation-tree/types.git
 git clone https://github.com/simulation-tree/transforms.git
