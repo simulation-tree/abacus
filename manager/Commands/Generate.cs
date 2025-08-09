@@ -1,5 +1,6 @@
 ﻿using Abacus.Manager.Constants;
 using Collections.Generic;
+using XML;
 using System;
 using System.IO;
 using Unmanaged;
@@ -8,8 +9,8 @@ namespace Abacus.Manager.Commands
 {
     public readonly struct Generate : ICommand
     {
-        readonly string ICommand.Name => "gen";
-        readonly string ICommand.Description => $"Generates files (--gh-test-workflow, --gh-publish-workflow, --clone-script --targets)";
+        readonly string ICommand.Name => "generate";
+        readonly string ICommand.Description => $"Generates files (--gh-test-workflow, --gh-publish-workflow, --clone-script --build-targets)";
 
         readonly void ICommand.Execute(Runner runner, Arguments arguments)
         {
@@ -29,41 +30,44 @@ namespace Abacus.Manager.Commands
                 branch |= Branch.CloneScript;
             }
 
-            if (arguments.Contains("--targets"))
+            if (arguments.Contains("--build-targets"))
             {
                 branch |= Branch.Targets;
             }
 
             if (branch != default)
             {
-                using Array<Repository> repositories = runner.GetRepositories();
-                Span<Repository> repositoriesSpan = repositories.AsSpan();
-                foreach (Repository repository in repositoriesSpan)
-                {
-                    if ((branch & Branch.GitHubTestWorkflow) == Branch.GitHubTestWorkflow)
-                    {
-                        GenerateGitHubTestWorkflow(repository, repositoriesSpan);
-                    }
-
-                    if ((branch & Branch.GitHubPublishWorkflow) == Branch.GitHubPublishWorkflow)
-                    {
-                        GenerateGitHubPublishWorkflow(repository, repositoriesSpan);
-                    }
-                }
-
                 if ((branch & Branch.CloneScript) == Branch.CloneScript)
                 {
-                    GenerateCloneScript(runner, repositoriesSpan);
+                    GenerateCloneScript(runner);
                 }
 
-                if ((branch & Branch.Targets) == Branch.Targets)
+                if ((branch & Branch.Targets) == Branch.Targets || (branch & Branch.GitHubTestWorkflow) == Branch.GitHubTestWorkflow || (branch & Branch.GitHubPublishWorkflow) == Branch.GitHubPublishWorkflow)
                 {
-                    GenerateTargetsFile(runner, repositoriesSpan);
-                }
+                    using Array<Repository> repositories = runner.GetRepositories();
+                    Span<Repository> repositoriesSpan = repositories.AsSpan();
+                    foreach (Repository repository in repositoriesSpan)
+                    {
+                        if ((branch & Branch.GitHubTestWorkflow) == Branch.GitHubTestWorkflow)
+                        {
+                            GenerateGitHubTestWorkflow(repository, repositoriesSpan);
+                        }
 
-                foreach (Repository repository in repositoriesSpan)
-                {
-                    repository.Dispose();
+                        if ((branch & Branch.GitHubPublishWorkflow) == Branch.GitHubPublishWorkflow)
+                        {
+                            GenerateGitHubPublishWorkflow(repository, repositoriesSpan);
+                        }
+                    }
+
+                    if ((branch & Branch.Targets) == Branch.Targets)
+                    {
+                        GenerateTargetsFile(runner, repositoriesSpan);
+                    }
+
+                    foreach (Repository repository in repositoriesSpan)
+                    {
+                        repository.Dispose();
+                    }
                 }
             }
             else
@@ -128,18 +132,35 @@ namespace Abacus.Manager.Commands
             File.WriteAllText(filePath, source);
         }
 
-        private static void GenerateCloneScript(Runner runner, ReadOnlySpan<Repository> repositories)
+        private static void GenerateCloneScript(Runner runner)
         {
-            string solutionFolder = Path.GetDirectoryName(runner.SolutionPath.ToString()) ?? string.Empty;
-            string cloneScript = Path.Combine(solutionFolder, "clone-dependencies.bat");
+            string solutionPath = runner.SolutionPath.ToString();
+            string solutionDirectory = Path.GetDirectoryName(solutionPath) ?? string.Empty;
+            string cloneScript = Path.Combine(solutionDirectory, "clone-dependencies.bat");
+            using List<long> repositoryHashes = new();
+            if (Repository.TryGetRepository(runner.SolutionPath, out Repository solutionRepository))
+            {
+                repositoryHashes.Add(solutionRepository.Remote.GetLongHashCode());
+            }
+
+            using Solution solution = new(solutionPath);
             using Text builder = new();
             builder.Append("cd ..");
             builder.Append('\n');
-            foreach (Repository repository in repositories)
+            foreach (Project project in solution.Projects)
             {
-                builder.Append("git clone ");
-                builder.Append(repository.Remote.ToString());
-                builder.Append('\n');
+                if (Repository.TryGetRepository(project.Directory, out Repository repository))
+                {
+                    long hash = repository.Remote.GetLongHashCode();
+                    if (repositoryHashes.TryAdd(hash))
+                    {
+                        builder.Append("git clone ");
+                        builder.Append(repository.Remote.ToString());
+                        builder.Append('\n');
+                    }
+
+                    repository.Dispose();
+                }
             }
 
             File.WriteAllText(cloneScript, builder.ToString());
@@ -238,7 +259,6 @@ namespace Abacus.Manager.Commands
                 source = source.Replace("{{BuildMode}}", release ? "Release" : "Debug");
             }
 
-            source = source.Replace("{{DotNetVersion}}", "'9.0.x'");
             source = source.Replace("{{RepositoryName}}", repository.Name.ToString());
             return source;
         }

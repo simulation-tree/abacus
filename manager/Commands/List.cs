@@ -13,7 +13,7 @@ namespace Abacus.Manager.Commands
             bool listRepositories = arguments.Contains("--repositories");
             if (listRepositories)
             {
-                using TableBuilder table = new("Name", "Remote", "Projects", "Commits?", "Changes?");
+                using TableBuilder table = new("Name", "Remote", "Projects", "Commits", "Changes");
                 using Array<Repository> repositories = runner.GetRepositories();
                 runner.WriteInfoLine($"Found {repositories.Length} repositories");
                 foreach (Repository repository in repositories)
@@ -46,14 +46,15 @@ namespace Abacus.Manager.Commands
             }
             else if (listProjects)
             {
-                using TableBuilder table = new("Name", "Is Test?");
+                using TableBuilder table = new("Name", "Test", "Generator");
                 using Array<Project> projects = runner.GetProjects();
                 runner.WriteInfoLine($"Found {projects.Length} projects");
                 foreach (Project project in projects)
                 {
                     string name = project.Name.ToString();
                     string isTest = project.isTestProject ? "Yes" : "No";
-                    table.AddRow(name, isTest);
+                    string isGenerator = project.isGeneratorProject ? "Yes" : "No";
+                    table.AddRow(name, isTest, isGenerator);
                     project.Dispose();
                 }
 

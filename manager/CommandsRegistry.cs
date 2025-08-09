@@ -15,6 +15,7 @@ namespace Abacus.Manager
         {
             //todo: have a source generator perform this
             Register<Help>();
+            Register<Info>();
             Register<Quit>();
             Register<Test>();
             Register<List>();
@@ -30,6 +31,7 @@ namespace Abacus.Manager
             Register<UML>();
             Register<UpdateProjectFiles>();
             Register<DiscardLocalChanges>();
+            Register<Normalize>();
         }
 
         public static void Register<T>() where T : unmanaged, ICommand

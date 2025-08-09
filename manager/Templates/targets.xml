@@ -3,7 +3,7 @@
 
     <ItemGroup>
         <Reference Include="{{ProjectName}}">
-            <HintPath>$(MSBuildThisFileDirectory)..\lib\net9.0\$(Configuration)\{{ProjectName}}.dll</HintPath>
+            <HintPath>$(MSBuildThisFileDirectory)..\lib\$(TargetFramework)\$(Configuration)\{{ProjectName}}.dll</HintPath>
         </Reference>
     </ItemGroup>
 

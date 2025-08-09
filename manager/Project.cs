@@ -1,5 +1,5 @@
 ﻿using Collections.Generic;
-using Serialization.XML;
+using XML;
 using System;
 using System.IO;
 using Unmanaged;
@@ -15,33 +15,34 @@ namespace Abacus.Manager
         private const string ProjectReferenceNode = "ProjectReference";
         private const string PackageReferenceNode = "PackageReference";
         private const string IncludeAttribute = "Include";
-        private const string IncludeBuildOutputNode = "IncludeBuildOutput";
         private const string SuppressDependenciesWhenPackingNode = "SuppressDependenciesWhenPacking";
         private const string OutDirNode = "OutDir";
 
         public readonly bool isTestProject;
+        public readonly bool isGeneratorProject;
         public readonly XMLNode rootNode;
 
         private readonly Text path;
-        private readonly Text name;
-        private readonly Array<ProjectReference> projectReferences;
-        private readonly Array<PackageReference> packageReferences;
-        private readonly XMLNode targetFramework;
+        private readonly List<ProjectReference> projectReferences;
+        private readonly List<PackageReference> packageReferences;
+        private readonly List<TargetFramework> targetFrameworks;
+        private readonly XMLNode targetFrameworkNode;
         private readonly XMLNode projectPropertyGroup;
         private readonly XMLNode packageId;
         private readonly XMLNode company;
         private readonly XMLNode repositoryUrl;
         private readonly XMLNode includeBuildOutput;
+        private readonly XMLNode embedAllSources;
         private readonly XMLNode suppressDependenciesWhenPacking;
         private readonly XMLNode outDir;
 
         /// <summary>
         /// Name of the project based on the file name.
         /// </summary>
-        public readonly ReadOnlySpan<char> Name => name.AsSpan();
+        public readonly ReadOnlySpan<char> Name => System.IO.Path.GetFileNameWithoutExtension(Path);
 
         /// <summary>
-        /// Path to the .csproj file.
+        /// Path to the project file.
         /// </summary>
         public readonly ReadOnlySpan<char> Path => path.AsSpan();
 
@@ -66,8 +67,26 @@ namespace Abacus.Manager
         /// </summary>
         public readonly Text.Borrowed RepositoryUrl => repositoryUrl.Content;
 
-        public readonly Text.Borrowed IncludeBuildOutput => includeBuildOutput.Content;
-        public readonly Text.Borrowed SuppressDependenciesWhenPacking => suppressDependenciesWhenPacking.Content;
+        public readonly ReadOnlySpan<TargetFramework> TargetFrameworks => targetFrameworks.AsSpan();
+        
+        public readonly bool IncludeBuildOutput
+        {
+            get => includeBuildOutput.Content.Equals("true");
+            set => includeBuildOutput.Content.CopyFrom(value ? "true" : "false");
+        }
+
+        public readonly bool EmbedAllSources
+        {
+            get => embedAllSources.Content.Equals("true");
+            set => embedAllSources.Content.CopyFrom(value ? "true" : "false");
+        }
+
+        public readonly bool SuppressDependenciesWhenPacking
+        {
+            get => suppressDependenciesWhenPacking.Content.Equals("true");
+            set => suppressDependenciesWhenPacking.Content.CopyFrom(value ? "true" : "false");
+        }
+
         public readonly Text.Borrowed OutDir => outDir.Content;
 
         public readonly int SourceFiles
@@ -128,33 +147,31 @@ namespace Abacus.Manager
         public Project(ReadOnlySpan<char> path)
         {
             this.path = new(path);
-            this.name = new(System.IO.Path.GetFileNameWithoutExtension(path));
 
             using FileStream fileStream = File.OpenRead(this.path.ToString());
             using ByteReader reader = new(fileStream);
             rootNode = reader.ReadObject<XMLNode>();
+            projectReferences = new();
+            packageReferences = new();
+            targetFrameworks = new();
 
             using Stack<XMLNode> stack = new();
             stack.Push(rootNode);
 
-            Span<ProjectReference> projectReferences = stackalloc ProjectReference[128];
-            int projectReferencesCount = 0;
-            Span<PackageReference> packageReferences = stackalloc PackageReference[128];
-            int packageReferencesCount = 0;
             while (stack.TryPop(out XMLNode node))
             {
                 if (node.Name.Equals(ProjectReferenceNode))
                 {
                     if (node.TryGetAttribute(IncludeAttribute, out ReadOnlySpan<char> referencedProjectPath))
                     {
-                        projectReferences[projectReferencesCount++] = new(referencedProjectPath);
+                        projectReferences.Add(new(referencedProjectPath));
                     }
                 }
                 else if (node.Name.Equals(PackageReferenceNode))
                 {
                     if (node.TryGetAttribute(IncludeAttribute, out ReadOnlySpan<char> referencedProjectPath) && node.TryGetAttribute("Version", out ReadOnlySpan<char> version))
                     {
-                        packageReferences[packageReferencesCount++] = new(referencedProjectPath, version);
+                        packageReferences.Add(new(referencedProjectPath, version));
                     }
                 }
                 else if (node.Name.Equals(PackageIdNode))
@@ -169,9 +186,13 @@ namespace Abacus.Manager
                 {
                     repositoryUrl = node;
                 }
-                else if (node.Name.Equals(IncludeBuildOutputNode))
+                else if (node.Name.Equals(nameof(IncludeBuildOutput)))
                 {
                     includeBuildOutput = node;
+                }
+                else if (node.Name.Equals(nameof(EmbedAllSources)))
+                {
+                    embedAllSources = node;
                 }
                 else if (node.Name.Equals(SuppressDependenciesWhenPackingNode))
                 {
@@ -187,7 +208,34 @@ namespace Abacus.Manager
                     {
                         if (child.Name.Equals(TargetFrameworkNode))
                         {
-                            targetFramework = child;
+                            targetFrameworkNode = child;
+                            projectPropertyGroup = node;
+                            targetFrameworks.Add(TargetFramework.Parse(child.Content.AsSpan()));
+                        }
+                        else if (child.Name.Equals(TargetFrameworkNode + "s"))
+                        {
+                            targetFrameworkNode = child;
+                            int start = 0;
+                            int index = 0;
+                            int length = child.Content.Length;
+                            while (index < length)
+                            {
+                                char c = child.Content[index];
+                                if (c == ';')
+                                {
+                                    ReadOnlySpan<char> part = child.Content.Slice(start, index - start);
+                                    targetFrameworks.Add(TargetFramework.Parse(part));
+                                    start = index + 1;
+                                }
+                                else if (index == length - 1)
+                                {
+                                    ReadOnlySpan<char> part = child.Content.Slice(start);
+                                    targetFrameworks.Add(TargetFramework.Parse(part));
+                                }
+
+                                index++;
+                            }
+
                             projectPropertyGroup = node;
                         }
 
@@ -196,7 +244,7 @@ namespace Abacus.Manager
                 }
             }
 
-            if (targetFramework == default)
+            if (targetFrameworkNode == default)
             {
                 throw new InvalidOperationException($"TargetFramework node not found in {path.ToString()}");
             }
@@ -221,8 +269,14 @@ namespace Abacus.Manager
 
             if (includeBuildOutput == default)
             {
-                includeBuildOutput = new(IncludeBuildOutputNode);
+                includeBuildOutput = new(nameof(IncludeBuildOutput));
                 projectPropertyGroup.Add(includeBuildOutput);
+            }
+
+            if (embedAllSources == default)
+            {
+                embedAllSources = new(nameof(EmbedAllSources));
+                projectPropertyGroup.Add(embedAllSources);
             }
 
             if (suppressDependenciesWhenPacking == default)
@@ -237,9 +291,8 @@ namespace Abacus.Manager
                 projectPropertyGroup.Add(outDir);
             }
 
-            this.projectReferences = new(projectReferences.Slice(0, projectReferencesCount));
-            this.packageReferences = new(packageReferences.Slice(0, packageReferencesCount));
             isTestProject = ContainsTestPackages();
+            isGeneratorProject = ContainsGeneratorPackages();
         }
 
         private readonly bool ContainsTestPackages()
@@ -263,6 +316,19 @@ namespace Abacus.Manager
             return false;
         }
 
+        private readonly bool ContainsGeneratorPackages()
+        {
+            foreach (PackageReference packageReference in packageReferences)
+            {
+                if (packageReference.Include.IndexOf("Microsoft.CodeAnalysis.CSharp") != -1)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         public override string ToString()
         {
             return path.ToString();
@@ -270,21 +336,39 @@ namespace Abacus.Manager
 
         public readonly void Dispose()
         {
-            for (int i = 0; i < projectReferences.Length; i++)
+            for (int i = projectReferences.Count - 1; i >= 0; i--)
             {
                 projectReferences[i].Dispose();
             }
 
-            for (int i = 0; i < packageReferences.Length; i++)
+            for (int i = packageReferences.Count - 1; i >= 0; i--)
             {
                 packageReferences[i].Dispose();
             }
 
+            targetFrameworks.Dispose();
             projectReferences.Dispose();
             packageReferences.Dispose();
-            name.Dispose();
             path.Dispose();
             rootNode.Dispose();
+        }
+
+        public readonly void ClearTargetFrameworks()
+        {
+            targetFrameworks.Clear();
+        }
+
+        public readonly void AddTargetFramework(TargetFramework targetFramework)
+        {
+            for (int i = 0; i < targetFrameworks.Count; i++)
+            {
+                if (targetFrameworks[i].Equals(targetFramework))
+                {
+                    return;
+                }
+            }
+
+            targetFrameworks.Add(targetFramework);
         }
 
         /// <summary>
@@ -292,12 +376,29 @@ namespace Abacus.Manager
         /// </summary>
         public readonly void WriteToFile()
         {
+            targetFrameworkNode.Name.CopyFrom("TargetFramework");
+            if (targetFrameworks.Count > 1)
+            {
+                targetFrameworkNode.Name.Append('s');
+            }
+
+            targetFrameworkNode.Content.Clear();
+            for (int i = 0; i < targetFrameworks.Count; i++)
+            {
+                if (i > 0)
+                {
+                    targetFrameworkNode.Content.Append(';');
+                }
+
+                targetFrameworkNode.Content.Append(targetFrameworks[i]);
+            }
+
             using Text buffer = new(0);
             SerializationSettings settings = SerializationSettings.PrettyPrinted;
             settings.flags |= SerializationSettings.Flags.RootSpacing;
             settings.flags |= SerializationSettings.Flags.SkipEmptyNodes;
             rootNode.ToString(buffer, settings);
-            System.IO.File.WriteAllText(path.ToString(), buffer.AsSpan());
+            File.WriteAllText(path.ToString(), buffer.AsSpan());
         }
 
         public readonly struct PackageReference : IDisposable

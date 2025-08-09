@@ -1,81 +1,78 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
-	<PropertyGroup>
-		<OutputType>WinExe</OutputType>
-		<TargetFramework>net9.0</TargetFramework>
-		<ImplicitUsings>enable</ImplicitUsings>
-		<Nullable>enable</Nullable>
-		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-		<ProduceReferenceAssembly>False</ProduceReferenceAssembly>
-		<PublishAot>True</PublishAot>
-		<PublishTrimmed>True</PublishTrimmed>
-		<TreatWarningsAsErrors>True</TreatWarningsAsErrors>
-		<WarningLevel>8</WarningLevel>
-	</PropertyGroup>
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <ProduceReferenceAssembly>False</ProduceReferenceAssembly>
+    <PublishAot>True</PublishAot>
+    <PublishTrimmed>True</PublishTrimmed>
+    <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
+    <WarningLevel>8</WarningLevel>
+    <OutDir>bin/$(TargetFramework)/$(Configuration)</OutDir>
+  </PropertyGroup>
 
-	<ItemGroup>
-		<Compile Remove="Assets\**" />
-		<EmbeddedResource Remove="Assets\**" />
-		<None Remove="Assets\**" />
-	</ItemGroup>
+  <ItemGroup>
+    <Compile Remove="Assets\**"/>
+    <EmbeddedResource Remove="Assets\**"/>
+    <None Remove="Assets\**"/>
+  </ItemGroup>
 
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-		<DefineConstants></DefineConstants>
-	</PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Alimer.Bindings.SDL" Version="3.9.8"/>
+    <PackageReference Include="OpenAssetImporter" Version="0.0.6"/>
+    <PackageReference Include="Vortice.ShaderCompiler" Version="1.8.0"/>
+    <PackageReference Include="Vortice.SPIRV" Version="1.0.4"/>
+    <PackageReference Include="Vortice.SpirvCross" Version="1.5.3"/>
+    <PackageReference Include="Vortice.Vulkan" Version="2.2.0"/>
+    <PackageReference Include="NativeFileDialogSharp" Version="0.6.0-alpha"/>
+  </ItemGroup>
 
-	<ItemGroup>
-		<PackageReference Include="Alimer.Bindings.SDL" Version="3.9.8" />
-		<PackageReference Include="OpenAssetImporter" Version="0.0.6" />
-		<PackageReference Include="Vortice.ShaderCompiler" Version="1.8.0" />
-		<PackageReference Include="Vortice.SPIRV" Version="1.0.4" />
-		<PackageReference Include="Vortice.SpirvCross" Version="1.5.3" />
-		<PackageReference Include="Vortice.Vulkan" Version="2.2.0" />
-		<PackageReference Include="NativeFileDialogSharp" Version="0.6.0-alpha" />
-	</ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\automation-systems\source\Automation.Systems.csproj"/>
+    <ProjectReference Include="..\..\automations\source\Automations.csproj"/>
+    <ProjectReference Include="..\..\camera-systems\source\Camera.Systems.csproj"/>
+    <ProjectReference Include="..\..\cameras\source\Cameras.csproj"/>
+    <ProjectReference Include="..\..\data-systems\source\Data.Systems.csproj"/>
+    <ProjectReference Include="..\..\global-kbm-systems\source\GlobalKeyboardAndMouse.Systems.csproj"/>
+    <ProjectReference Include="..\..\material-systems\source\Materials.Systems.csproj"/>
+    <ProjectReference Include="..\..\data\core\Data.Core.csproj"/>
+    <ProjectReference Include="..\..\file-dialog\source\FileDialogs.csproj"/>
+    <ProjectReference Include="..\..\font-systems\source\Fonts.Systems.csproj"/>
+    <ProjectReference Include="..\..\input-device-systems\source\InputDevices.Systems.csproj"/>
+    <ProjectReference Include="..\..\ui-systems\source\UI.Systems.csproj"/>
+    <ProjectReference Include="..\..\ui\source\UI.csproj"/>
+    <ProjectReference Include="..\..\meshes-9s\source\Meshes.NineSliced.csproj"/>
+    <ProjectReference Include="..\..\model-systems\source\Models.Systems.csproj"/>
+    <ProjectReference Include="..\..\physics-systems\source\Physics.Systems.csproj"/>
+    <ProjectReference Include="..\..\shader-systems\source\Shaders.Systems.csproj"/>
+    <ProjectReference Include="..\..\unmanaged\core\Unmanaged.Core.csproj"/>
+    <ProjectReference Include="..\..\text-rendering-systems\source\TextRendering.Systems.csproj"/>
+    <ProjectReference Include="..\..\texture-systems\source\Textures.Systems.csproj"/>
+    <ProjectReference Include="..\..\transform-systems\source\Transforms.Systems.csproj"/>
+    <ProjectReference Include="..\..\vulkan-renderer\source\VulkanRenderer.csproj"/>
+    <ProjectReference Include="..\..\window-systems\source\Windows.Systems.csproj"/>
+    <ProjectReference Include="..\program\Abacus.csproj"/>
+  </ItemGroup>
 
-	<ItemGroup>
-		<ProjectReference Include="..\..\automation-systems\source\Automation.Systems.csproj" />
-		<ProjectReference Include="..\..\automations\source\Automations.csproj" />
-		<ProjectReference Include="..\..\camera-systems\source\Camera.Systems.csproj" />
-		<ProjectReference Include="..\..\cameras\source\Cameras.csproj" />
-		<ProjectReference Include="..\..\data-systems\source\Data.Systems.csproj" />
-		<ProjectReference Include="..\..\global-kbm-systems\source\GlobalKeyboardAndMouse.Systems.csproj" />
-		<ProjectReference Include="..\..\material-systems\source\Materials.Systems.csproj" />
-		<ProjectReference Include="..\..\data\core\Data.Core.csproj" />
-		<ProjectReference Include="..\..\data\generator\Data.Generator.csproj">
-			<OutputItemType>Analyzer</OutputItemType>
-			<ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-		</ProjectReference>
-		<ProjectReference Include="..\..\file-dialog\source\FileDialogs.csproj" />
-		<ProjectReference Include="..\..\font-systems\source\Fonts.Systems.csproj" />
-		<ProjectReference Include="..\..\input-device-systems\source\InputDevices.Systems.csproj" />
-		<ProjectReference Include="..\..\ui-systems\source\UI.Systems.csproj" />
-		<ProjectReference Include="..\..\ui\source\UI.csproj" />
-		<ProjectReference Include="..\..\meshes-9s\source\Meshes.NineSliced.csproj" />
-		<ProjectReference Include="..\..\model-systems\source\Models.Systems.csproj" />
-		<ProjectReference Include="..\..\physics-systems\source\Physics.Systems.csproj" />
-		<ProjectReference Include="..\..\shader-systems\source\Shaders.Systems.csproj" />
-		<ProjectReference Include="..\..\unmanaged\core\Unmanaged.Core.csproj" />
-		<ProjectReference Include="..\..\worlds\generator\Worlds.Generator.csproj">
-			<OutputItemType>Analyzer</OutputItemType>
-			<ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-		</ProjectReference>
-		<ProjectReference Include="..\..\text-rendering-systems\source\TextRendering.Systems.csproj" />
-		<ProjectReference Include="..\..\texture-systems\source\Textures.Systems.csproj" />
-		<ProjectReference Include="..\..\transform-systems\source\Transforms.Systems.csproj" />
-		<ProjectReference Include="..\..\vulkan-renderer\source\VulkanRenderer.csproj" />
-		<ProjectReference Include="..\..\window-systems\source\Windows.Systems.csproj" />
-		<ProjectReference Include="..\program\Abacus.csproj" />
-		<ProjectReference Include="..\..\types\generator\Types.Generator.csproj">
-			<OutputItemType>Analyzer</OutputItemType>
-			<ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-		</ProjectReference>
-	</ItemGroup>
+  <ItemGroup>
+    <Analyzer Include="..\..\unmanaged\generator\bin\$(Configuration)\netstandard2.0\Unmanaged.Generator.dll"/>
+    <Analyzer Include="..\..\worlds\generator\bin\$(Configuration)\netstandard2.0\Worlds.Generator.dll"/>
+    <Analyzer Include="..\..\types\generator\bin\$(Configuration)\netstandard2.0\Types.Generator.dll"/>
+    <Analyzer Include="..\..\data\generator\bin\$(Configuration)\netstandard2.0\Data.Generator.dll"/>
+  </ItemGroup>
 
-	<ItemGroup>
-		<Using Include="Abacus.Simulator" />
-		<Using Include="VoxelGame" />
-		<Using Include="Abacus" />
-	</ItemGroup>
+  <ItemGroup>
+    <Using Include="Abacus.Simulator"/>
+    <Using Include="VoxelGame"/>
+    <Using Include="Abacus"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="bin/**/*" Pack="true" PackagePath="lib" Visible="false"/>
+    <Content Include="buildTransitive/**/*" Pack="true" PackagePath="buildTransitive"/>
+  </ItemGroup>
 
 </Project>

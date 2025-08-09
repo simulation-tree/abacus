@@ -1,6 +1,6 @@
 ﻿using Abacus.Manager.Constants;
 using Collections.Generic;
-using Serialization.XML;
+using XML;
 using System;
 using System.IO;
 using Unmanaged;
@@ -23,9 +23,21 @@ namespace Abacus.Manager.Commands
 
                 foreach (Project project in repository.Projects)
                 {
-                    if (!project.isTestProject && project.SourceFiles > 0 && !project.Name.Contains("Generator", StringComparison.Ordinal))
+                    if (!project.isGeneratorProject)
                     {
                         bool changed = false;
+                        if (!project.TargetFrameworks.Contains(TargetFramework.Net9))
+                        {
+                            project.AddTargetFramework(TargetFramework.Net9);
+                            changed |= true;
+                        }
+
+                        if (!project.TargetFrameworks.Contains(TargetFramework.Net10))
+                        {
+                            project.AddTargetFramework(TargetFramework.Net10);
+                            changed |= true;
+                        }
+
                         if (!project.Company.IsEmpty)
                         {
                             project.Company.CopyFrom(organizationName);
@@ -38,26 +50,29 @@ namespace Abacus.Manager.Commands
                             changed |= true;
                         }
 
-                        if (!project.IncludeBuildOutput.Equals("false"))
+                        if (!project.isTestProject && project.SourceFiles > 0)
                         {
-                            project.IncludeBuildOutput.CopyFrom("false");
-                            changed |= true;
-                        }
+                            if (project.IncludeBuildOutput)
+                            {
+                                project.IncludeBuildOutput = false;
+                                changed |= true;
+                            }
 
-                        if (!project.SuppressDependenciesWhenPacking.IsEmpty)
-                        {
-                            project.SuppressDependenciesWhenPacking.Clear();
-                            changed |= true;
-                        }
+                            if (project.SuppressDependenciesWhenPacking)
+                            {
+                                project.SuppressDependenciesWhenPacking = false;
+                                changed |= true;
+                            }
 
-                        const string OutDir = "bin/$(TargetFramework)/$(Configuration)";
-                        if (!project.OutDir.Equals(OutDir))
-                        {
-                            project.OutDir.CopyFrom(OutDir);
-                            changed |= true;
-                        }
+                            const string OutDir = "bin/$(TargetFramework)/$(Configuration)";
+                            if (!project.OutDir.Equals(OutDir))
+                            {
+                                project.OutDir.CopyFrom(OutDir);
+                                changed |= true;
+                            }
 
-                        changed |= EnsureBuildOutputsArePacked(project);
+                            changed |= EnsureBuildOutputsArePacked(project);
+                        }
 
                         if (changed)
                         {

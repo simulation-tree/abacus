@@ -152,7 +152,7 @@ public static class Program
         string? lastSolutionPath = null;
         while (path is not null)
         {
-            string[] files = Directory.GetFiles(path, "*.sln");
+            string[] files = Directory.GetFiles(path, "*.slnx");
             if (files.Length > 0)
             {
                 lastSolutionPath = files[0];

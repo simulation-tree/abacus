@@ -1,5 +1,6 @@
 ﻿using Collections.Generic;
 using System;
+using System.IO;
 using Unmanaged;
 
 namespace Abacus.Manager
@@ -8,13 +9,12 @@ namespace Abacus.Manager
     {
         private readonly Text path;
         private readonly Text remote;
-        private readonly Text name;
         private readonly Array<Project> projects;
 
         /// <summary>
-        /// Name of the repository.
+        /// Name of the repository based on the remote URL.
         /// </summary>
-        public readonly ReadOnlySpan<char> Name => name.AsSpan();
+        public readonly ReadOnlySpan<char> Name => System.IO.Path.GetFileNameWithoutExtension(remote.ToString());
 
         /// <summary>
         /// The remote URL.
@@ -39,11 +39,14 @@ namespace Abacus.Manager
             throw new NotSupportedException();
         }
 
-        public Repository(ReadOnlySpan<char> path, ReadOnlySpan<char> remote)
+        public Repository(ReadOnlySpan<char> path)
         {
+            ReadOnlySpan<char> remote = Terminal.Execute(path, "git remote get-url origin");
+            remote = remote.TrimEnd('\n');
+            remote = remote.TrimEnd('\r');
+
             this.path = new(path);
             this.remote = new(remote);
-            this.name = new(System.IO.Path.GetFileNameWithoutExtension(path));
             string[] projectPaths = System.IO.Directory.GetFiles(this.path.ToString(), "*.csproj", System.IO.SearchOption.AllDirectories);
             Span<uint> projectPathIndicesBuffer = stackalloc uint[projectPaths.Length];
             int projectCount = 0;
@@ -51,13 +54,13 @@ namespace Abacus.Manager
             {
                 string projectPath = projectPaths[i];
                 string projectDirectory = System.IO.Path.GetDirectoryName(projectPath) ?? string.Empty;
-                if (System.IO.Directory.GetFiles(projectDirectory, "*.sln").Length == 0)
+                if (System.IO.Directory.GetFiles(projectDirectory, "*.slnx").Length == 0)
                 {
                     projectPathIndicesBuffer[projectCount++] = i;
                 }
             }
 
-            this.projects = new(projectCount);
+            projects = new(projectCount);
             for (int i = 0; i < projectCount; i++)
             {
                 string projectPath = projectPaths[projectPathIndicesBuffer[i]];
@@ -73,7 +76,6 @@ namespace Abacus.Manager
             }
 
             projects.Dispose();
-            name.Dispose();
             remote.Dispose();
             path.Dispose();
         }
@@ -100,6 +102,40 @@ namespace Abacus.Manager
         public readonly override int GetHashCode()
         {
             return path.GetHashCode();
+        }
+
+        /// <summary>
+        /// Tries to fetch the repository that contains this <paramref name="path"/>.
+        /// </summary>
+        public static bool TryGetRepository(ReadOnlySpan<char> path, out Repository repository)
+        {
+            // check if path is a directory or a file first
+            string? directory = path.ToString();
+            if (System.IO.Path.HasExtension(directory))
+            {
+                directory = System.IO.Path.GetDirectoryName(directory);
+                if (directory is null)
+                {
+                    repository = default;
+                    return false;
+                }
+            }
+
+            do
+            {
+                string[] directories = Directory.GetDirectories(directory, ".git", SearchOption.TopDirectoryOnly);
+                if (directories.Length > 0)
+                {
+                    repository = new(directories[0]);
+                    return true;
+                }
+
+                directory = System.IO.Path.GetDirectoryName(directory) ?? string.Empty;
+            }
+            while (directory is not null);
+
+            repository = default;
+            return false;
         }
 
         public static bool operator ==(Repository left, Repository right)

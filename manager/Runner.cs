@@ -106,10 +106,7 @@ namespace Abacus.Manager
             for (int i = 0; i < foundRepositories.Count; i++)
             {
                 Text repositoryPath = foundRepositories[i];
-                ReadOnlySpan<char> remote = Terminal.Execute(repositoryPath.ToString(), "git remote get-url origin");
-                remote = remote.TrimEnd('\n');
-                remote = remote.TrimEnd('\r');
-                repositories[i] = new(repositoryPath.AsSpan(), remote);
+                repositories[i] = new(repositoryPath.AsSpan());
                 repositoryPath.Dispose();
             }
 
