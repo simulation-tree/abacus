@@ -26,16 +26,32 @@ namespace Abacus.Manager.Commands
                     if (!project.isGeneratorProject)
                     {
                         bool changed = false;
-                        if (!project.TargetFrameworks.Contains(TargetFramework.Net9))
+                        if (project.isTestProject)
                         {
-                            project.AddTargetFramework(TargetFramework.Net9);
-                            changed |= true;
-                        }
+                            if (project.TargetFrameworks.Length > 1 || !project.TargetFrameworks.Contains(TargetFramework.Net10))
+                            {
+                                project.ClearTargetFrameworks();
+                            }
 
-                        if (!project.TargetFrameworks.Contains(TargetFramework.Net10))
+                            if (!project.TargetFrameworks.Contains(TargetFramework.Net10))
+                            {
+                                project.AddTargetFramework(TargetFramework.Net10);
+                                changed |= true;
+                            }
+                        }
+                        else
                         {
-                            project.AddTargetFramework(TargetFramework.Net10);
-                            changed |= true;
+                            if (!project.TargetFrameworks.Contains(TargetFramework.Net9))
+                            {
+                                project.AddTargetFramework(TargetFramework.Net9);
+                                changed |= true;
+                            }
+
+                            if (!project.TargetFrameworks.Contains(TargetFramework.Net10))
+                            {
+                                project.AddTargetFramework(TargetFramework.Net10);
+                                changed |= true;
+                            }
                         }
 
                         if (!project.Company.IsEmpty)

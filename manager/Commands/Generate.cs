@@ -1,6 +1,5 @@
 ﻿using Abacus.Manager.Constants;
 using Collections.Generic;
-using XML;
 using System;
 using System.IO;
 using Unmanaged;
@@ -108,7 +107,7 @@ namespace Abacus.Manager.Commands
             }
 
             string filePath = Path.Combine(workflowsFolder, "test.yml");
-            string source = GetSource(GitHubWorkflowTemplate.TestSource, repository, repositories, false);
+            string source = GetSource(repository, repositories, BuildMode.Debug, Workflow.Test);
             File.WriteAllText(filePath, source);
         }
 
@@ -128,7 +127,7 @@ namespace Abacus.Manager.Commands
             }
 
             string filePath = Path.Combine(workflowsFolder, "publish.yml");
-            string source = GetSource(GitHubWorkflowTemplate.PublishSource, repository, repositories, true);
+            string source = GetSource(repository, repositories, BuildMode.Release, Workflow.Publish);
             File.WriteAllText(filePath, source);
         }
 
@@ -203,16 +202,62 @@ namespace Abacus.Manager.Commands
             }
         }
 
-        private static string GetSource(string source, Repository repository, ReadOnlySpan<Repository> repositories, bool release)
+        private static string GetSource(Repository repository, ReadOnlySpan<Repository> repositories, BuildMode buildMode, Workflow workflow)
         {
+            using List<SemanticVersion> dotNetVersions = new();
+            TargetFramework latestTargetFramework = default;
+            string source = workflow == Workflow.Test ? GitHubWorkflowTemplate.TestSource : GitHubWorkflowTemplate.PublishSource;
             bool containsTestProject = false;
             foreach (Project project in repository.Projects)
             {
                 if (project.isTestProject)
                 {
                     containsTestProject = true;
-                    break;
+                    if (workflow == Workflow.Test)
+                    {
+                        foreach (TargetFramework targetFramework in project.TargetFrameworks)
+                        {
+                            if (targetFramework.IsDotNet)
+                            {
+                                dotNetVersions.TryAdd(targetFramework.GetSemanticVersion());
+                                if (latestTargetFramework == default || targetFramework > latestTargetFramework)
+                                {
+                                    latestTargetFramework = targetFramework;
+                                }
+                            }
+                            else
+                            {
+                                // ignore non dotnet version because the only other version in use is netstandard2.0 for source generators
+                            }
+                        }
+                    }
                 }
+                else
+                {
+                    if (workflow == Workflow.Publish)
+                    {
+                        foreach (TargetFramework targetFramework in project.TargetFrameworks)
+                        {
+                            if (targetFramework.IsDotNet)
+                            {
+                                dotNetVersions.TryAdd(targetFramework.GetSemanticVersion());
+                                if (latestTargetFramework == default || targetFramework > latestTargetFramework)
+                                {
+                                    latestTargetFramework = targetFramework;
+                                }
+                            }
+                            else
+                            {
+                                // ignore non dotnet version because the only other version in use is netstandard2.0 for source generators
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (dotNetVersions.Count == 0)
+            {
+                throw new InvalidOperationException($"No .NET versions recognized in any projects of `{repository.Name}` repository");
             }
 
             source = source.TrimStart('\r');
@@ -222,7 +267,22 @@ namespace Abacus.Manager.Commands
             source = source.Replace("{{CheckoutDependenciesStep}}", GetIndented(GetCheckoutDependencies(dependencies), indent));
             if (containsTestProject)
             {
-                source = source.Replace("{{TestStep}}", GetIndented(GitHubWorkflowTemplate.TestStep, indent));
+                SemanticVersion latestDotNetVersion = dotNetVersions[0];
+                foreach (SemanticVersion version in dotNetVersions)
+                {
+                    if (version > latestDotNetVersion)
+                    {
+                        latestDotNetVersion = version;
+                    }
+                }
+
+                string testStep = GetIndented(GitHubWorkflowTemplate.TestStep, indent);
+                if (dotNetVersions.Count > 1)
+                {
+                    testStep += $" --framework {latestTargetFramework}";
+                }
+
+                source = source.Replace("{{TestStep}}", testStep);
             }
             else
             {
@@ -236,7 +296,29 @@ namespace Abacus.Manager.Commands
 
             if (source.Contains("{{SetupStep}}"))
             {
-                source = source.Replace("{{SetupStep}}", GetIndented(GitHubWorkflowTemplate.SetupStep, indent));
+                using Text setupStep = new(GetIndented(GitHubWorkflowTemplate.SetupStep, indent));
+                if (dotNetVersions.Count == 1)
+                {
+                    setupStep.Append(' ');
+                    setupStep.Append(dotNetVersions[0].ToString());
+                }
+                else
+                {
+                    setupStep.Append(" |");
+                    setupStep.AppendLine();
+                    for (int i = 0; i < dotNetVersions.Count; i++)
+                    {
+                        if (i > 0)
+                        {
+                            setupStep.AppendLine();
+                        }
+
+                        setupStep.Append(' ', indent + 6);
+                        setupStep.Append(dotNetVersions[i].ToString());
+                    }
+                }
+
+                source = source.Replace("{{SetupStep}}", setupStep.ToString());
             }
 
             if (source.Contains("{{BuildProjectsStep}}"))
@@ -256,7 +338,7 @@ namespace Abacus.Manager.Commands
 
             if (source.Contains("{{BuildMode}}"))
             {
-                source = source.Replace("{{BuildMode}}", release ? "Release" : "Debug");
+                source = source.Replace("{{BuildMode}}", buildMode.ToString());
             }
 
             source = source.Replace("{{RepositoryName}}", repository.Name.ToString());
