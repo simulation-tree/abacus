@@ -13,7 +13,7 @@ namespace Abacus.Manager
 
         public static void RegisterAll()
         {
-            //todo: have a source generator perform this
+            // todo: have a source generator perform this
             Register<Help>();
             Register<Info>();
             Register<Quit>();
@@ -32,6 +32,7 @@ namespace Abacus.Manager
             Register<UpdateProjectFiles>();
             Register<DiscardLocalChanges>();
             Register<Normalize>();
+            Register<UndoLatestCommit>();
         }
 
         public static void Register<T>() where T : unmanaged, ICommand

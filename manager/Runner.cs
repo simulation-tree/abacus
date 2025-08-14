@@ -69,6 +69,7 @@ namespace Abacus.Manager
             using Array<Project> projects = GetProjects(topologicallySorted);
             using List<Text> foundRepositories = new();
             using List<int> foundRepositoryHashes = new();
+
             foreach (Project project in projects)
             {
                 //travel up from this directory to find the repo
@@ -134,6 +135,11 @@ namespace Abacus.Manager
                         try
                         {
                             project = new(filePath);
+                            if (project.Name.StartsWith("Abacus"))
+                            {
+                                project.Dispose();
+                                continue;
+                            }
                         }
                         catch (Exception ex)
                         {

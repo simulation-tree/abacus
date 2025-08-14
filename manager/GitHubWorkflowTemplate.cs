@@ -43,7 +43,7 @@
 - name: Setup
   uses: actions/setup-dotnet@v4
   with:
-    dotnet-version: ";
+    dotnet-version:";
 
         public const string TestSource = @"
 name: Test

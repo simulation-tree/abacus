@@ -304,7 +304,8 @@ namespace Abacus.Manager.Commands
                 }
                 else
                 {
-                    setupStep.Append(" |");
+                    setupStep.Append(' ');
+                    setupStep.Append('|');
                     setupStep.AppendLine();
                     for (int i = 0; i < dotNetVersions.Count; i++)
                     {
@@ -454,8 +455,12 @@ namespace Abacus.Manager.Commands
             string text = string.Empty;
             foreach (Project project in repository.Projects)
             {
-                text += GetSource(GitHubWorkflowTemplate.BuildStep, project).Replace("{{BuildMode}}", "Debug") + '\n';
-                text += GetSource(GitHubWorkflowTemplate.BuildStep, project).Replace("{{BuildMode}}", "Release") + '\n';
+                bool isExecutable = project.OutputType == OutputType.WinExe || project.OutputType == OutputType.Exe;
+                if (!isExecutable)
+                {
+                    text += GetSource(GitHubWorkflowTemplate.BuildStep, project).Replace("{{BuildMode}}", "Debug") + '\n';
+                    text += GetSource(GitHubWorkflowTemplate.BuildStep, project).Replace("{{BuildMode}}", "Release") + '\n';
+                }
             }
 
             return text.TrimEnd('\n');
@@ -466,7 +471,8 @@ namespace Abacus.Manager.Commands
             string text = string.Empty;
             foreach (Project project in repository.Projects)
             {
-                if (!project.isTestProject)
+                bool isExecutable = project.OutputType == OutputType.WinExe || project.OutputType == OutputType.Exe;
+                if (!project.isTestProject && !isExecutable)
                 {
                     text += GetSource(GitHubWorkflowTemplate.PackStep, project) + '\n';
                 }
@@ -480,7 +486,8 @@ namespace Abacus.Manager.Commands
             string text = string.Empty;
             foreach (Project project in repository.Projects)
             {
-                if (!project.isTestProject)
+                bool isExecutable = project.OutputType == OutputType.WinExe || project.OutputType == OutputType.Exe;
+                if (!project.isTestProject && !isExecutable)
                 {
                     text += GetSource(GitHubWorkflowTemplate.PublishStep, project) + '\n';
                 }

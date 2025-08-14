@@ -1,15 +1,14 @@
 ﻿using Collections.Generic;
-using XML;
 using System;
 using System.IO;
 using Unmanaged;
+using XML;
 
 namespace Abacus.Manager
 {
     public readonly struct Project : IDisposable
     {
         private const string PackageIdNode = "PackageId";
-        private const string CompanyNode = "Company";
         private const string RepositoryUrlNode = "RepositoryUrl";
         private const string TargetFrameworkNode = "TargetFramework";
         private const string ProjectReferenceNode = "ProjectReference";
@@ -30,7 +29,8 @@ namespace Abacus.Manager
         private readonly XMLNode projectPropertyGroup;
         private readonly XMLNode packageId;
         private readonly XMLNode company;
-        private readonly XMLNode repositoryUrl;
+        private readonly XMLNode outputTypeNode;
+        private readonly XMLNode repositoryUrlNode;
         private readonly XMLNode includeBuildOutput;
         private readonly XMLNode embedAllSources;
         private readonly XMLNode suppressDependenciesWhenPacking;
@@ -65,10 +65,29 @@ namespace Abacus.Manager
         /// <summary>
         /// RepositoryUrl value.
         /// </summary>
-        public readonly Text.Borrowed RepositoryUrl => repositoryUrl.Content;
+        public readonly Text.Borrowed RepositoryUrl => repositoryUrlNode.Content;
+
+        /// <summary>
+        /// The output type of the project.
+        /// </summary>
+        public readonly OutputType OutputType
+        {
+            get
+            {
+                if (Enum.TryParse(outputTypeNode.Content.AsSpan(), out OutputType outputType))
+                {
+                    return outputType;
+                }
+                else
+                {
+                    return OutputType.Unknown;
+                }
+            }
+            set => outputTypeNode.Content.CopyFrom(value.ToString());
+        }
 
         public readonly ReadOnlySpan<TargetFramework> TargetFrameworks => targetFrameworks.AsSpan();
-        
+
         public readonly bool IncludeBuildOutput
         {
             get => includeBuildOutput.Content.Equals("true");
@@ -178,13 +197,17 @@ namespace Abacus.Manager
                 {
                     packageId = node;
                 }
-                else if (node.Name.Equals(CompanyNode))
+                else if (node.Name.Equals(nameof(Company)))
                 {
                     company = node;
                 }
+                else if (node.Name.Equals(nameof(OutputType)))
+                {
+                    outputTypeNode = node;
+                }
                 else if (node.Name.Equals(RepositoryUrlNode))
                 {
-                    repositoryUrl = node;
+                    repositoryUrlNode = node;
                 }
                 else if (node.Name.Equals(nameof(IncludeBuildOutput)))
                 {
@@ -257,14 +280,20 @@ namespace Abacus.Manager
 
             if (company == default)
             {
-                company = new(CompanyNode);
+                company = new(nameof(Company));
                 projectPropertyGroup.Add(company);
             }
 
-            if (repositoryUrl == default)
+            if (outputTypeNode == default)
             {
-                repositoryUrl = new(RepositoryUrlNode);
-                projectPropertyGroup.Add(repositoryUrl);
+                outputTypeNode = new(nameof(OutputType));
+                projectPropertyGroup.Add(outputTypeNode);
+            }
+
+            if (repositoryUrlNode == default)
+            {
+                repositoryUrlNode = new(RepositoryUrlNode);
+                projectPropertyGroup.Add(repositoryUrlNode);
             }
 
             if (includeBuildOutput == default)
