@@ -10,6 +10,9 @@ public readonly struct Workflow : IEquatable<Workflow>
 
     private readonly ASCIIText32 name;
 
+    [Obsolete("Not supported", true)]
+    public Workflow() { }
+
     private Workflow(ASCIIText32 name)
     {
         this.name = name;

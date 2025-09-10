@@ -23,11 +23,12 @@ namespace Abacus.Manager.Commands
 
                 foreach (Project project in repository.Projects)
                 {
+                    bool changed = false;
                     if (!project.isGeneratorProject)
                     {
-                        bool changed = false;
                         if (project.isTestProject)
                         {
+                            // make sure test projects only use net10
                             if (project.TargetFrameworks.Length > 1 || !project.TargetFrameworks.Contains(TargetFramework.Net10))
                             {
                                 project.ClearTargetFrameworks();
@@ -41,6 +42,7 @@ namespace Abacus.Manager.Commands
                         }
                         else
                         {
+                            // make sure general projects use net9 and net10
                             if (!project.TargetFrameworks.Contains(TargetFramework.Net9))
                             {
                                 project.AddTargetFramework(TargetFramework.Net9);
@@ -88,6 +90,52 @@ namespace Abacus.Manager.Commands
                             }
 
                             changed |= EnsureBuildOutputsArePacked(project);
+                        }
+
+                        // ensure generator dll analyzers are referenced
+                        foreach (Project.Analyzer analyzer in project.Analyzers)
+                        {
+                            if (analyzer.Include.IndexOf("netstandard2.0") != -1 && analyzer.Include.IndexOf("Generator") != -1 && analyzer.Include.IndexOf(".dll") != -1)
+                            {
+                                string fullPathToInclude = project.GetFullPath(analyzer.Include);
+                                string? directory = Path.GetDirectoryName(fullPathToInclude);
+                                string includeProjectPath = string.Empty;
+                                while (directory is not null)
+                                {
+                                    string folderName = Path.GetFileName(directory);
+                                    if (folderName != "bin" && folderName != "$(Configuration)" && folderName != "netstandard2.0")
+                                    {
+                                        string[] projectFiles = Directory.GetFiles(directory, "*.csproj", SearchOption.TopDirectoryOnly);
+                                        if (projectFiles.Length > 0)
+                                        {
+                                            includeProjectPath = projectFiles[0];
+                                            break;
+                                        }
+                                    }
+
+                                    directory = Path.GetDirectoryName(directory);
+                                }
+
+                                string pathToProject = project.GetRelativePath(includeProjectPath);
+                                bool referencesProject = false;
+                                foreach (Project.ProjectReference projectReference in project.ProjectReferences)
+                                {
+                                    if (projectReference.ReferenceOutputAssembly == false && projectReference.OutputItemType == OutputType.Analyzer)
+                                    {
+                                        if (projectReference.Include.SequenceEqual(pathToProject))
+                                        {
+                                            referencesProject = true;
+                                            break;
+                                        }
+                                    }
+                                }
+
+                                if (!referencesProject)
+                                {
+                                    project.AddProjectReference(pathToProject, false, OutputType.Analyzer);
+                                    changed |= true;
+                                }
+                            }
                         }
 
                         if (changed)

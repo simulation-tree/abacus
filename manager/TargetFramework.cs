@@ -137,6 +137,18 @@ public readonly struct TargetFramework : IEquatable<TargetFramework>, ISpanForma
 
     public static TargetFramework Parse(ReadOnlySpan<char> targetFramework)
     {
+        // trim start of whitespace
+        while (char.IsWhiteSpace(targetFramework[0]))
+        {
+            targetFramework = targetFramework[1..];
+        }
+
+        // trim end of whitespace
+        while (char.IsWhiteSpace(targetFramework[^1]))
+        {
+            targetFramework = targetFramework[..^1];
+        }
+
         if (TryParse(targetFramework, out TargetFramework value))
         {
             return value;

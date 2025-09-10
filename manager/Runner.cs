@@ -171,8 +171,8 @@ namespace Abacus.Manager
                         }
                         else
                         {
-                            WriteErrorLine($"Project `{projectName}` references project `{referencedProjectName}` which does not exist");
-                            continue;
+                            //WriteErrorLine($"Project `{projectName}` references project `{referencedProjectName}` which does not exist");
+                            //continue;
                         }
                     }
 

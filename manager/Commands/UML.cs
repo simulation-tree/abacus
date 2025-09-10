@@ -146,6 +146,14 @@ namespace Abacus.Manager.Commands
                         continue;
                     }
 
+                    if (mode == true)
+                    {
+                        if (!dependencyName.EndsWith(".System") && !dependencyName.EndsWith(".Systems"))
+                        {
+                            continue;
+                        }
+                    }
+
                     long combination = projectName.GetLongHashCode() + dependencyName.GetLongHashCode();
                     if (!combinations.TryAdd(combination))
                     {
@@ -171,6 +179,7 @@ namespace Abacus.Manager.Commands
             source = source.Replace("{{Types}}", types.ToString());
             source = source.Replace("{{Dependencies}}", dependencies.ToString());
 
+            runner.WriteInfo(source);
             using Library clipboard = new();
             clipboard.Text = source;
 
@@ -178,6 +187,8 @@ namespace Abacus.Manager.Commands
             {
                 project.Dispose();
             }
+
+            runner.WriteInfo("Copied to clipboard");
         }
     }
 }

@@ -2,8 +2,8 @@
 
 public enum OutputType
 {
-    Unknown,
     WinExe,
     Exe,
-    Library
+    Library,
+    Analyzer,
 }
