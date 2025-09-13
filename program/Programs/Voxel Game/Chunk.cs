@@ -95,8 +95,7 @@ namespace VoxelGame
             int positionType = world.Schema.GetComponentType<Position>();
             foreach (Worlds.Chunk chunk in world.Chunks)
             {
-                Definition key = chunk.Definition;
-                if (key.ContainsTag(chunkType) && key.ContainsComponent(positionType))
+                if (chunk.tagTypes.Contains(chunkType) && chunk.componentTypes.Contains(positionType))
                 {
                     ReadOnlySpan<uint> entities = chunk.Entities;
                     ComponentEnumerator<Position> components = chunk.GetComponents<Position>(positionType);
