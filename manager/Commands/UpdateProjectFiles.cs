@@ -26,35 +26,11 @@ namespace Abacus.Manager.Commands
                     bool changed = false;
                     if (!project.isGeneratorProject)
                     {
-                        if (project.isTestProject)
-                        {
-                            // make sure test projects only use net10
-                            if (project.TargetFrameworks.Length > 1 || !project.TargetFrameworks.Contains(TargetFramework.Net10))
-                            {
-                                project.ClearTargetFrameworks();
-                            }
-
-                            if (!project.TargetFrameworks.Contains(TargetFramework.Net10))
-                            {
-                                project.AddTargetFramework(TargetFramework.Net10);
-                                changed |= true;
-                            }
-                        }
-                        else
-                        {
-                            // make sure general projects use net9 and net10
-                            if (!project.TargetFrameworks.Contains(TargetFramework.Net9))
-                            {
-                                project.AddTargetFramework(TargetFramework.Net9);
-                                changed |= true;
-                            }
-
-                            if (!project.TargetFrameworks.Contains(TargetFramework.Net10))
-                            {
-                                project.AddTargetFramework(TargetFramework.Net10);
-                                changed |= true;
-                            }
-                        }
+                        // make sure projects use net9 only
+                        project.ClearTargetFrameworks();
+                        project.AddTargetFramework(TargetFramework.Net9);
+                        project.ClearAnalyzers();
+                        changed |= true;
 
                         if (!project.Company.IsEmpty)
                         {

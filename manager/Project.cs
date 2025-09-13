@@ -216,6 +216,7 @@ public readonly struct Project : IDisposable
                     {
                         child.TryGetAttribute("Include", out ReadOnlySpan<char> include);
                         analyzers.Add(new Analyzer(include));
+                        node.TryRemove(child);
                     }
                 }
             }
@@ -436,9 +437,13 @@ public readonly struct Project : IDisposable
         targetFrameworks.Add(targetFramework);
     }
 
+    public readonly void ClearAnalyzers()
+    {
+        analyzers.Clear();
+    }
+
     public readonly void AddProjectReference(ReadOnlySpan<char> include, bool? referenceOutputAssembly = null, OutputType? outputItemType = null)
     {
-
         if (projectReferencesReferencesItemGroup == default)
         {
             throw new InvalidOperationException("An ItemGroup containing ProjectReferences was not found");
