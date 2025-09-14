@@ -1,9 +1,9 @@
 ﻿using Abacus.Manager.Constants;
 using Collections.Generic;
-using XML;
 using System;
 using System.IO;
 using Unmanaged;
+using XML;
 
 namespace Abacus.Manager.Commands
 {
@@ -14,6 +14,7 @@ namespace Abacus.Manager.Commands
 
         readonly void ICommand.Execute(Runner runner, Arguments arguments)
         {
+            ASCIIText256 companyName = Constant.Get<CompanyName>();
             ASCIIText256 organizationName = Constant.Get<OrganizationName>();
             ASCIIText256 repositoryHost = Constant.Get<RepositoryHost>();
             using Array<Repository> repositories = runner.GetRepositories();
@@ -34,7 +35,7 @@ namespace Abacus.Manager.Commands
 
                         if (!project.Company.IsEmpty)
                         {
-                            project.Company.CopyFrom(organizationName);
+                            project.Company.CopyFrom(companyName);
                             changed |= true;
                         }
 
@@ -42,6 +43,11 @@ namespace Abacus.Manager.Commands
                         {
                             project.RepositoryUrl.CopyFrom($"{repositoryHost}/{organizationName}/{repository.Name}");
                             changed |= true;
+                        }
+
+                        if (!project.PackageId.IsEmpty)
+                        {
+                            project.PackageId.CopyFrom(GetPackageId(project.Name));
                         }
 
                         if (!project.isTestProject && project.SourceFiles > 0)
@@ -186,6 +192,7 @@ namespace Abacus.Manager.Commands
             const string URLStart = "https://github.com/";
             const string RepositoryStart = "repository: ";
             const string CopyrightStart = "Copyright (c) ";
+            ASCIIText256 companyName = Constant.Get<CompanyName>();
             ASCIIText256 organizationName = Constant.Get<OrganizationName>();
             string[] markdownFiles = Directory.GetFiles(repositoryPath.ToString(), "*.md", SearchOption.AllDirectories);
             string[] yamlFiles = Directory.GetFiles(repositoryPath.ToString(), "*.yml", SearchOption.AllDirectories);
@@ -201,6 +208,8 @@ namespace Abacus.Manager.Commands
                 for (int i = 0; i < lines.Length; i++)
                 {
                     string line = lines[i];
+
+                    // update github organization in urls
                     int httpIndex = line.IndexOf(URLStart);
                     if (httpIndex != -1)
                     {
@@ -218,6 +227,7 @@ namespace Abacus.Manager.Commands
                         }
                     }
 
+                    // update organization in yaml repository fields
                     if (isYaml)
                     {
                         int repositoryIndex = line.IndexOf(RepositoryStart);
@@ -239,11 +249,12 @@ namespace Abacus.Manager.Commands
                     }
                     else if (isLicense)
                     {
+                        // update company name in license copyright
                         int copyrightStart = line.IndexOf(CopyrightStart);
                         if (copyrightStart != -1)
                         {
                             int currentYear = DateTime.Now.Year;
-                            string newLine = $"{CopyrightStart}{currentYear} {organizationName}";
+                            string newLine = $"{CopyrightStart}{currentYear} {companyName}";
                             if (newLine != line)
                             {
                                 lines[i] = newLine;
@@ -259,6 +270,26 @@ namespace Abacus.Manager.Commands
                     runner.WriteInfoLine($"Updated {filePath}");
                 }
             }
+        }
+
+        public static ASCIIText256 GetPackageId(ReadOnlySpan<char> projectName)
+        {
+            ASCIIText256 companyName = Constant.Get<CompanyName>();
+            Span<char> buffer = stackalloc char[companyName.Length + projectName.Length + 32];
+            int index = 0;
+            for (int i = 0; i < companyName.Length; i++)
+            {
+                char c = companyName[i];
+                if (c != ' ')
+                {
+                    buffer[index++] = c;
+                }
+            }
+
+            buffer[index++] = '.';
+            projectName.CopyTo(buffer.Slice(index));
+            index += projectName.Length;
+            return buffer.Slice(0, index).ToString();
         }
     }
 }

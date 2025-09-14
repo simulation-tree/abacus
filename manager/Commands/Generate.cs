@@ -511,13 +511,14 @@ namespace Abacus.Manager.Commands
 
             if (source.Contains("{{PackageId}}"))
             {
-                Text.Borrowed packageId = project.PackageId;
-                if (packageId.IsEmpty)
+                if (!project.PackageId.IsEmpty)
                 {
-                    packageId.CopyFrom(project.Name);
+                    source = source.Replace("{{PackageId}}", project.PackageId.ToString());
                 }
-
-                source = source.Replace("{{PackageId}}", packageId.ToString());
+                else
+                {
+                    source = source.Replace("{{PackageId}}", UpdateProjectFiles.GetPackageId(project.Name).ToString());
+                }
             }
 
             return source;
