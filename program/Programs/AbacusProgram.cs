@@ -5,7 +5,7 @@ using DefaultPresentationAssets;
 using Fonts;
 using InputDevices;
 using Materials;
-using Materials.Components;
+using Materials.Arrays;
 using Meshes;
 using Meshes.NineSliced;
 using Models;

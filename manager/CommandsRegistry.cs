@@ -33,6 +33,7 @@ namespace Abacus.Manager
             Register<DiscardLocalChanges>();
             Register<Normalize>();
             Register<UndoLatestCommit>();
+            Register<Pack>();
         }
 
         public static void Register<T>() where T : unmanaged, ICommand

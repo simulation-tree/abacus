@@ -6,7 +6,7 @@ using Data.Messages;
 using DefaultPresentationAssets;
 using InputDevices;
 using Materials;
-using Materials.Components;
+using Materials.Arrays;
 using Meshes;
 using Physics;
 using Physics.Functions;

@@ -25,6 +25,22 @@ namespace Abacus.Manager.Commands
                 foreach (Project project in repository.Projects)
                 {
                     bool changed = false;
+                    if (!project.isTestProject)
+                    {
+                        string packageId = GetPackageId(project.Name);
+                        if (!project.PackageId.Equals(packageId))
+                        {
+                            project.PackageId.CopyFrom(packageId);
+                            changed |= true;
+                        }
+
+                        if (!project.PackageLicenseExpression.Equals("MIT"))
+                        {
+                            project.PackageLicenseExpression.CopyFrom("MIT");
+                            changed |= true;
+                        }
+                    }
+
                     if (!project.isGeneratorProject)
                     {
                         // make sure projects use net9 only
@@ -43,11 +59,6 @@ namespace Abacus.Manager.Commands
                         {
                             project.RepositoryUrl.CopyFrom($"{repositoryHost}/{organizationName}/{repository.Name}");
                             changed |= true;
-                        }
-
-                        if (!project.PackageId.IsEmpty)
-                        {
-                            project.PackageId.CopyFrom(GetPackageId(project.Name));
                         }
 
                         if (!project.isTestProject && project.SourceFiles > 0)
@@ -119,12 +130,12 @@ namespace Abacus.Manager.Commands
                                 }
                             }
                         }
+                    }
 
-                        if (changed)
-                        {
-                            project.WriteToFile();
-                            runner.WriteInfoLine($"Updated {project.Path.ToString()}");
-                        }
+                    if (changed)
+                    {
+                        project.WriteToFile();
+                        runner.WriteInfoLine($"Updated {project.Path.ToString()}");
                     }
                 }
 
@@ -163,7 +174,7 @@ namespace Abacus.Manager.Commands
             if (itemGroupNode == default)
             {
                 itemGroupNode = new("ItemGroup");
-                project.rootNode.Add(itemGroupNode);
+                project.rootNode.AddChild(itemGroupNode);
                 changed = true;
             }
             else
@@ -173,17 +184,17 @@ namespace Abacus.Manager.Commands
             }
 
             XMLNode packBin = new("Content");
-            itemGroupNode.Add(packBin);
-            packBin.SetAttribute("Include", BinPath + "/**/*");
-            packBin.SetAttribute("Pack", "true");
-            packBin.SetAttribute("PackagePath", "lib");
-            packBin.SetAttribute("Visible", "false");
+            itemGroupNode.AddChild(packBin);
+            packBin.SetOrAddAttribute("Include", BinPath + "/**/*");
+            packBin.SetOrAddAttribute("Pack", "true");
+            packBin.SetOrAddAttribute("PackagePath", "lib");
+            packBin.SetOrAddAttribute("Visible", "false");
 
             XMLNode packBuildTransitive = new("Content");
-            itemGroupNode.Add(packBuildTransitive);
-            packBuildTransitive.SetAttribute("Include", BuildTransitivePath + "/**/*");
-            packBuildTransitive.SetAttribute("Pack", "true");
-            packBuildTransitive.SetAttribute("PackagePath", "buildTransitive");
+            itemGroupNode.AddChild(packBuildTransitive);
+            packBuildTransitive.SetOrAddAttribute("Include", BuildTransitivePath + "/**/*");
+            packBuildTransitive.SetOrAddAttribute("Pack", "true");
+            packBuildTransitive.SetOrAddAttribute("PackagePath", "buildTransitive");
             return true;
         }
 
@@ -272,7 +283,7 @@ namespace Abacus.Manager.Commands
             }
         }
 
-        public static ASCIIText256 GetPackageId(ReadOnlySpan<char> projectName)
+        public static string GetPackageId(ReadOnlySpan<char> projectName)
         {
             ASCIIText256 companyName = Constant.Get<CompanyName>();
             Span<char> buffer = stackalloc char[companyName.Length + projectName.Length + 32];

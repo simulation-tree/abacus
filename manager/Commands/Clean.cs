@@ -6,7 +6,7 @@ namespace Abacus.Manager.Commands
     public readonly struct Clean : ICommand
     {
         readonly string ICommand.Name => "clean";
-        readonly string ICommand.Description => "Cleans project of artifacts (--source-control, --ide, --test-results, --builds, --meta)";
+        readonly string ICommand.Description => "Cleans project of artifacts (--source-control, --ide, --test-results, --builds, --meta --nuget)";
 
         readonly void ICommand.Execute(Runner runner, Arguments arguments)
         {
@@ -40,9 +40,15 @@ namespace Abacus.Manager.Commands
                 meta = true;
             }
 
-            if (!sourceControlArtifacts && !ideArtifacts && !testResults && !builds && !meta)
+            bool nuget = false;
+            if (arguments.Contains("--nuget"))
             {
-                runner.WriteErrorLine("At least one clean filter is required: --source-control, --ide, --test-results, --builds, --meta");
+                nuget = true;
+            }
+
+            if (!sourceControlArtifacts && !ideArtifacts && !testResults && !builds && !meta && !nuget)
+            {
+                runner.WriteErrorLine("At least one clean filter is required: --source-control, --ide, --test-results, --builds, --meta, --nuget");
                 return;
             }
 
@@ -100,6 +106,15 @@ namespace Abacus.Manager.Commands
                         foreach (string metaFile in metaFiles)
                         {
                             DeleteFile(runner, metaFile);
+                        }
+                    }
+
+                    if (nuget)
+                    {
+                        string[] nupkgFiles = Directory.GetFiles(currentFolder, "*.nupkg", SearchOption.TopDirectoryOnly);
+                        foreach (string nupkgFile in nupkgFiles)
+                        {
+                            DeleteFile(runner, nupkgFile);
                         }
                     }
 

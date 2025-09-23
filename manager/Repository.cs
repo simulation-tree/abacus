@@ -31,13 +31,50 @@ namespace Abacus.Manager
         /// </summary>
         public readonly ReadOnlySpan<Project> Projects => projects.AsSpan();
 
+        /// <summary>
+        /// Greatest semantic version tag in the repository.
+        /// </summary>
+        public readonly SemanticVersion GreatestVersion
+        {
+            get
+            {
+                ReadOnlySpan<char> allTags = Terminal.Execute(Path, "git tag -l --sort=-creatordate");
+                SemanticVersion greatestVersion = SemanticVersion.Parse("0.0.0");
+                int index = 0;
+                int start = 0;
+                while (index < allTags.Length)
+                {
+                    char c = allTags[index];
+                    if (c == '\n')
+                    {
+                        ReadOnlySpan<char> tag = allTags.Slice(start, index - start).TrimEnd('\r');
+                        if (tag.StartsWith('v'))
+                        {
+                            tag = tag.Slice(1);
+                        }
+
+                        if (SemanticVersion.TryParse(tag, out SemanticVersion version))
+                        {
+                            if (version > greatestVersion)
+                            {
+                                greatestVersion = version;
+                            }
+                        }
+
+                        start = index + 1;
+                    }
+
+                    index++;
+                }
+
+                return greatestVersion;
+            }
+        }
+
         public readonly bool IsDisposed => path.IsDisposed;
 
-        [Obsolete("Default constructor not supported")]
-        public Repository()
-        {
-            throw new NotSupportedException();
-        }
+        [Obsolete("Default constructor not supported", true)]
+        public Repository() { }
 
         public Repository(ReadOnlySpan<char> path)
         {
@@ -47,14 +84,14 @@ namespace Abacus.Manager
 
             this.path = new(path);
             this.remote = new(remote);
-            string[] projectPaths = System.IO.Directory.GetFiles(this.path.ToString(), "*.csproj", System.IO.SearchOption.AllDirectories);
+            string[] projectPaths = Directory.GetFiles(this.path.ToString(), "*.csproj", SearchOption.AllDirectories);
             Span<uint> projectPathIndicesBuffer = stackalloc uint[projectPaths.Length];
             int projectCount = 0;
             for (uint i = 0; i < projectPaths.Length; i++)
             {
                 string projectPath = projectPaths[i];
                 string projectDirectory = System.IO.Path.GetDirectoryName(projectPath) ?? string.Empty;
-                if (System.IO.Directory.GetFiles(projectDirectory, "*.slnx").Length == 0)
+                if (Directory.GetFiles(projectDirectory, "*.slnx").Length == 0)
                 {
                     projectPathIndicesBuffer[projectCount++] = i;
                 }

@@ -24,6 +24,7 @@ public readonly struct Project : IDisposable
     private readonly XMLNode company;
     private readonly XMLNode outputTypeNode;
     private readonly XMLNode repositoryUrlNode;
+    private readonly XMLNode packageLicenseExpression;
     private readonly XMLNode includeBuildOutput;
     private readonly XMLNode embedAllSources;
     private readonly XMLNode suppressDependenciesWhenPacking;
@@ -59,6 +60,8 @@ public readonly struct Project : IDisposable
     /// RepositoryUrl value.
     /// </summary>
     public readonly Text.Borrowed RepositoryUrl => repositoryUrlNode.Content;
+
+    public readonly Text.Borrowed PackageLicenseExpression => packageLicenseExpression.Content;
 
     /// <summary>
     /// The output type of the project.
@@ -216,7 +219,7 @@ public readonly struct Project : IDisposable
                     {
                         child.TryGetAttribute("Include", out ReadOnlySpan<char> include);
                         analyzers.Add(new Analyzer(include));
-                        node.TryRemove(child);
+                        node.TryRemoveChild(child);
                     }
                 }
             }
@@ -239,6 +242,10 @@ public readonly struct Project : IDisposable
                     else if (child.Name.Equals(nameof(RepositoryUrl)))
                     {
                         repositoryUrlNode = child;
+                    }
+                    else if (child.Name.Equals(nameof(PackageLicenseExpression)))
+                    {
+                        packageLicenseExpression = child;
                     }
                     else if (child.Name.Equals(nameof(IncludeBuildOutput)))
                     {
@@ -306,49 +313,55 @@ public readonly struct Project : IDisposable
         if (packageId == default)
         {
             packageId = new(nameof(PackageId));
-            projectPropertyGroup.Add(packageId);
+            projectPropertyGroup.AddChild(packageId);
         }
 
         if (company == default)
         {
             company = new(nameof(Company));
-            projectPropertyGroup.Add(company);
+            projectPropertyGroup.AddChild(company);
         }
 
         if (outputTypeNode == default)
         {
             outputTypeNode = new(nameof(OutputType));
-            projectPropertyGroup.Add(outputTypeNode);
+            projectPropertyGroup.AddChild(outputTypeNode);
         }
 
         if (repositoryUrlNode == default)
         {
             repositoryUrlNode = new(nameof(RepositoryUrl));
-            projectPropertyGroup.Add(repositoryUrlNode);
+            projectPropertyGroup.AddChild(repositoryUrlNode);
+        }
+
+        if (packageLicenseExpression == default)
+        {
+            packageLicenseExpression = new(nameof(PackageLicenseExpression));
+            projectPropertyGroup.AddChild(packageLicenseExpression);
         }
 
         if (includeBuildOutput == default)
         {
             includeBuildOutput = new(nameof(IncludeBuildOutput));
-            projectPropertyGroup.Add(includeBuildOutput);
+            projectPropertyGroup.AddChild(includeBuildOutput);
         }
 
         if (embedAllSources == default)
         {
             embedAllSources = new(nameof(EmbedAllSources));
-            projectPropertyGroup.Add(embedAllSources);
+            projectPropertyGroup.AddChild(embedAllSources);
         }
 
         if (suppressDependenciesWhenPacking == default)
         {
             suppressDependenciesWhenPacking = new(nameof(SuppressDependenciesWhenPacking));
-            projectPropertyGroup.Add(suppressDependenciesWhenPacking);
+            projectPropertyGroup.AddChild(suppressDependenciesWhenPacking);
         }
 
         if (outDir == default)
         {
             outDir = new(nameof(OutDir));
-            projectPropertyGroup.Add(outDir);
+            projectPropertyGroup.AddChild(outDir);
         }
 
         isTestProject = ContainsTestPackages();
@@ -451,18 +464,18 @@ public readonly struct Project : IDisposable
 
         projectReferences.Add(new ProjectReference(include, referenceOutputAssembly, outputItemType));
         XMLNode projectReferenceNode = new("ProjectReference");
-        projectReferenceNode.SetAttribute("Include", include);
+        projectReferenceNode.SetOrAddAttribute("Include", include);
         if (referenceOutputAssembly is not null)
         {
-            projectReferenceNode.SetAttribute("ReferenceOutputAssembly", referenceOutputAssembly.Value ? "true" : "false");
+            projectReferenceNode.SetOrAddAttribute("ReferenceOutputAssembly", referenceOutputAssembly.Value ? "true" : "false");
         }
 
         if (outputItemType is not null)
         {
-            projectReferenceNode.SetAttribute("OutputItemType", outputItemType.Value.ToString());
+            projectReferenceNode.SetOrAddAttribute("OutputItemType", outputItemType.Value.ToString());
         }
 
-        projectReferencesReferencesItemGroup.Add(projectReferenceNode);
+        projectReferencesReferencesItemGroup.AddChild(projectReferenceNode);
     }
 
     /// <summary>

@@ -13,12 +13,11 @@ namespace Abacus.Manager.Commands
             bool listRepositories = arguments.Contains("--repositories");
             if (listRepositories)
             {
-                using TableBuilder table = new("Name", "Remote", "Projects", "Commits", "Changes");
+                using TableBuilder table = new("Remote", "Projects", "Commits", "Changes", "Version");
                 using Array<Repository> repositories = runner.GetRepositories();
                 runner.WriteInfoLine($"Found {repositories.Length} repositories");
                 foreach (Repository repository in repositories)
                 {
-                    string name = repository.Name.ToString();
                     string remote = repository.Remote.ToString();
                     if (remote.StartsWith("https://github.com/"))
                     {
@@ -38,7 +37,7 @@ namespace Abacus.Manager.Commands
                         projects = projects.Substring(0, projects.Length - 2);
                     }
 
-                    table.AddRow(name, remote, projects, hasCommits ? "Yes" : string.Empty, hasChanges ? "Yes" : string.Empty);
+                    table.AddRow(remote, projects, hasCommits ? "Yes" : string.Empty, hasChanges ? "Yes" : string.Empty, repository.GreatestVersion.ToString());
                     repository.Dispose();
                 }
 

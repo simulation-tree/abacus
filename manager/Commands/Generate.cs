@@ -185,16 +185,18 @@ namespace Abacus.Manager.Commands
                             Directory.CreateDirectory(buildFolder);
                         }
 
-                        string packageId = project.PackageId.ToString();
-                        string projectName = project.Name.ToString();
-                        if (string.IsNullOrEmpty(packageId))
+                        // delete existing .targets files
+                        string[] targetsFiles = Directory.GetFiles(buildFolder, "*.targets");
+                        for (int i = 0; i < targetsFiles.Length; i++)
                         {
-                            packageId = projectName;
+                            File.Delete(targetsFiles[i]);
                         }
 
+                        // create the only .targets file
+                        string packageId = UpdateProjectFiles.GetPackageId(project.Name);
                         string targetsPath = Path.Combine(buildFolder, packageId + ".targets");
                         string content = EmbeddedResources.Get("targets.xml") ?? throw new("Targets template is missing");
-                        content = content.Replace("{{ProjectName}}", projectName);
+                        content = content.Replace("{{ProjectName}}", project.Name.ToString());
                         content = content.Replace("{{PackageId}}", packageId);
                         File.WriteAllText(targetsPath, content);
                     }
@@ -511,14 +513,7 @@ namespace Abacus.Manager.Commands
 
             if (source.Contains("{{PackageId}}"))
             {
-                if (!project.PackageId.IsEmpty)
-                {
-                    source = source.Replace("{{PackageId}}", project.PackageId.ToString());
-                }
-                else
-                {
-                    source = source.Replace("{{PackageId}}", UpdateProjectFiles.GetPackageId(project.Name).ToString());
-                }
+                source = source.Replace("{{PackageId}}", UpdateProjectFiles.GetPackageId(project.Name).ToString());
             }
 
             return source;

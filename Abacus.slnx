@@ -96,7 +96,7 @@
   <Project Path="../unmanaged/generator/Unmanaged.Generator.csproj" />
   <Project Path="../unmanaged/source/Unmanaged.csproj" />
   <Project Path="../unmanaged/tests/Unmanaged.Tests.csproj" />
-  <Project Path="../unmanaged/types pregenerator/Unmanaged.TypesPregenerator.csproj" DisplayName="Unmanaged.TypesPreGenerator" />
+  <Project Path="../unmanaged/types pregenerator/Unmanaged.TypesPregenerator.csproj" />
   <Project Path="../vulkan-renderer/source/VulkanRenderer.csproj" />
   <Project Path="../window-systems/source/Windows.Systems.csproj" />
   <Project Path="../windows/source/Windows.csproj" />
