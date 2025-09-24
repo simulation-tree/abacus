@@ -23,10 +23,15 @@
   run: dotnet pack ""${{ github.event.repository.name }}/{{ProjectFolderName}}"" /p:Version=${VERSION} --no-build --output .";
 
         public const string PublishStep = @"
-- name: Publish `{{ProjectName}}`
-  run: dotnet nuget push {{PackageId}}.${VERSION}.nupkg --source github --api-key ${NUGET_TOKEN}
+- name: Publish `{{ProjectName}}` to GitHub registry
+  run: dotnet nuget push {{PackageId}}.${VERSION}.nupkg --source github --api-key ${API_KEY}
   env:
-    NUGET_TOKEN: ${{ secrets.NUGET_TOKEN }}";
+    API_KEY: ${{ secrets.NUGET_TOKEN_GITHUB }}
+
+- name: Publish `{{ProjectName}}` to official registry
+  run: dotnet nuget push {{PackageId}}.${VERSION}.nupkg --source nuget.org --api-key ${API_KEY}
+  env:
+    API_KEY: ${{ secrets.NUGET_TOKEN_OFFICIAL }}";
 
         public const string ReportStep = @"
 - name: Report
@@ -106,7 +111,7 @@ jobs:
       {{TestStep}}
       {{PackProjectsStep}}
 
-      - name: Add NuGet Source
+      - name: Add GitHub source
         run: dotnet nuget add source https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json --name github --username ${{ github.repository_owner }} --password ${{ github.token }} --store-password-in-clear-text
       {{PublishProjectsStep}}";
     }
